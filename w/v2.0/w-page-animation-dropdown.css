@@ -1,0 +1,12 @@
+.w-current-page-display-forward {
+  animation: -w-current-page-display-forward 0.23s 1;
+}
+
+@keyframes -w-current-page-display-forward {
+  0% {transform: translateY(-95%);}
+  35% {transform: translateY(-80%);}
+  60% {transform: translateY(-65%);}
+  75% {transform: translateY(-35%);}
+  90% {transform: translateY(-20%);}
+  100% {transform: translateY(0%);}
+}

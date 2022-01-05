@@ -1,0 +1,68 @@
+{
+    "title" : "新项目",
+    "pages" : [
+        "home",
+        "user",
+        "test",
+        "list"
+    ],
+
+    "host" : "https://www.a.com",
+
+    "testHost" : "http://localhost:2022",
+
+    "tabs" : {
+        "background" : "#fafaff",
+        "selectedBackground" : "#3678c1",
+        "list" : [
+            {
+                "page" : "home",
+                "icon" : "static/icon/home.png",
+                "name" : "首页"
+            },
+            {
+                "page" : "user",
+                "icon" : "static/icon/user.png",
+                "name" : "用户"
+            }
+        ]
+    },
+
+    "buildPrePath" : "",
+
+    "cssurl" : [
+        "/static/css/concise.min.css",
+        "/static/css/concise-ui.min.css",
+        "/static/css/mgrid.css"
+    ],
+
+    "jsurl" : [],
+
+    "jsbottom" : [],
+
+    "hooks" : [],
+
+    "components" : [
+        "token",
+        "init",
+        "parseUrl",
+        "checkToken",
+        "confirm",
+        "loginRedirect",
+        "pushStart"
+    ],
+
+    "version": "1.5",
+
+    "radius" : "small",
+
+    "debug": true,
+
+    "animation": true,
+
+    "pageAnimation": true,
+
+    "closePrompt": false,
+
+    "buildCompress": false
+}

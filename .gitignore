@@ -1,0 +1,10 @@
+/node_modules/
+/apps/
+/tmp/
+/favicon.ico
+/config.js
+/config/
+/cache/
+/test/
+/events/
+/cert/

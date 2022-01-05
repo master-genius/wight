@@ -1,0 +1,9 @@
+/**CSS文件，建议在样式名前面统一加上页面名称**/
+.user-cell {
+  box-shadow: 0.25rem 0.25rem 0.25rem #efefef;
+  color: #565758;
+  line-height: 145%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
