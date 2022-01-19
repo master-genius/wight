@@ -1,5 +1,5 @@
 exports.token = new function () {
-  this.key = 'bxl_token';
+  this.key = 'token';
 
   this.get = function () {
     return w.storage.get(this.key);

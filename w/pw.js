@@ -1,6 +1,11 @@
+'use strict';
+
 const fs = require('fs');
 const terser = require('terser');
-var csso = require('csso');
+const csso = require('csso');
+const htmlstate = require('./htmlstate');
+
+const htmlparser = new htmlstate();
 
 function delayOutError (err, info, delay = 1280) {
   setTimeout(() => {
@@ -56,6 +61,7 @@ var wapp = function (options = {}) {
     closePrompt: true,
     pagedir : '',
     components : [],
+    exts: [],
     iconPath: '/favicon.ico'
   };
 
@@ -90,11 +96,6 @@ var wapp = function (options = {}) {
     this.jch.css += fs.readFileSync(`${wdir}/w.css`, {encoding: 'utf8'});
     this.jch.js = fs.readFileSync(wdir + '/w.js', {encoding: 'utf8'});
 
-    /**
-     * 在涉及到重新登录的时候，在goloal.js的hidePage函数会出现__dom__ undefined错误。
-     * 原因在于用户端检测登录的代码在页面DOM创建之前执行，目前的解决方案是在global.js中loadPage
-     * 函数加载之前如果发现initFlag是false则等待一会，默认是50多毫秒。
-     */
     if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)) {
       let data = await terser.minify(this.jch.js+'\n');
       if (data.code === undefined) {
@@ -110,7 +111,6 @@ var wapp = function (options = {}) {
       this.iconlink = `<link href="${this.pageUrlPath}${ds}favicon.ico" rel="icon" type="image/x-icon">`;
     } else if (this.isbuild && this.config.iconPath) {
       this.iconlink = `<link rel="icon" href="${this.config.iconPath}" type="image/x-icon">`;
-      //this.iconlink = '';
     }
 
   };
@@ -142,6 +142,7 @@ var wapp = function (options = {}) {
 
   this.hooksText = '';
   this.components = '';
+  this.extends = '';
   this.jstext = '';
   this.cssCode = '';
   this.csstext = '';
@@ -149,6 +150,7 @@ var wapp = function (options = {}) {
   this.isbuild = false;
   this.buildPrePath = '';
   this.iconlink = '';
+  this.templates = '';
 
   this.compile = function () {
 
@@ -178,6 +180,7 @@ var wapp = function (options = {}) {
         </script>
       </head>
       <body style="overflow-x:hidden;overflow-wrap:break-word;">
+        <div>${this.templates}</div>
         <script>
           'use strict';
           w.host = '${this.config.host}';
@@ -214,9 +217,9 @@ var wapp = function (options = {}) {
           window.alertCover = w.alertCover.bind(w);
           window.setCoverText = w.setCoverText.bind(w);
         </script>
-
-        <script>'use strict';${this.components}</script>
         <script>'use strict';${this.libCode}</script>
+        <script>'use strict';${this.extends}</script>
+        <script>'use strict';${this.components}</script>
         <script>'use strict';${this.hooksText}</script>
         <script>'use strict';${this.pagesCode}</script>
         <script>
@@ -227,6 +230,7 @@ var wapp = function (options = {}) {
             'pgcdom','coverdom','notifydom','alertdom','alertdom1', 'slidedom', 'alertcoverdom',
             'alertcoverdom1', 'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
           ];
+
           for (let i=0; i<dms.length; i++) {
             w[ dms[i] ] = document.body.insertBefore(
               document.createElement('div'),
@@ -257,6 +261,7 @@ var wapp = function (options = {}) {
             w.pages[p].data = {};
           }
           w._make_page_bind(p);
+          w._page_style_bind(p);
         }
 
         window.onpageshow = async function() {
@@ -491,12 +496,10 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
 
 };
 
-/**
- * 
- */
 wapp.prototype.checkCode = function (filename, ctext) {
   try {
-    let testcode = `let w = {comps:{},hooks:[],events:{},config:{}};
+    let testcode = `let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
+                let notify = () => {};
                 let window = {}; let document={};let exports = {};require = async function () {};
                 \nasync () => {${ctext}};`;
 
@@ -693,20 +696,81 @@ wapp.prototype.loadLib = function (libdir) {
   }
 };
 
+wapp.prototype.loadExt = async function (cdir) {
+  try {
+    let data = '';
+    let orgdata = '';
+
+    if (this.config.extends === '*'
+      || (this.config.extends.length > 0 && this.config.extends[0] === '*') )
+    {
+      let flist = fs.readdirSync(`${cdir}`, {withFileTypes: true})
+      this.config.exts = []
+      for (let f of flist) {
+        if (!f.isFile() || f.name.substring(f.name.length - 3) !== '.js')
+          continue;
+
+        if (f.name[0] === '!') continue;
+
+        this.config.exts.push(f.name.substring(0, f.name.length - 3));
+      }
+    }
+    
+    let names = this.config.exts;
+
+    for (let i=0; i < names.length; i++) {
+
+      try {
+        orgdata = fs.readFileSync(`${cdir}/${names[i]}.js`, 'utf8') + '\n';
+        
+        this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
+
+        this.extends += `;((async function(exports){${orgdata}})(w.ext)).catch(err=> {console.error(err);});`;
+      } catch (err) {
+        console.error(err.message);
+      }
+    }
+
+    //进行src替换处理
+    this.extends = this.replaceSrc(this.components);
+
+    if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)){
+      data = await terser.minify(this.extends);
+      if (data.error) {
+        console.error(data.error);
+      } else {
+        this.extends = data.code;
+      }
+    }
+
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
+/**
+ * 一个组件是一个目录，其中包括和目录同名的.js文件、explain.json文件、.html文件，若html文件不存在则表示不存在template。
+ * explain.json文件描述组件的类名和组件名称，以及相关其他描述，其属性如下：
+ *  - name 组件名称
+ *  - className 类名称
+ *  - detail 相关的详细描述
+ * @param {string} cdir 
+ */
+
 wapp.prototype.loadComps = async function (cdir) {
   try {
     let data = '';
     let orgdata = '';
-    //let files = fs.readdirSync(cdir, {withFileTypes: true});
 
     if (this.config.components === '*'
       || (this.config.components.length > 0 && this.config.components[0] === '*') )
     {
       let flist = fs.readdirSync(`${cdir}`, {withFileTypes: true})
+
       this.config.components = []
+
       for (let f of flist) {
-        if (!f.isFile() || f.name.substring(f.name.length - 3) !== '.js')
-          continue;
+        if (!f.isDirectory()) continue;
 
         if (f.name[0] === '!') continue;
 
@@ -715,24 +779,43 @@ wapp.prototype.loadComps = async function (cdir) {
     }
     
     let names = this.config.components;
+    let cex;
+    let opts = '';
+    let tempdata = '';
 
     for (let i=0; i < names.length; i++) {
 
-      /* if (!files[i].isFile()) {continue;}
-      if (files[i].name.substring(files[i].name.length-3) !== '.js') {
-        continue;
-      } */
+      //检测组件是否存在相关文件。
+      try {
+        fs.accessSync(`${cdir}/${names[i]}/explain.json`);
+        fs.accessSync(`${cdir}/${names[i]}/${names[i]}.js`);
+        cex = require(`${cdir}/${names[i]}/explain.json`);
+      } catch (err) {
+        delayOutError(err, '检测组件文件是否存在', 1234);
+      }
+
+      tempdata = '';
+      try {
+        fs.accessSync(`${cdir}/${names[i]}/template.html`);
+        tempdata = fs.readFileSync(`${cdir}/${names[i]}/template.html`, {encoding: 'utf8'});
+        if (!htmlparser.parse(tempdata)) {
+          delayOutError(htmlparser.lastErrorMsg, `语法检测：${names[i]}/template.html`);
+        } else {
+          this.templates += tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
+        }
+      } catch (err) {}
 
       try {
-        orgdata = fs.readFileSync(`${cdir}/${names[i]}.js`, 'utf8') + '\n';
-        
-        //检测代码是否存在问题，但是不会退出程序，只是给出错误提示。
-        //this.checkCode(`${cdir}/${files[i].name}`, orgdata);
+        orgdata = fs.readFileSync(`${cdir}/${names[i]}/${names[i]}.js`, 'utf8') + '\n';
         
         this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
 
-        this.components += `;((async function(exports){${orgdata}})(w.__comps__)).catch(err=> {console.error(err);});`;
-        //this.components += orgdata;
+        opts = '';
+        if (cex.options && cex.options.extends) {
+          opts = `,{extends: '${cex.options.extends}'}`;
+        }
+
+        this.components += `${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});`;
       } catch (err) {
         console.error(err.message);
       }
@@ -798,22 +881,27 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
     this.cssCode += appcss;
   } catch(err){}
 
-  //let files = fs.readdirSync(pdir, {withFileTypes: true});
-  /* if (this.config.css) {
-    try {
-      this.cssText = fs.readFileSync(`${pdir}/${this.config.css}`);
-    } catch (err){}
-  } */
-
   try {
-    fs.accessSync(`${pdir}/_comps`, fs.constants.F_OK);
-    this.loadComps(`${pdir}/_comps`);
+    fs.accessSync(`${pdir}/_extends`, fs.constants.F_OK);
+    await this.loadExt(`${pdir}/_extends`);
   } catch (err){
     console.error(err);
   }
 
   try {
-    this.loadLib(`${pdir}/_lib`);
+    fs.accessSync(`${pdir}/_components`, fs.constants.F_OK);
+    await this.loadComps(`${pdir}/_components`);
+  } catch (err){
+    console.error(err);
+  }
+
+  if (this.templates.length > 0) {
+    this.templates = this.replaceSrc(this.templates);
+    this.templates = this.replaceCssUrl(this.templates);
+  }
+
+  try {
+    await this.loadLib(`${pdir}/_lib`);
   } catch (err) {
     console.error(err);
   }
@@ -949,8 +1037,6 @@ wapp.prototype.build = async function (appdir, appname = '') {
 };
 
 wapp.prototype.newPage = function (name, pagedir) {
-  //重命名页面名称，这会放在window属性上，作为全局变量。
-  //this.name = '${name}';
   
   let html = `exports.${name} = new function () {
 
@@ -1023,7 +1109,113 @@ wapp.prototype.newPage = function (name, pagedir) {
   
 };
 
+function checkCompsName (cname) {
+  cname = cname.trim();
+  if (cname.length < 3) return false;
+
+  if (cname.indexOf('-') < 0) return false;
+
+  if (!(/^[a-z]/i).test(cname)) return false;
+
+  return true;
+}
+
+function fmtCompsClassName (cname) {
+  let namearr = []
+
+  let end = cname.length - 1;
+
+  for (let i = 0; i < cname.length; i++) {
+    if (cname[i] === '-' && i < end && (/[a-z]/i).test(cname[i+1])) {
+      namearr.push(cname[i+1].toUpperCase());
+      i += 1;
+    } else {
+      namearr.push(cname[i])
+    }
+  }
+
+  return namearr.join('');
+};
+
+function renderExplainJSON (cname) {
+  let className = fmtCompsClassName(cname);
+  return `{
+    "name" : "${cname}",
+    "className" : "${className}",
+    "detail" : "..."
+}`;
+}
+
+function renderCompsClass (cname) {
+  let className = fmtCompsClassName(cname);
+
+  return `'use strict';
+class ${className} extends Component {
+
+  constructor () {
+    super();
+
+  }
+
+  init () {
+
+  }
+
+  //返回字符串或DOM节点。
+  render () {
+    return '${cname}组件';
+  }
+
+  onLoad () {
+
+  }
+
+  onRemove () {
+
+  }
+
+  onAttrChange (name, oldValue, newValue) {
+
+  }
+
+  onAdopted () {
+
+  }
+
+
+}`;
+
+}
+
+wapp.prototype.newComps = function (cname, cdir) {
+
+  if (!checkCompsName(cname)) {
+    console.error(`${cname} 不符合要求，至少3字符长度，字母开头，包含 - 。`);
+    return false;
+  }
+
+  let compsdir = `${cdir}/_components/${cname}`;
+
+  try {
+    fs.accessSync(compsdir)
+    console.error(`${cname} 组件已存在。`);
+    return false;
+  } catch (err) {
+    
+  }
+
+  fs.mkdirSync(compsdir);
+
+  fs.writeFileSync(`${compsdir}/explain.json`, renderExplainJSON(cname), {encoding: 'utf8'});
+
+  fs.writeFileSync(`${compsdir}/${cname}.js`, renderCompsClass(cname), {encoding: 'utf8'});
+
+  return true;
+
+};
+
 //new project
+
 wapp.prototype.newProject = function (project_dir) {
   try {
     fs.accessSync(project_dir);
@@ -1053,8 +1245,8 @@ wapp.prototype.newProject = function (project_dir) {
   }
 
   let loopcp = [
-    '_comps', '_hooks', '_static', 'home', 'user', 'test',
-    '_static/css', '_static/icon', 'list', '_lib'
+    '_components', '_extends', '_hooks', '_static', 'home', 'user', 'test',
+    '_static/css', '_static/icon', 'list', '_lib', '_components/user-card'
   ];
 
   for (let i = 0; i < loopcp.length; i++) {

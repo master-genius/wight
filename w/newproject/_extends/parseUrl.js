@@ -1,6 +1,9 @@
+const token = await require('token');
+const userinfo = await require('userinfo');
+
 exports.parseUrl = function () {
 
-  let tk = w.comps.token.get();
+  let tk = token.get();
 
   let querystring = decodeURIComponent(location.search);
   
@@ -25,9 +28,9 @@ exports.parseUrl = function () {
     urlobj[tmp[0]] = tmp[1];
   }
 
-  if (urlobj['bxl_token'] !== undefined) {
-    w.comps.token.set(urlobj['bxl_token']);
-    w.comps.userinfo.set(urlobj);
+  if (urlobj['token'] !== undefined) {
+    token.set(urlobj['token']);
+    userinfo.set(urlobj);
   }
   
 };

@@ -1,22 +1,19 @@
 
-/**
- * {
-  callback : null,
-  args : null
-}
- */
-w.comps.confirmExp = {};
+let cexp = {};
 
-w.comps.confirmExec = function (id) {
+exports.confirmExp = cexp;
+
+exports.confirmExec = function (id) {
+
   unalert();
 
-  if (w.comps.confirmExp[id] === undefined) {
+  if (cexp[id] === undefined) {
     return false;
   }
 
-  let {callback,args} = w.comps.confirmExp[id];
+  let {callback, args} = cexp[id];
 
-  delete w.comps.confirmExp[id];
+  delete cexp[id];
 
   if (typeof callback !== 'function') {
     return;
@@ -30,20 +27,20 @@ exports.confirmCancel = function (id) {
   
   unalert();
 
-  if (w.comps.confirmExp[id] === undefined) {
+  if (cexp[id] === undefined) {
     return;
   }
 
   try {
-    if (w.comps.confirmExp[id].cancel) {
-      if (typeof w.comps.confirmExp[id].cancel === 'function') {
-        w.comps.confirmExp[id].cancel();
+    if (cexp[id].cancel) {
+      if (typeof cexp[id].cancel === 'function') {
+        cexp[id].cancel();
       }
     }
   } catch (err) {
     console.error(err);
   } finally {
-    delete w.comps.confirmExp[id];
+    delete cexp[id];
   }
 
 };
@@ -52,13 +49,13 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
 
   let id = `call_${Date.now()}${parseInt(Math.random() * 10000)+1}`;
 
-  w.comps.confirmExp[id] = {
+  cexp[id] = {
     callback : opts.callback,
     args : opts.args || null
   };
 
   if (opts.cancel) {
-    w.comps.confirmExp[id].cancel = opts.cancel;
+    cexp[id].cancel = opts.cancel;
   }
 
   let atext = `<div style="text-align:center;font-size:89%;color:#4a4a4f;">

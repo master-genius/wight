@@ -386,7 +386,8 @@ class __htmlstate {
       if (!st) {
         let errt = this.data.substring(this.cursor - 20, this.cursor + 20);
         
-        this.lastErrorMsg = `cursor ${this.cursor} 错误的语法。<p style="color:#df6878;">...${errt.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}...</p>`;
+        this.lastErrorMsg = `cursor ${this.cursor} 错误的语法。<p style="color:#df6878;">...`
+          +`${errt.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}...</p>`;
 
         console.error(this.data);
         return false;
@@ -463,6 +464,7 @@ const w = new function () {
   };
 
   this.ua = navigator.userAgent;
+
   this.isFirefox = false;
   if (navigator.userAgent.indexOf('Firefox') > 0) {
     this.isFirefox = true;
@@ -1369,6 +1371,8 @@ w.setAttr = function (pagename, data) {
       qcss = `[class=${k.substring(1)}]`;
     } else if (k[0] === '[') {
       qcss = k;
+    } else if (k[0] === ':') {
+      qcss = `[data-bind=${k.substring(1)}]`;
     }
 
     nds = pgdom.querySelectorAll(qcss);
@@ -1385,6 +1389,7 @@ w.setAttr = function (pagename, data) {
           case 'class':
             d.className = attr[a];
             break;
+
           case 'style':
             if (typeof attr[a] === 'string') {
               d.style.cssText = attr[a];
@@ -1692,6 +1697,35 @@ w._make_page_bind = function (pagename) {
   });
 };
 
+w._page_style_bind = function (pname) {
+  w.pages[pname].__style__ = {}
+
+  w.pages[pname].style = new Proxy(w.pages[pname].__style__, {
+    set: (obj, k, data) => {
+      obj[k] = data;
+
+      let styleData = {}
+      
+      styleData[`:${k}`] = {
+        style: data
+      };
+
+      w.setAttr(pname, styleData);
+
+      return true;
+    },
+
+    get: (obj, k) => {
+      if (obj[k]) return obj[k];
+      return null;
+    },
+
+    deleteProperty: (obj, k) => {
+      delete obj[k];
+    }
+  });
+};
+
 w.parseform = function (fd) {
   var m = {
     node : fd,
@@ -1852,8 +1886,6 @@ w.events = {
   },
 };
 
-w.comps = {};
-
 //如果设置为函数，会首先进行初始化，但是会在初始化页面以后
 w.init = null;
 
@@ -1976,11 +2008,11 @@ w.initPageDomEvents = function (pg, dom) {
 
 w.eventProxy = function (evt, pg, funcname) {
 
-  let wind = funcname.trim().indexOf('w.comps.');
+  let wind = funcname.trim().indexOf('w.ext.');
   let wfunc = null;
 
   if (wind === 0) {
-    wfunc = w.comps[funcname.substring(8)];
+    wfunc = w.ext[funcname.substring(8)];
     if (typeof wfunc !== 'function') {
       w.notifyError(`${funcname} is not a function.`);
       return false;
@@ -2075,7 +2107,9 @@ window._import = w.import = async function (path, reload=false) {
   }
 };
 
-w.__comps__ = new Proxy(w.comps, {
+w.__ext__ = {};
+
+w.ext = new Proxy(w.__ext__, {
   set: (obj, k, data) => {
     if (!obj[k]) {
       obj[k] = data;
@@ -2102,7 +2136,7 @@ w.__comps__ = new Proxy(w.comps, {
 
 window.require = async function (name, loop = 20) {
   try {
-    if (w.comps[name]) return w.comps[name];
+    if (w.ext[name]) return w.ext[name];
     
     if (typeof loop !== 'number' || loop < 10 || loop > 50) loop = 20;
 
@@ -2111,7 +2145,7 @@ window.require = async function (name, loop = 20) {
         setTimeout(() => { rv(); }, 5);
       });
 
-      if (w.comps[name]) return w.comps[name];
+      if (w.ext[name]) return w.ext[name];
     }
 
     throw new Error(`${name}: 没有此扩展。`);
@@ -2119,3 +2153,99 @@ window.require = async function (name, loop = 20) {
     console.error(err.message);
   }
 };
+
+class Component extends HTMLElement {
+  constructor () {
+    super();
+
+    this.shadow = this.attachShadow({mode: 'closed'});
+
+    if (this.init && typeof this.init === 'function') {
+      this.init();
+    }
+
+    if (this.render && typeof this.render === 'function') {
+      let d = this.render() || '';
+      if (typeof d === 'object') {
+        this.shadow.appendChild(d);
+      } else if (typeof d === 'string' && d.length > 0) {
+        this.shadow.innerHTML = d;
+      }
+    }
+
+    w.initPageDomEvents(this, this.shadow);
+
+  }
+
+  /**
+   * 
+   * @param {string} id 
+   * @param {object} data 
+   */
+  plate (id, data) {
+    let nd = document.querySelector(id);
+    if (!nd) return false;
+
+    let d = nd.cloneNode(true);
+
+    let nds = d.querySelectorAll('slot');
+
+    let a;
+    let temp_val = '';
+
+    for (let n of nds) {
+      if (!n.name || data[n.name] === undefined) continue;
+      
+      a = data[n.name];
+
+      temp_val = '';
+
+      if (n.dataset.map && this[n.dataset.map] && typeof this[n.dataset.map] === 'function') {
+        temp_val = this[n.dataset.map](a) || '';
+      } else {
+        if (Array.isArray(a)) {
+          temp_val = a.join();
+        } else if (typeof a === 'object') {
+          temp_val = JSON.stringify(a);
+        } else {
+          temp_val = a;
+        }
+        
+      }
+
+      n.innerHTML = temp_val;
+
+    }
+
+    return d;
+  }
+
+  connectedCallback () {
+    if (this.onLoad && typeof this.onLoad === 'function') {
+      this.onLoad();
+    }
+  }
+
+  //remove from page
+  disconnectedCallback () {
+    if (this.onRemove && typeof this.onRemove === 'function') {
+      this.onRemove();
+    }
+  }
+
+  //to new page
+  adoptedCallback() {
+    if (this.onAdopted && typeof this.onAdopted === 'function') {
+      this.onAdopted();
+    }
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (this.onAttrChange && typeof this.onAttrChange === 'function') {
+      this.onAttrChange(name, oldValue, newValue);
+    }
+  }
+
+
+
+}

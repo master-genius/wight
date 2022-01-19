@@ -6,7 +6,7 @@ exports.pushStart = function () {
 
   let oldhash = location.hash;
 
-  if (oldhash === '' || oldhash === '#' || history.length > 1) return;
+  if (oldhash === '' || oldhash === '#' || history.length > 2) return;
 
   history.replaceState({id: 'home'}, '', '#');
   history.pushState({id: 'home'}, '', '#');

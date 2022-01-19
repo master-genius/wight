@@ -42,7 +42,7 @@
 
     "hooks" : [],
 
-    "components" : [
+    "extends" : [
         "token",
         "init",
         "parseUrl",
@@ -52,7 +52,11 @@
         "pushStart"
     ],
 
-    "version": "1.5",
+    "components" : [
+        "user-card"
+    ],
+
+    "version": "2.0",
 
     "radius" : "small",
 

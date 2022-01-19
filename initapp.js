@@ -150,13 +150,30 @@ class initapp {
       for (let f of flist) {
         if (f.isDirectory()) {
           if (f.name === '_static' || f.name === '.git') continue;
+
           tmpfile = `${pd}/${f.name}`;
+
           fs.watch(tmpfile, (evt, name) => {
             fs.access(tmpfile, err => {
               !err && this.delayReload(app, appname);
             });
             
           });
+
+          if (f.name === '_components') {
+            let comps = fs.readdirSync(`${pd}/${f.name}`, {withFileTypes: true});
+
+            for (let c of comps) {
+              if (c.isDirectory()) {
+                fs.watch(`${pd}/${f.name}/${c.name}`, (evt, name) => {
+                  fs.access(`${pd}/${f.name}/${c.name}`, err => {
+                    !err && this.delayReload(app, appname);
+                  });
+                });
+              }
+            }
+          }
+
         }
       }
     } catch (err) {

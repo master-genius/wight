@@ -1,8 +1,12 @@
+const parseUrl = await require('parseUrl');
+const token = await require('token');
+
 exports.checkToken = function (autoRemove = false) {
 
-  w.comps.parseUrl();
+  parseUrl();
 
-  let tk = w.comps.token.get();
+  let tk = token.get();
+
   if (tk === null) {
     return false;
   }
@@ -11,7 +15,7 @@ exports.checkToken = function (autoRemove = false) {
 
   if (parseInt(u.logintime) + parseInt(u.expires) <= Date.now()) {
     if (autoRemove) {
-      w.comps.token.remove();
+      token.remove();
     }
     return false;
   }
