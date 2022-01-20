@@ -2169,6 +2169,10 @@ class Component extends HTMLElement {
       if (typeof d === 'object') {
         this.shadow.appendChild(d);
       } else if (typeof d === 'string' && d.length > 0) {
+        if (d.indexOf(this.tagName.toLowerCase() >= 0)) {
+          return w.notifyError(`${this.tagName} 存在循环引用。`);
+        }
+
         this.shadow.innerHTML = d;
       }
     }
@@ -2178,25 +2182,36 @@ class Component extends HTMLElement {
   }
 
   /**
+   * slot必须有一个普通的标签使用slot属性通过name属性来绑定。
+   * <span slot="xyz"></span>
+   * 而具体标签是需要根据渲染情况自行定义，所以在slot模式只能是使用模板字符串。
    * 
    * @param {string} id 
    * @param {object} data 
    */
   plate (id, data) {
-    let nd = document.querySelector(id);
+    if (id[0] === '#') id = id.substring(1);
+
+    let nd = document.querySelector(`template[id=${id}]`);
+
     if (!nd) return false;
 
-    let d = nd.cloneNode(true);
+    if (nd.innerHTML.indexOf(this.tagName.toLowerCase()) >= 0 ) {
+      w.notifyError(`${this.tagName} 存在循环引用`);
+      return '';
+    }
 
-    let nds = d.querySelectorAll('slot');
+    let d = nd.content.cloneNode(true);
+
+    let nds = d.querySelectorAll('[data-name]');
 
     let a;
     let temp_val = '';
 
     for (let n of nds) {
-      if (!n.name || data[n.name] === undefined) continue;
+      if (!n.dataset.name || data[n.dataset.name] === undefined) continue;
       
-      a = data[n.name];
+      a = data[n.dataset.name];
 
       temp_val = '';
 
@@ -2245,7 +2260,6 @@ class Component extends HTMLElement {
       this.onAttrChange(name, oldValue, newValue);
     }
   }
-
 
 
 }
