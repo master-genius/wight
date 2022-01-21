@@ -2164,6 +2164,22 @@ window.require = async function (name, loop = 20) {
 
 w.shareData = {};
 
+w.share = new Proxy(w.shareData, {
+  set: (obj, k, data) => {
+    obj[k] = data;
+    return true;
+  },
+
+  get: (obj, k) => {
+    return obj[k] || null;
+  },
+
+  deleteProperty : (obj, k) => {
+    delete obj[k];
+    return true;
+  }
+});
+
 class Component extends HTMLElement {
   constructor () {
     super();
@@ -2196,6 +2212,11 @@ class Component extends HTMLElement {
    * @param {object} data 
    */
   plate (id, data) {
+    if (typeof id === 'object') {
+      data = id;
+      id = this.tagName.toLowerCase();
+    }
+    
     if (id[0] === '#') id = id.substring(1);
 
     let nd = document.querySelector(`template[id=${id}]`);
