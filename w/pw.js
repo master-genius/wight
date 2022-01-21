@@ -214,7 +214,10 @@ var wapp = function (options = {}) {
           window.promptMiddleGlass = w.promptMiddleGlass.bind(w);
           window.promptDark = w.promptDark.bind(w);
           window.promptMiddleDark = w.promptMiddleDark.bind(w);
-          window.alertCover = w.alertCover.bind(w);
+          window.acover = w.acover.bind(w);
+          window.coverShadow = w.coverShadow.bind(w);
+          window.uncover = w.uncover.bind(w);
+          window.uncoverShadow = w.uncoverShadow.bind(w);
           window.setCoverText = w.setCoverText.bind(w);
         </script>
         <script>'use strict';${this.libCode}</script>
@@ -269,11 +272,13 @@ var wapp = function (options = {}) {
           if (w.init && typeof w.init === 'function') {
             w.init();
           }
-          if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2) {
+          if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
+          {
             w.switchTab(w.homepage);
           } else {
             w.listenHash();
           }
+          Object.seal(w);
         };
 
         window.jump_page_forward = false;

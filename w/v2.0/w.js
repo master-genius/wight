@@ -575,7 +575,15 @@ const w = new function () {
     }
   };
 
-  this.alertCoverShadow = function (info, trans = false) {
+  this.uncover = function () {
+    this.unalert();
+  };
+
+  this.uncoverShadow = function () {
+    this.unalert('shadow');
+  };
+
+  this.coverShadow = function (info, trans = false) {
     this.alert(info, {
       replace: true,
       notClose: true,
@@ -585,7 +593,7 @@ const w = new function () {
     });
   };
 
-  this.alertCover = function (info, trans = false) {
+  this.acover = function (info, trans = false) {
     this.alert(info, {
       replace: true,
       notClose: true,
@@ -851,7 +859,7 @@ const w = new function () {
   this.historyLength = history.length;
   this.pageShowType = '';
   this.pageShowTypeLock = false;
-  //newurl 和 oldurl 为以后实现历史记录链条做准备。op表示前进、后退。
+  
   this.listenHash = function (op = '') {
     if (this.listenHashLock === true) {
       return ;
@@ -2138,7 +2146,7 @@ window.require = async function (name, loop = 20) {
   try {
     if (w.ext[name]) return w.ext[name];
     
-    if (typeof loop !== 'number' || loop < 10 || loop > 50) loop = 20;
+    if (typeof loop !== 'number' || loop < 1 || loop > 50) loop = 20;
 
     for (let i = 0; i < loop; i++) {
       await new Promise((rv) => {
@@ -2153,6 +2161,8 @@ window.require = async function (name, loop = 20) {
     console.error(err.message);
   }
 };
+
+w.shareData = {};
 
 class Component extends HTMLElement {
   constructor () {
@@ -2182,10 +2192,6 @@ class Component extends HTMLElement {
   }
 
   /**
-   * slot必须有一个普通的标签使用slot属性通过name属性来绑定。
-   * <span slot="xyz"></span>
-   * 而具体标签是需要根据渲染情况自行定义，所以在slot模式只能是使用模板字符串。
-   * 
    * @param {string} id 
    * @param {object} data 
    */
@@ -2260,6 +2266,5 @@ class Component extends HTMLElement {
       this.onAttrChange(name, oldValue, newValue);
     }
   }
-
 
 }
