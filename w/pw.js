@@ -503,9 +503,10 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
 
 wapp.prototype.checkCode = function (filename, ctext) {
   try {
-    let testcode = `let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
+    let testcode = `'use strict';
+                let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
                 let notify = () => {};
-                let window = {}; let document={};let exports = {};require = async function () {};
+                let window = {}; let document={};let exports = {};let require = async function () {};
                 \nasync () => {${ctext}};`;
 
     let t = Function(testcode);
@@ -690,7 +691,7 @@ wapp.prototype.loadLib = function (libdir) {
 
     let orgdata;
 
-    for (n of names) {
+    for (let n of names) {
       orgdata = fs.readFileSync(`${libdir}/${n}`, 'utf8') + '\n';
       this.checkCode(`${libdir}/${n}`, orgdata);
       this.libCode += `;(function(exports){${orgdata}})(window);`;
@@ -1251,7 +1252,7 @@ wapp.prototype.newProject = function (project_dir) {
 
   let loopcp = [
     '_components', '_extends', '_hooks', '_static', 'home', 'user', 'test',
-    '_static/css', '_static/icon', 'list', '_lib', '_components/user-card'
+    '_static/css', '_static/icon', 'list', '_lib', '_components/u-card'
   ];
 
   for (let i = 0; i < loopcp.length; i++) {
