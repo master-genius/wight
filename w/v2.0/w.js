@@ -1236,11 +1236,10 @@ w.loadPage = async function (R) {
     }
     pg.init = true;
     
-    let eml = document.createElement('div');
-    eml.innerHTML = pg.orgHTML.replace(/<img src=/ig, '<img loading=lazy src=');
+    let htext = pg.orgHTML.replace(/<img src=/ig, '<img loading=lazy src=');
 
-    pg.__dom__.innerHTML = `${eml.innerHTML}${pg.tabsPlace}`;
-    eml = null;
+    pg.__dom__.innerHTML = `${htext}${pg.tabsPlace}`;
+
     w.initPageDomEvents(pg, pg.__dom__);
   }
 
@@ -2164,17 +2163,98 @@ window.require = async function (name, loop = 20) {
 
 w.shareData = {};
 
+w.shareNoticeList = [];
+
+/**
+ * mode默认为一直执行，或者是选择once表示执行一次则删除。
+ * @param {object} options callback, type, mode
+ */
+w.registerShareNotice = function (options) {
+
+  if (w.shareNoticeList.length >= 200) {
+    w.notifyError('注册通知函数已达上限，不能超过200。');
+    return false;
+  }
+
+  if (!options.type) options.type = 'all';
+  if (!options.mode) options.mode = 'always';
+  if (!options.name) options.name = '--';
+
+  for (let a of w.shareNoticeList) {
+    if (a.name === options.name) {
+      return a.name;
+    }
+  }
+
+  options.count = 0;
+
+  if (!options.callback || typeof options.callback !== 'function') {
+    w.notifyError('没有callback函数用于通知回调。');
+    return false;
+  }
+
+  w.shareNoticeList.push(options);
+
+  return options.name;
+};
+
+w.removeShareNotice = function (name) {
+  let ind = 0;
+  for (let a of w.shareNoticeList) {
+    if (name === a.name) {
+      w.shareNoticeList.splice(ind, 1);
+      return a;
+    }
+
+    ind += 1;
+  }
+};
+
+w.runShareNotice = function (type, obj, k, data = null) {
+  let ind = 0;
+
+  for (let a of w.shareNoticeList) {
+
+    if (a.type !== 'all' && a.type !== type) continue;
+
+    if (a.key && a.key !== k) continue;
+
+    if (a.mode === 'once' && a.count > 0) {
+      w.shareNoticeList.splice(ind, 1);
+    }
+
+    a.count < 10000000 && (a.count += 1);
+
+    try {
+      a.callback({
+        type,
+        obj,
+        key: k,
+        data: data
+      });
+    } catch (err) {
+      w.notifyError(err.message);
+    }
+
+    ind += 1;
+  }
+
+};
+
 w.share = new Proxy(w.shareData, {
   set: (obj, k, data) => {
     obj[k] = data;
+    w.runShareNotice('set', obj, k, data);
     return true;
   },
 
   get: (obj, k) => {
+    w.runShareNotice('get', obj, k);
     return obj[k] || null;
   },
 
   deleteProperty : (obj, k) => {
+    w.runShareNotice('delete', obj, k);
     delete obj[k];
     return true;
   }
@@ -2183,6 +2263,10 @@ w.share = new Proxy(w.shareData, {
 class Component extends HTMLElement {
   constructor () {
     super();
+
+    if (this.beforeInit && typeof this.beforeInit === 'function') {
+      this.beforeInit();
+    }
 
     this.shadow = this.attachShadow({mode: 'closed'});
 

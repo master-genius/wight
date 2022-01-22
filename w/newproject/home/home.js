@@ -56,6 +56,14 @@ exports.home = new function () {
       timeText : this.curTime()
     });
     
+    setTimeout(() => {
+      w.share.test = 123;
+    }, 1000);
+
+    setTimeout(() => {
+      delete w.share.test;
+    }, 2000);
+
   };
 
   this.onshow = function (c) {
