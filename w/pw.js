@@ -61,6 +61,7 @@ var wapp = function (options = {}) {
     closePrompt: true,
     pagedir : '',
     components : [],
+    extends: [],
     exts: [],
     iconPath: '/favicon.ico'
   };
@@ -711,18 +712,19 @@ wapp.prototype.loadExt = async function (cdir) {
       || (this.config.extends.length > 0 && this.config.extends[0] === '*') )
     {
       let flist = fs.readdirSync(`${cdir}`, {withFileTypes: true})
-      this.config.exts = []
+      this.config.extends = []
+
       for (let f of flist) {
         if (!f.isFile() || f.name.substring(f.name.length - 3) !== '.js')
           continue;
 
         if (f.name[0] === '!') continue;
 
-        this.config.exts.push(f.name.substring(0, f.name.length - 3));
+        this.config.extends.push(f.name.substring(0, f.name.length - 3));
       }
     }
     
-    let names = this.config.exts;
+    let names = this.config.extends;
 
     for (let i=0; i < names.length; i++) {
 
@@ -738,7 +740,7 @@ wapp.prototype.loadExt = async function (cdir) {
     }
 
     //进行src替换处理
-    this.extends = this.replaceSrc(this.components);
+    this.extends = this.replaceSrc(this.extends);
 
     if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)){
       data = await terser.minify(this.extends);

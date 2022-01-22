@@ -2141,7 +2141,7 @@ w.ext = new Proxy(w.__ext__, {
 
 window.require = async function (name, loop = 20) {
   try {
-    if (w.ext[name]) return w.ext[name];
+    if (w.__ext__[name]) return w.__ext__[name];
     
     if (typeof loop !== 'number' || loop < 1 || loop > 50) loop = 20;
 
@@ -2150,7 +2150,7 @@ window.require = async function (name, loop = 20) {
         setTimeout(() => { rv(); }, 5);
       });
 
-      if (w.ext[name]) return w.ext[name];
+      if (w.__ext__[name]) return w.__ext__[name];
     }
 
     throw new Error(`${name}: 没有此扩展。`);
