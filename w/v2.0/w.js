@@ -1235,10 +1235,8 @@ w.loadPage = async function (R) {
       return false;
     }
     pg.init = true;
-    
-    let htext = pg.orgHTML.replace(/<img src=/ig, '<img loading=lazy src=');
 
-    pg.__dom__.innerHTML = `${htext}${pg.tabsPlace}`;
+    pg.__dom__.innerHTML = `${pg.orgHTML}${pg.tabsPlace}`;
 
     w.initPageDomEvents(pg, pg.__dom__);
   }
