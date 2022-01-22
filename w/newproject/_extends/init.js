@@ -3,5 +3,5 @@ w.init = function () {
   if (t === false) {
     w.comps.logintip();
   } */
-  w.comps.pushStart && w.comps.pushStart();
+  w.ext.pushStart && w.ext.pushStart();
 };

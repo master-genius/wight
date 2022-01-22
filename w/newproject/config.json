@@ -49,7 +49,8 @@
         "checkToken",
         "confirm",
         "loginRedirect",
-        "pushStart"
+        "pushStart",
+        "userinfo"
     ],
 
     "components" : [

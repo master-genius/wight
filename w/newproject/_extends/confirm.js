@@ -5,7 +5,7 @@ exports.confirmExp = cexp;
 
 exports.confirmExec = function (id) {
 
-  unalert();
+  unalert('shadow');
 
   if (cexp[id] === undefined) {
     return false;
@@ -25,7 +25,7 @@ exports.confirmExec = function (id) {
 
 exports.confirmCancel = function (id) {
   
-  unalert();
+  unalert('shadow');
 
   if (cexp[id] === undefined) {
     return;
@@ -60,18 +60,14 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
 
   let atext = `<div style="text-align:center;font-size:89%;color:#4a4a4f;">
     <p>${opts.text || ''}</p>
-    <button class="small" style="font-weight:bold;" onclick="w.comps.confirmExec('${id}');">确定</button>
+    <button class="small" style="font-weight:bold;" onclick="w.ext.confirmExec('${id}');">确定</button>
     &nbsp;&nbsp;&nbsp;
-    <button class="small inverse" style="background:#676869;" onclick="w.comps.confirmCancel('${id}');">取消</button>
+    <button class="small inverse" style="background:#676869;" onclick="w.ext.confirmCancel('${id}');">取消</button>
   </div>`;
 
-  //true true表示：完全替换文本而不是叠加、不显示右上角关闭按钮
-  alert(atext, {
-    notClose:  true,
-    replace:   true,
-    withCover: true,
-    transparent: !!opts.transparent
-  });
+  unalert('all');
+
+  coverShadow(atext, !!opts.transparent);
   
 };
 
