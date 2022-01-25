@@ -22,9 +22,11 @@ exports.parseUrl = function () {
     if (tmp.length <= 0) {
       continue;
     }
+
     if (tmp.length < 2) {
       tmp.push('');
     }
+    
     urlobj[tmp[0]] = tmp[1];
   }
 
