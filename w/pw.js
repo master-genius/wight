@@ -1165,6 +1165,7 @@ class ${className} extends Component {
 
   }
 
+  //在render之前执行，此时已经创建好shadow DOM。
   init () {
 
   }

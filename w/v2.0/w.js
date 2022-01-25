@@ -2262,10 +2262,6 @@ class Component extends HTMLElement {
   constructor () {
     super();
 
-    if (this.beforeInit && typeof this.beforeInit === 'function') {
-      this.beforeInit();
-    }
-
     this.shadow = this.attachShadow({mode: 'closed'});
 
     if (this.init && typeof this.init === 'function') {
