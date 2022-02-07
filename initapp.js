@@ -290,6 +290,33 @@ class initapp {
       }
     });
 
+    app.service.manifestCache = {}
+
+    app.get(`/:name/manifest.json`, async c => {
+      try {
+        let mkey = `${c.param.name}-manifest.json`;
+
+        if (c.service.manifestCache[mkey]) {
+          c.setHeader('cache-control', 'public, max-age=86400');
+          c.setHeader('content-type', 'applocation/json;charset=utf-8');
+          c.res.body = c.service.manifestCache[mkey];
+          return ;
+        }
+
+        let mfile = `${c.service.appPath}/${c.service.prefix}/${c.param.name}/manifest.json`;
+        let data = await c.helper.readb(mfile);
+
+        c.service.manifestCache[mkey] = data;
+
+        c.setHeader('content-type', 'application/json;charset=utf-8');
+
+        c.res.body = data;
+
+      } catch (err) {
+        c.res.body = '';
+      }
+    });
+
   }
   
   init (app) {
