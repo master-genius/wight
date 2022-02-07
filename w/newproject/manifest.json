@@ -1,0 +1,13 @@
+{
+    "name": "新项目",
+    "short_name": "新项目",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#fff",
+    "description": "一个新项目",
+    "icons": [{
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }]
+  }

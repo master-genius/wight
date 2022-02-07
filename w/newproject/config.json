@@ -59,6 +59,8 @@
 
     "version": "2.0",
 
+    "manifest": false,
+
     "radius" : "small",
 
     "debug": true,

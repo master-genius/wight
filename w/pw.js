@@ -43,6 +43,7 @@ var wapp = function (options = {}) {
   this.forceCompress = false;
 
   this.config = {
+    manifest: '',
     test : false,
     debug: false,
     title : '',
@@ -106,12 +107,23 @@ var wapp = function (options = {}) {
       }
     }
 
-    if (!this.isbuild) {
-      let ds = this.pageUrlPath[this.pageUrlPath.length - 1] === '/' ? '' : '/';
+    let ds = this.pageUrlPath[this.pageUrlPath.length - 1] === '/' ? '' : '/';
 
+    if (!this.isbuild) {
       this.iconlink = `<link href="${this.pageUrlPath}${ds}favicon.ico" rel="icon" type="image/x-icon">`;
     } else if (this.isbuild && this.config.iconPath) {
       this.iconlink = `<link rel="icon" href="${this.config.iconPath}" type="image/x-icon">`;
+    }
+
+    this.manifest = '';
+
+    if (this.config.manifest) {
+      if (typeof this.config.manifest === 'boolean') {
+        this.manifest = `<link rel="manifest" href="${this.pageUrlPath}${ds}manifest.json">`;
+      } else {
+        this.manifest = `<link rel="manifest" href="${this.config.manifest}">`;
+      }
+      
     }
 
   };
@@ -169,6 +181,7 @@ var wapp = function (options = {}) {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0,user-scalable=no">
         ${this.iconlink}
+        ${this.manifest}
         ${this.csstext}
         <style>
           ${csso.minify(this.jch.css+'\n').css}
@@ -1243,7 +1256,7 @@ wapp.prototype.newProject = function (project_dir) {
 
   let new_project_dir = __dirname + '/newproject';
 
-  let cpfiles = ['app.css', 'config.json', 'favicon.ico'];
+  let cpfiles = ['app.css', 'config.json', 'favicon.ico', 'manifest.json'];
 
   for (let i = 0; i < cpfiles.length; i++) {
     try {
