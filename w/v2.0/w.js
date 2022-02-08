@@ -2283,6 +2283,10 @@ class Component extends HTMLElement {
 
     w.initPageDomEvents(this, this.shadow);
 
+    if (this.afterRender && typeof this.afterRender === 'function') {
+      this.afterRender();
+    }
+
   }
 
   /**
