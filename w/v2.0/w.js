@@ -2319,9 +2319,7 @@ class Component extends HTMLElement {
     for (let k in data) {
       nds = d.querySelectorAll(`[data-name=${k}]`);
       w._setData(null, this, nds, data[k]);
-      console.log(nds)
     }
-    console.log(d)
     /*
     let nds = d.querySelectorAll('[data-name]');
     let a;
