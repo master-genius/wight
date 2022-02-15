@@ -1620,7 +1620,7 @@ w._setData = function (pagename, pg, nds, data) {
         default:
           nds[i].innerHTML = dtemp_fmtval;
       }
-      if (pg)
+      if (pagename)
         w.initPageDomEvents(pg, nds[i]);
     }
 
@@ -2316,7 +2316,7 @@ class Component extends HTMLElement {
     let d = nd.content.cloneNode(true);
 
     let nds = d.querySelectorAll('[data-name]');
-    w._setData(null, null, nds, data);
+    w._setData(null, this, nds, data);
     /*
     let a;
     let temp_val = '';
