@@ -22,14 +22,23 @@ class uCard extends Component {
     prompt(uid)
   }
 
-  fmtList (ulist) {
+  /**
+   * 
+   * @param {*} t 包装对象，包括属性：data、target、type
+   * @returns 
+   */
+
+  fmtList (t) {
     let html = '';
+    let ulist = t.data;
+
     ulist.forEach( a => {
       html += `<div class=cell data-onclick=showId data-id="${a.id}">
         <h4>${a.name}</h4>
         <p>Level: ${a.level}</p>
       </div>`;
     });
+    
     return html;
   }
 
