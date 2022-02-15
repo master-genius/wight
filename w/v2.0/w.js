@@ -1562,7 +1562,8 @@ w._setData = function (pagename, pg, nds, data) {
       continue;
     }
 
-    dtemp_fmtval = w.fmtHTML(pagename, dtemp);
+    if (pagename)
+      dtemp_fmtval = w.fmtHTML(pagename, dtemp);
 
     if (nds[i].dataset.insert === undefined) {
       nds[i].dataset.insert = 'replace';
@@ -1619,7 +1620,8 @@ w._setData = function (pagename, pg, nds, data) {
         default:
           nds[i].innerHTML = dtemp_fmtval;
       }
-      w.initPageDomEvents(pg, nds[i]);
+      if (pg)
+        w.initPageDomEvents(pg, nds[i]);
     }
 
     dtemp = '';
@@ -2314,7 +2316,8 @@ class Component extends HTMLElement {
     let d = nd.content.cloneNode(true);
 
     let nds = d.querySelectorAll('[data-name]');
-
+    w._setData(null, null, nds, data);
+    /*
     let a;
     let temp_val = '';
 
@@ -2340,7 +2343,7 @@ class Component extends HTMLElement {
 
       w._htmlcheck(temp_val) && (n.innerHTML = temp_val);
 
-    }
+    } */
 
     return d;
   }
