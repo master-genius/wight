@@ -2321,34 +2321,6 @@ class Component extends HTMLElement {
       nds = d.querySelectorAll(`[data-name=${k}]`);
       w._setData(null, this, nds, data[k]);
     }
-    /*
-    let nds = d.querySelectorAll('[data-name]');
-    let a;
-    let temp_val = '';
-
-    for (let n of nds) {
-      if (!n.dataset.name || data[n.dataset.name] === undefined) continue;
-      
-      a = data[n.dataset.name];
-
-      temp_val = '';
-
-      if (n.dataset.map && this[n.dataset.map] && typeof this[n.dataset.map] === 'function') {
-        temp_val = this[n.dataset.map](a) || '';
-      } else {
-        if (Array.isArray(a)) {
-          temp_val = a.join();
-        } else if (typeof a === 'object') {
-          temp_val = JSON.stringify(a);
-        } else {
-          temp_val = a;
-        }
-        
-      }
-
-      w._htmlcheck(temp_val) && (n.innerHTML = temp_val);
-
-    } */
 
     return d;
   }
