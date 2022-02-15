@@ -2315,9 +2315,13 @@ class Component extends HTMLElement {
 
     let d = nd.content.cloneNode(true);
 
-    let nds = d.querySelectorAll('[data-name]');
-    w._setData(null, this, nds, data);
+    let nds;
+    for (let k in data) {
+      nds = d.querySelectorAll(`[data-name=${k}]`);
+      w._setData(null, this, nds, data[k]);
+    }
     /*
+    let nds = d.querySelectorAll('[data-name]');
     let a;
     let temp_val = '';
 
