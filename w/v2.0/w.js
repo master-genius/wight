@@ -2271,13 +2271,14 @@ class Component extends HTMLElement {
     if (this.render && typeof this.render === 'function') {
       let d = this.render() || '';
       if (typeof d === 'object') {
-        this.shadow.appendChild(d);
+        w._htmlcheck(d.innerHTML) && this.shadow.appendChild(d);
+
       } else if (typeof d === 'string' && d.length > 0) {
         if (d.indexOf(`<${this.tagName.toLowerCase()}>`) >= 0) {
           return w.notifyError(`${this.tagName} 存在循环引用。`);
         }
 
-        this.shadow.innerHTML = d;
+        w._htmlcheck(d) && (this.shadow.innerHTML = d);
       }
     }
 
