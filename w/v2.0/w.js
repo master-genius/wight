@@ -2271,7 +2271,7 @@ class Component extends HTMLElement {
     if (this.render && typeof this.render === 'function') {
       let d = this.render() || '';
       if (typeof d === 'object') {
-        w._htmlcheck(d.innerHTML) && this.shadow.appendChild(d);
+        w._htmlcheck(d.innerHTML || '') && this.shadow.appendChild(d);
 
       } else if (typeof d === 'string' && d.length > 0) {
         if (d.indexOf(`<${this.tagName.toLowerCase()}>`) >= 0) {
