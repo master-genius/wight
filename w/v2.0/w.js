@@ -2271,7 +2271,7 @@ class Component extends HTMLElement {
     if (this.render && typeof this.render === 'function') {
       let d = this.render() || '';
       if (typeof d === 'object') {
-        w._htmlcheck(d.innerHTML || '') && this.shadow.appendChild(d);
+        this.shadow.appendChild(d);
 
       } else if (typeof d === 'string' && d.length > 0) {
         if (d.indexOf(`<${this.tagName.toLowerCase()}>`) >= 0) {
@@ -2338,7 +2338,7 @@ class Component extends HTMLElement {
         
       }
 
-      n.innerHTML = temp_val;
+      w._htmlcheck(temp_val) && (n.innerHTML = temp_val);
 
     }
 
