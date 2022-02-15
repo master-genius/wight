@@ -1564,6 +1564,7 @@ w._setData = function (pagename, pg, nds, data) {
 
     if (pagename)
       dtemp_fmtval = w.fmtHTML(pagename, dtemp);
+    else dtemp_fmtval = dtemp;
 
     if (nds[i].dataset.insert === undefined) {
       nds[i].dataset.insert = 'replace';
@@ -2273,7 +2274,6 @@ class Component extends HTMLElement {
     if (this.render && typeof this.render === 'function') {
       let d = this.render() || '';
       if (typeof d === 'object') {
-        console.log(d, Array.isArray(d));
         this.shadow.appendChild(d);
 
       } else if (typeof d === 'string' && d.length > 0) {
