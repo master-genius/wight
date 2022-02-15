@@ -2273,6 +2273,7 @@ class Component extends HTMLElement {
     if (this.render && typeof this.render === 'function') {
       let d = this.render() || '';
       if (typeof d === 'object') {
+        console.log(d, Array.isArray(d));
         this.shadow.appendChild(d);
 
       } else if (typeof d === 'string' && d.length > 0) {
