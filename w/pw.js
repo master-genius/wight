@@ -1188,19 +1188,24 @@ class ${className} extends Component {
     return '${cname}组件';
   }
 
-  onLoad () {
+  //渲染完成后执行
+  afterRender () {
+    
+  }
+
+  onload () {
 
   }
 
-  onRemove () {
+  onremove () {
 
   }
 
-  onAttrChange (name, oldValue, newValue) {
+  onattrchange (name, oldValue, newValue) {
 
   }
 
-  onAdopted () {
+  onadopted () {
 
   }
 

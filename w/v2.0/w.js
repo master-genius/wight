@@ -2172,8 +2172,8 @@ w.shareNoticeList = [];
  */
 w.registerShareNotice = function (options) {
 
-  if (w.shareNoticeList.length >= 200) {
-    w.notifyError('注册通知函数已达上限，不能超过200。');
+  if (w.shareNoticeList.length >= 500) {
+    w.notifyError('注册通知函数已达上限，不能超过500。');
     return false;
   }
 
@@ -2267,6 +2267,12 @@ class Component extends HTMLElement {
 
     this.shadow = this.attachShadow({mode: 'closed'});
 
+    this.attrs = {};
+
+    for (let a of this.attributes) {
+      this.attrs[a.name] = a.value;
+    }
+
     if (this.init && typeof this.init === 'function') {
       this.init();
     }
@@ -2326,28 +2332,28 @@ class Component extends HTMLElement {
   }
 
   connectedCallback () {
-    if (this.onLoad && typeof this.onLoad === 'function') {
-      this.onLoad();
+    if (this.onload && typeof this.onload === 'function') {
+      this.onload();
     }
   }
 
   //remove from page
   disconnectedCallback () {
-    if (this.onRemove && typeof this.onRemove === 'function') {
-      this.onRemove();
+    if (this.onremove && typeof this.onremove === 'function') {
+      this.onremove();
     }
   }
 
   //to new page
   adoptedCallback() {
-    if (this.onAdopted && typeof this.onAdopted === 'function') {
-      this.onAdopted();
+    if (this.onadopted && typeof this.onadopted === 'function') {
+      this.onadopted();
     }
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (this.onAttrChange && typeof this.onAttrChange === 'function') {
-      this.onAttrChange(name, oldValue, newValue);
+    if (this.onattrchange && typeof this.onattrchange === 'function') {
+      this.onattrchange(name, oldValue, newValue);
     }
   }
 

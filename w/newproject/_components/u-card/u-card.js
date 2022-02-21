@@ -54,19 +54,19 @@ class uCard extends Component {
     });
   }
 
-  onLoad () {
+  onload () {
 
   }
 
-  onRemove () {
+  onremove () {
 
   }
 
-  onAttrChange (name, oldValue, newValue) {
+  onattrchange (name, oldValue, newValue) {
 
   }
 
-  onAdopted () {
+  onadopted () {
 
   }
 

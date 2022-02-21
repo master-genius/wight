@@ -12,10 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "concise.css": "^4.1.2",
-    "csso": "^4.2.0",
+    "csso": "^5.0.2",
     "gohttp": "^4.2.1",
     "qrcode": "^1.4.4",
-    "terser": "^5.9.0",
+    "terser": "^5.10.0",
     "titbit": "^22.8.1",
     "titbit-httpc": "^2.0.2",
     "titbit-loader": "^22.0.3",
