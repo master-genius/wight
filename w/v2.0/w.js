@@ -2331,6 +2331,38 @@ class Component extends HTMLElement {
     return d;
   }
 
+  view (data) {
+    let qcss = '';
+    let nds;
+    
+    for (let k in data) {
+      qcss = `[data-name=${k}]`;
+      
+      if (k[0] === '#') {
+        qcss = k;
+      } else if (k[0] === '@') {
+        qcss = `[name=${k.substring(1)}]`;
+      } else if (k[0] === '.') {
+        qcss = `[class=${k.substring(1)}]`;
+      } else if (k[0] === '[') {
+        qcss = k;
+      }
+  
+      nds = this.shadow.querySelectorAll(qcss);
+  
+      try {
+        w._setData(null, this, nds, data[k]);
+      } catch (err) {
+        if (w.debug) {
+          w.notifyError(err.message, 3500);
+          console.error(err);
+        } else {
+          w.__cacheError(err);
+        }
+      }
+    }
+  }
+
   connectedCallback () {
     if (this.onload && typeof this.onload === 'function') {
       this.onload();
