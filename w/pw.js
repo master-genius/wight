@@ -1170,7 +1170,7 @@ function renderExplainJSON (cname) {
 function renderCompsClass (cname) {
   let className = fmtCompsClassName(cname);
 
-  return `'use strict';
+  return `'use strict';\n
 class ${className} extends Component {
 
   constructor () {

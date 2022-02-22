@@ -380,3 +380,15 @@ exports.user = new function () {
 ```javascript
 node newcomps.js [应用目录名称] [组件名称]
 ```
+
+### 组件结构和CSS
+
+组件目录若是存在template.html则会加载模板，因为shadow dom被独立出去，所以外部样式一般不能起作用，若要使用外部样式，或者多组件复用样式，则要使用::part伪元素，若要全局起作用，需要使用:root。示例：
+
+```css
+
+:root ::part(row) {
+  display: flex;
+}
+
+```

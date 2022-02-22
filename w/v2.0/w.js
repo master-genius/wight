@@ -2212,7 +2212,6 @@ w.removeShareNotice = function (name) {
 };
 
 w.runShareNotice = function (type, obj, k, data = null) {
-  let ind = 0;
 
   for (let a of w.shareNoticeList) {
 
@@ -2221,7 +2220,7 @@ w.runShareNotice = function (type, obj, k, data = null) {
     if (a.key && a.key !== k) continue;
 
     if (a.mode === 'once' && a.count > 0) {
-      w.shareNoticeList.splice(ind, 1);
+      continue;
     }
 
     a.count < 10000000 && (a.count += 1);
@@ -2236,8 +2235,6 @@ w.runShareNotice = function (type, obj, k, data = null) {
     } catch (err) {
       w.notifyError(err.message);
     }
-
-    ind += 1;
   }
 
 };
@@ -2260,6 +2257,34 @@ w.share = new Proxy(w.shareData, {
     return true;
   }
 });
+
+w.loadScript = async function (src) {
+
+  if (!w._http_preg.test(src)) {
+    if (src[0] !== '/') src = `/${src}`;
+
+    src = `${w.prepath}${w.prepath.length > 0 ? '/' : ''}${src}`;
+  }
+
+  let d = document.createElement('script');
+
+  return new Promise((rv, rj) => {
+    d.type = 'text/javascript';
+    d.src = src;
+
+    document.body.appendChild(d);
+
+    d.onerror = err => {
+      rj(err);
+    };
+
+    d.onload = () => {
+      rv();
+    };
+
+  });
+
+};
 
 class Component extends HTMLElement {
   constructor () {
@@ -2303,7 +2328,7 @@ class Component extends HTMLElement {
    * @param {string} id 
    * @param {object} data 
    */
-  plate (id, data) {
+  plate (id, data = {}) {
     if (typeof id === 'object') {
       data = id;
       id = this.tagName.toLowerCase();
