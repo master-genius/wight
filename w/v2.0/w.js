@@ -2363,6 +2363,14 @@ class Component extends HTMLElement {
     }
   }
 
+  queryAll (qss) {
+    return this.shadow.querySelectorAll(qss);
+  }
+
+  query (qss) {
+    return this.shadow.querySelector(qss);
+  }
+
   connectedCallback () {
     if (this.onload && typeof this.onload === 'function') {
       this.onload();
