@@ -2046,7 +2046,7 @@ w.eventProxy = function (evt, pg, funcname) {
   if (tag === 'form') {
     a.form = w.parseform(evt.target);
     a.value = a.form.values;
-  } else if (tag === 'input') {
+  } else if (tag === 'input' || tag === 'textarea') {
     a.value = a.target.value || '';
 
     switch (a.target.type) {
@@ -2356,22 +2356,28 @@ class Component extends HTMLElement {
     return d;
   }
 
+  _fmtquery (k) {
+    let qcss = `[data-name=${k}]`;
+
+    if (k[0] === '#') {
+      qcss = k;
+    } else if (k[0] === '@') {
+      qcss = `[name=${k.substring(1)}]`;
+    } else if (k[0] === '.') {
+      qcss = `[class=${k.substring(1)}]`;
+    } else if (k[0] === '[') {
+      qcss = k;
+    }
+    return qcss;
+  }
+
   view (data) {
     let qcss = '';
     let nds;
     
     for (let k in data) {
-      qcss = `[data-name=${k}]`;
       
-      if (k[0] === '#') {
-        qcss = k;
-      } else if (k[0] === '@') {
-        qcss = `[name=${k.substring(1)}]`;
-      } else if (k[0] === '.') {
-        qcss = `[class=${k.substring(1)}]`;
-      } else if (k[0] === '[') {
-        qcss = k;
-      }
+      qcss = this._fmtquery(k);
   
       nds = this.shadow.querySelectorAll(qcss);
   
@@ -2386,6 +2392,49 @@ class Component extends HTMLElement {
         }
       }
     }
+  }
+
+  setAttr (data) {
+    if (!data || typeof data !== 'object') {
+      return;
+    }
+
+    let qcss, nds, attr;
+
+    for (let k in data) {
+      qcss = this._fmtquery(k);
+
+      nds = this.shadow.querySelectorAll(qcss);
+      if (nds.length === 0) {
+        continue;
+      }
+
+      attr = data[k];
+
+      for (let d of nds) {
+        for (let a in attr) {
+          switch (a) {
+            case 'class':
+              d.className = attr[a];
+              break;
+
+            case 'style':
+              if (typeof attr[a] === 'string') {
+                d.style.cssText = attr[a];
+              } else if (typeof attr[a] === 'object') {
+                for (let ak in attr[a]) {
+                  d.style[ak] = attr[a][ak];
+                }
+              }
+              break;
+
+            default:
+              d[a] = attr[a];
+          }
+        }
+      }//end for nds
+
+    }//end for data
   }
 
   queryAll (qss) {

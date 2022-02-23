@@ -392,3 +392,19 @@ node newcomps.js [应用目录名称] [组件名称]
 }
 
 ```
+
+### w常用API
+
+- acover 弹出层显示内容，带有cover页面不允许点击其他部分。
+
+- uncover 取消acover弹出层。
+
+- notify 右下角消息通知。
+
+- notifyTop 顶部中间消息通知。
+
+- notifyTopError 顶部中间错误消息通知。
+
+- registerShareNotice 注册共享数据通知函数。
+
+- removeShareNotice 移除share通知函数。
