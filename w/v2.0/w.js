@@ -452,7 +452,9 @@ const w = new function () {
         this.curTitle = t;
       }
     },
-    get: () => {return this.curTitle;}
+    get: () => {
+      return this.curTitle;
+    }
   });
 
   this.setTitle = (t) => {
@@ -2271,7 +2273,6 @@ w.loadScript = async function (src) {
   return new Promise((rv, rj) => {
     d.type = 'text/javascript';
     d.src = src;
-
     document.body.appendChild(d);
 
     d.onerror = err => {
