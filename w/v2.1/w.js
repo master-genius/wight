@@ -967,6 +967,22 @@ const w = new function () {
       this.length = 0;
     };
 
+    this.clearPre = function (pre, callback = null) {
+      let total = localStorage.length;
+      let nk;
+      for (let i = 0; i < total; i++) {
+        nk = localStorage.key(i);
+        if (nk.indexOf(pre) !== 0) {
+          continue;
+        }
+        if (callback && typeof callback === 'function') {
+          callback(this.jget(nk)) && this.remove(nk);
+        } else {
+          this.remove(nk);
+        }
+      }
+    };
+
     this.jset = function (k,d) {
       this.set(k,d);
     };
