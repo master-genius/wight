@@ -36,9 +36,9 @@ var wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '2.0';
+  this.defaultVersion = '2.1';
 
-  this.version = '2.0';
+  this.version = '2.1';
 
   this.forceCompress = false;
 
