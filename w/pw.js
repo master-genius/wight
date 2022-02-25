@@ -166,13 +166,13 @@ var wapp = function (options = {}) {
   this.templates = '';
 
   this.compile = function () {
-
-    let closePromptText = `window.onbeforeunload = function () {return '退出？';};`
-      +`window.onunload = function () {return '退出？';};`
-      +`window.onpagehide = evt => {if (evt.persisted) {} return '退出?';}`;
+    //window.onunload = function () {return '退出？';};
+    let closePromptText = `window.onbeforeunload = function (e) {return e.returnValue = '退出应用？';};`
+      +`window.onpagehide = evt => {if (evt.persisted) {} return '退出?';};`
+      +`window.onunload = function () {w.destroyAllPage();};`;
 
     if (this.config.closePrompt === false) {
-      closePromptText = '';
+      closePromptText = 'window.onunload = function () {w.destroyAllPage();};';
     }
 
     return `<!DOCTYPE html><html>
