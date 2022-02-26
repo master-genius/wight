@@ -531,7 +531,7 @@ const w = new function () {
         w[domname].innerHTML = `<div style="text-align:right;">`
             +`${closeText}</div><p>${w.alertlog}</p>`;
       }
-      w.initPageDomEvents(w.curpage, w[domname]);
+      w.initPageDomEvents(options.context || w.curpage, w[domname]);
     }
 
     if (options.withCover && w[coverdomname]) {
@@ -967,24 +967,33 @@ const w = new function () {
       this.length = 0;
     };
 
-    this.clearPre = function (pre, callback = null) {
+    this.getPre = function (pre) {
       let total = localStorage.length;
       let nk;
+      let dlist = [];
       for (let i = 0; i < total; i++) {
         nk = localStorage.key(i);
         if (nk.indexOf(pre) !== 0) {
           continue;
         }
-        if (callback && typeof callback === 'function') {
-          callback(this.jget(nk)) && this.remove(nk);
-        } else {
-          this.remove(nk);
-        }
+        dlist.push({
+          key: nk,
+          data: this.jget(nk)
+        });
       }
+
+      return dlist;
     };
 
-    this.jset = function (k,d) {
-      this.set(k,d);
+    this.removePre = function (pre, callback = null) {
+      let dlist = this.getPre(pre);
+      for (let a of dlist) {
+        if (callback && typeof callback === 'function') {
+          callback(a) && this.remove(a.key);
+        } else {
+          this.remove(a.key);
+        }
+      }
     };
 
     this.jget = function (k) {
@@ -1147,7 +1156,7 @@ w.setCoverShadowText = (text = '', style = '') => {
   w.alertcoverdom1.style.cssText = style;
 };
 
-w.sliderPage = function(html = null, append = true) {
+w.sliderPage = function(html = null, append = true, obj=null) {
   if (w.slidedom) {
     w.slidedom.className = 'w-common-slide-right';
     w.slidexdom.className = 'w-common-slide-right-close';
@@ -1169,7 +1178,7 @@ w.sliderPage = function(html = null, append = true) {
           w.slidedom.innerHTML = w.fmtHTML(w.curpagename, html.innerHTML);;
         }
       }
-      w.initPageDomEvents(w.curpage, w.slidedom);
+      w.initPageDomEvents(obj || w.curpage, w.slidedom);
     }
   }
 
@@ -1977,17 +1986,13 @@ w.navi = function (htext, opts = {}) {
   setTimeout(() => {
     w.navibtndom.className = classtext;
     w.navibtndom.innerHTML = w.fmtHTML(w.curpagename, htext);
-    w.initPageDomEvents(w.curpage, w.navibtndom);
+    w.initPageDomEvents(opts.context || w.curpage, w.navibtndom);
   }, 5);
   
 };
 
 w.naviGlass = function (htext, lr='left', up = false) {
   w.navi(htext, {position: lr, background: 'glass', up: up});
-};
-
-w.naviLucency = function (htext, lr='left', up = false) {
-  w.navi(htext, {position: lr, background: 'lucency', up: up});
 };
 
 w.naviHide = function () {
@@ -2040,11 +2045,13 @@ w.eventProxy = function (evt, pg, funcname) {
   if (wind === 0) {
     wfunc = w.ext[funcname.substring(8)];
     if (typeof wfunc !== 'function') {
+      if (evt.target && evt.target.dataset.noterror) return false;
       w.notifyError(`${funcname} is not a function.`);
       return false;
     }
   }
   else if (!pg || !pg[funcname] || !(typeof pg[funcname] === 'function')) {
+    if (evt.target && evt.target.dataset.noterror) return false;
     w.notifyError(`${funcname} is not a function.`);
     return false;
   }
@@ -2345,9 +2352,9 @@ class Component extends HTMLElement {
    * @param {string} id 
    * @param {object} data 
    */
-  plate (id, data = {}) {
-    if (typeof id === 'object') {
-      data = id;
+  plate (id = null, data = {}) {
+    if (typeof id === 'object' || !id) {
+      data = id || {};
       id = this.tagName.toLowerCase();
     }
     
@@ -2422,9 +2429,7 @@ class Component extends HTMLElement {
       qcss = this._fmtquery(k);
 
       nds = this.shadow.querySelectorAll(qcss);
-      if (nds.length === 0) {
-        continue;
-      }
+      if (nds.length === 0) continue;
 
       attr = data[k];
 
@@ -2488,4 +2493,22 @@ class Component extends HTMLElement {
     }
   }
 
+  naviGlass (text, pr = 'left', up = false) {
+    w.navi(text, { context: this, position: pr, background: 'glass', up });
+  }
+
+  naviHide () { w.naviHide(); }
+
+  cover (info, trans = false) {
+    w.alert(info, {
+      context: this,
+      replace: true,
+      notClose: true,
+      withCover: true,
+      shadow: true,
+      transparent: trans
+    });
+  };
+
+  uncover () { w.unalert('shadow'); }
 }
