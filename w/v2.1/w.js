@@ -2238,6 +2238,7 @@ w.registerShareNotice = function (options) {
   if (!w.shareNoticeList.funcmap[ options.key ]) {
     w.shareNoticeList.funcmap[ options.key ] = [ options ];
   } else {
+    if (options.only) return false;
     let kn = w.shareNoticeList.funcmap[ options.key ];
     if (kn.length >= 10) {
       w.notifyError('同一个key注册通知函数不能超过10个。');
