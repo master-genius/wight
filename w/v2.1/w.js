@@ -967,19 +967,22 @@ const w = new function () {
       this.length = 0;
     };
 
-    this.getPre = function (pre) {
+    this.getPre = function (pre, options = null) {
       let total = localStorage.length;
       let nk;
       let dlist = [];
       for (let i = 0; i < total; i++) {
         nk = localStorage.key(i);
-        if (nk.indexOf(pre) !== 0) {
-          continue;
+        if (nk.indexOf(pre) !== 0) continue;
+
+        if (options && options.justKeys) {
+          dlist.push(nk);
+        } else {
+          dlist.push({
+            key: nk,
+            data: this.jget(nk)
+          });
         }
-        dlist.push({
-          key: nk,
-          data: this.jget(nk)
-        });
       }
 
       return dlist;
@@ -1688,7 +1691,7 @@ w.bind = new Proxy(w.data, {
 });
 
 w._make_page_bind = function (pagename) {
-  w.pages[pagename].bind = new Proxy(w.pages[pagename].data, {
+  let pxy = new Proxy(w.pages[pagename].data, {
     set: (obj, k, data) => {
       obj[k] = data;
 
@@ -1730,12 +1733,17 @@ w._make_page_bind = function (pagename) {
       return true;
     }
   });
+  
+  Object.defineProperty(w.pages[pagename], 'bind', {
+    value: pxy,
+    writable: false
+  });
 };
 
 w._page_style_bind = function (pname) {
-  w.pages[pname].__style__ = {}
+  w.pages[pname].__style__ = {};
 
-  w.pages[pname].style = new Proxy(w.pages[pname].__style__, {
+  let pxy = new Proxy(w.pages[pname].__style__, {
     set: (obj, k, data) => {
       obj[k] = data;
 
@@ -1758,6 +1766,11 @@ w._page_style_bind = function (pname) {
     deleteProperty: (obj, k) => {
       delete obj[k];
     }
+  });
+
+  Object.defineProperty(w.pages[pname], 'style', {
+    value: pxy,
+    writable: false
   });
 };
 
