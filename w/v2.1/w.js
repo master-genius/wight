@@ -1651,6 +1651,10 @@ w._setData = function (pagename, pg, nds, data) {
       }
       if (pagename)
         w.initPageDomEvents(pg, nds[i]);
+      else if (pagename === 0) {
+        //如果在组件里，使用view，则需要执行initPageDomEvents，目前使用pagename为0表示组件内调用。
+        w.initPageDomEvents(pg, nds[i]);
+      }
     }
 
     dtemp = '';
@@ -2469,7 +2473,7 @@ class Component extends HTMLElement {
       nds = this.shadow.querySelectorAll(qcss);
 
       try {
-        w._setData(null, this, nds, data[k]);
+        w._setData(0, this, nds, data[k]);
       } catch (err) {
         if (w.debug) {
           w.notifyError(err.message, 3500);
