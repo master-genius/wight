@@ -1188,13 +1188,11 @@ w.sliderPage = function(html = null, append = true, obj=null) {
   return w.slidedom;
 };
 
-w.hideSliderPage = function (clearhtml = false) {
+w.hideSliderPage = function () {
   if (w.slidedom) {
     w.slidedom.className = 'w-hide-common-slide-right';
     w.slidexdom.className = 'w-hide-common-slide-right-close';
-    if (clearhtml) {
-      w.slidedom.innerHTML = '';
-    }
+    w.slidedom.innerHTML = '';
   }
 };
 w.hideSlider = w.hideSliderPage;
