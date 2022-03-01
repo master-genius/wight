@@ -2277,23 +2277,26 @@ w.runShareNotice = function (type, obj, k, data = null) {
 
 };
 
-w.share = new Proxy(w.shareData, {
-  set: (obj, k, data) => {
-    obj[k] = data;
-    w.runShareNotice('set', obj, k, data);
-    return true;
-  },
-
-  get: (obj, k) => {
-    w.runShareNotice('get', obj, k);
-    return obj[k] || null;
-  },
-
-  deleteProperty : (obj, k) => {
-    w.runShareNotice('delete', obj, k);
-    delete obj[k];
-    return true;
-  }
+Object.defineProperty(w, 'share', {
+  writable: false,
+  value: new Proxy(w.shareData, {
+    set: (obj, k, data) => {
+      obj[k] = data;
+      w.runShareNotice('set', obj, k, data);
+      return true;
+    },
+  
+    get: (obj, k) => {
+      w.runShareNotice('get', obj, k);
+      return obj[k] || null;
+    },
+  
+    deleteProperty : (obj, k) => {
+      w.runShareNotice('delete', obj, k);
+      delete obj[k];
+      return true;
+    }
+  })
 });
 
 w.loadScript = async function (src) {
