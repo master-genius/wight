@@ -2198,13 +2198,17 @@ window.require = async function (name, loop = 20) {
   }
 };
 
-w.shareData = {};
-
-Object.defineProperty(w, 'shareNoticeList', {
-  writable: false,
-  value: {
-    length: 0,
-    funcmap: {}
+Object.defineProperties(w, {
+  'shareData': {
+    writable: false,
+    value: {}
+  },
+  'shareNoticeList': {
+    writable: false,
+    value: {
+      length: 0,
+      funcmap: {}
+    }
   }
 });
 
