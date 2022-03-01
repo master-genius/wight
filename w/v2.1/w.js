@@ -2200,7 +2200,13 @@ window.require = async function (name, loop = 20) {
 
 w.shareData = {};
 
-w.shareNoticeList = [];
+Object.defineProperty(w, 'shareNoticeList', {
+  writable: false,
+  value: {
+    length: 0,
+    funcmap: {}
+  }
+});
 
 /**
  * mode默认为一直执行，或者是选择once表示执行一次则删除。
@@ -2213,15 +2219,9 @@ w.registerShareNotice = function (options) {
     return false;
   }
 
-  if (!options.type) options.type = 'all';
+  if (!options.type) options.type = 'set';
   if (!options.mode) options.mode = 'always';
-  if (!options.name) options.name = '--';
-
-  for (let a of w.shareNoticeList) {
-    if (a.name === options.name) {
-      return a.name;
-    }
-  }
+  if (!options.key) options.key = '*';
 
   options.count = 0;
 
@@ -2230,32 +2230,64 @@ w.registerShareNotice = function (options) {
     return false;
   }
 
-  w.shareNoticeList.push(options);
+  options.id = `${options.key}.${Math.random().toString(16).substring(2)}${Date.now()}`;
 
-  return options.name;
+  if (!w.shareNoticeList.funcmap[ options.key ]) {
+    w.shareNoticeList.funcmap[ options.key ] = [ options ];
+  } else {
+    let kn = w.shareNoticeList.funcmap[ options.key ];
+    if (kn.length >= 10) {
+      w.notifyError('同一个key注册通知函数不能超过10个。');
+      return false;
+    }
+    kn.push(options);
+  }
+
+  w.shareNoticeList.length += 1;
+
+  return options.id;
 };
 
-w.removeShareNotice = function (name) {
+w.removeShareNotice = function (id) {
+  let dotind = id.indexOf('.');
+
+  let km;
+  if (dotind < 0) km = id;
+  else km = id.substring(0, dotind);
+
+  if (!km || !w.shareNoticeList.funcmap[km]) return false;
+
+  if (km === id) {
+    w.shareNoticeList.funcmap[km] = null;
+    return true;
+  }
+
+  let kmap = w.shareNoticeList.funcmap[km];
   let ind = 0;
-  for (let a of w.shareNoticeList) {
-    if (name === a.name) {
-      w.shareNoticeList.splice(ind, 1);
+
+  for (let a of kmap) {
+    if (a.id === id) {
+      kmap.splice(ind, 1);
+      w.shareNoticeList.length -= 1;
       return a;
     }
-
     ind += 1;
   }
 };
 
 w.runShareNotice = function (type, obj, k, data = null) {
 
-  for (let a of w.shareNoticeList) {
+  let kmlist = w.shareNoticeList.funcmap[k];
 
+  if (!kmlist) return;
+
+  let delids = [];
+
+  for (let a of kmlist) {
     if (a.type !== 'all' && a.type !== type) continue;
-
-    if (a.key && a.key !== k) continue;
-
+    if (a.key !== '*' && a.key !== k) continue;
     if (a.mode === 'once' && a.count > 0) {
+      delids.push(a.id);
       continue;
     }
 
@@ -2270,6 +2302,12 @@ w.runShareNotice = function (type, obj, k, data = null) {
       });
     } catch (err) {
       w.notifyError(err.message);
+    }
+  }
+
+  if (delids.length > 0) {
+    for (let id of delids) {
+      w.removeShareNotice(id);
     }
   }
 
@@ -2418,7 +2456,7 @@ class Component extends HTMLElement {
       qcss = this._fmtquery(k);
   
       nds = this.shadow.querySelectorAll(qcss);
-  
+
       try {
         w._setData(null, this, nds, data[k]);
       } catch (err) {
