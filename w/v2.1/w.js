@@ -2429,6 +2429,11 @@ class Component extends HTMLElement {
 
     let nd = document.querySelector(`template[id=${id}]`);
 
+    if (!nd) {
+      nd = document.querySelector(`div[data-id=${id}]`);
+      if (nd) nd = nd.querySelector('template');
+    }
+
     if (!nd) return false;
 
     if (nd.innerHTML.indexOf(`<${this.tagName.toLowerCase()}>`) >= 0 ) {

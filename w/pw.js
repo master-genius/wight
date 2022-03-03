@@ -822,7 +822,10 @@ wapp.prototype.loadComps = async function (cdir) {
         if (!htmlparser.parse(tempdata)) {
           delayOutError(htmlparser.lastErrorMsg, `语法检测：${names[i]}/template.html`);
         } else {
-          this.templates += tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
+          //使用div包装模板。
+          this.templates += `<div data-id="${cex.name}">
+            ${tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '')}
+          </div>`;
         }
       } catch (err) {}
 
@@ -836,7 +839,7 @@ wapp.prototype.loadComps = async function (cdir) {
           opts = `,{extends: '${cex.options.extends}'}`;
         }
 
-        this.components += `${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});`;
+        this.components += `;(()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
       } catch (err) {
         console.error(err.message);
       }
