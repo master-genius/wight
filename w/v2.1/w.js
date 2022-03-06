@@ -2016,11 +2016,13 @@ w.naviHide = function () {
 };
 
 w._devents = [
-  'click', 'blur', 'submit', 'input', 'dblclick', 'copy', 'fullscreenchange',
+  'click', 'blur', 'submit', 'input', 'dblclick', 'copy', 
+  'fullscreenchange','fullscreenerror',
   'focus', 'focusin', 'focusout', 'keyup', 'keydown', 'scroll', 'change',
   'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
-  'touchcancel', 'touchend', 'touchmove', 'touchstart', 'select', 'wheel', 'paste', 'cut',
-  'contextmenu',
+  'touchcancel', 'touchend', 'touchmove', 'touchstart', 'select', 'wheel', 
+  'paste', 'cut', 'contextmenu', 
+  'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 'dragenter', 'drop'
 ];
 
 w.initDomEvent = function (pg, dom, evtname) {
