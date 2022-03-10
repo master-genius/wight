@@ -620,13 +620,19 @@ wapp.prototype.replaceCssUrl = function (codetext) {
 
 wapp.prototype.replaceSrc = function (codetext) {
 
-  let replace_src = (url) => {
+  let replace_src = (url, plist, offset, text) => {
     if ((/^http[s]?:\/\//).test(url)) {
       return url;
     }
 
-    if (url.trim().indexOf('${') == 0) {
+    let turl = url.trim();
+    if (turl.indexOf('${') === 0) {
       return url;
+    }
+
+    //不做替换处理。
+    if (turl[0] === '!') {
+      return turl.substring(1);
     }
 
     if (this.isbuild) {
@@ -638,13 +644,13 @@ wapp.prototype.replaceSrc = function (codetext) {
   };
 
   let match_replace = m => {
-    let url = m.substring(5, m.length-1);
-    return `src="${replace_src(url)}"`;
+    let url = m.substring(6, m.length-1);
+    return ` src="${replace_src(url)}"`;
   };
 
-  codetext = codetext.replace(/src="[^"]+"/g, match_replace);
+  codetext = codetext.replace(/ src="[^"]+"/g, match_replace);
 
-  codetext = codetext.replace(/src='[^']+'/g, match_replace);
+  codetext = codetext.replace(/ src='[^']+'/g, match_replace);
 
   return codetext;
 
