@@ -2506,7 +2506,6 @@ class Component extends HTMLElement {
       if (nds.length === 0) continue;
 
       attr = data[k];
-
       for (let d of nds) {
         for (let a in attr) {
           switch (a) {
