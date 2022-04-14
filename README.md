@@ -395,6 +395,30 @@ node newcomps.js [应用目录名称] [组件名称]
 
 ```
 
+#### 组件文件构成
+
+- [组件名].js 组件的类文件。
+
+- explain.json 组件的声明文件，指定了组件的文件、类的名字、组件基本介绍等。
+
+- template.html 组件的HTML模板，可以不存在，如果存在则会去加载模板，这时候可以在js文件内通过this.plate方法渲染模板。
+
+
+#### 组件类继承的方法
+
+- plate 渲染模板
+
+- view VM映射函数
+
+- cover 全局显示弹框，内容可自定义，可以渲染HTML
+
+- uncover 取消弹框
+
+- naviGlass 显示侧边栏按钮
+
+- naviHide 隐藏侧边栏
+
+
 ### w常用API
 
 - acover 弹出层显示内容，带有cover页面不允许点击其他部分。
