@@ -186,10 +186,9 @@
 }
 
 .w-prompt-block {
+  top:0;
   height:99.9%;
   width: 99.9%;
-  left: 0.05%;
-  top: 0.05%;
 }
 
 .w-navigate-btn {

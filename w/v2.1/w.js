@@ -806,6 +806,7 @@ const w = new function () {
           + `${w.fmtHTML(w.curpagename, info)}`
           + `</div>`;
     }
+    w.initPageDomEvents(w.curpage, w.promptdom);
     return w.promptdom;
   };
 
