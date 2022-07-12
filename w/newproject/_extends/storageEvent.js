@@ -1,6 +1,6 @@
 exports.storageEvent = new function () {
 
-  this.events = [ 'set', 'remove']
+  this.events = ['set', 'remove']
 
   this.eventMap = {}
 
@@ -41,10 +41,9 @@ exports.storageEvent = new function () {
       this._setEventHandle(key, options.type, options)
     }
 
-    this.idMap[id] = {
-      key,
-      options
-    }
+    options.id = id
+
+    this.idMap[id] = key
     
     return id
   }
@@ -56,6 +55,7 @@ exports.storageEvent = new function () {
     }
 
     if (!options.callback || typeof options.callback !==  'function') {
+      w.alertError('storageEvent注册事件callback必须为函数。');
       return false;
     }
 
@@ -79,11 +79,17 @@ exports.storageEvent = new function () {
 
     let handles = this.eventMap[key][type]
 
+    let rmids = []
+
     for (let f of handles) {
       if (f.callback.constructor.name === 'AsyncFunction') {
         ret = await f.callback(data)
       } else {
         ret = f.callback(data)
+      }
+
+      if (f.mode === 'once') {
+        rmids.push(f.id)
       }
 
       if (ret === '::stop::') break
@@ -94,13 +100,17 @@ exports.storageEvent = new function () {
       }
     }
 
+    rmids.forEach(id => {
+      this.removeHandle(id)
+    })
+
   }
 
   this.removeHandle = function (id, type = '') {
-    let h = this.idMap[id]
-    if (!h) return false
+    let ky = this.idMap[id]
+    if (!ky) return false
 
-    let m = this.eventMap[h.key]
+    let m = this.eventMap[ky]
 
     if (!m) return false
 
@@ -108,7 +118,7 @@ exports.storageEvent = new function () {
       if (type !== '' && k !== type) continue
 
       for (let i = 0; i < m[k].length; i++) {
-        if (m[k][i] === h.options) {
+        if (m[k][i].id === id) {
           m[k].splice(i, 1)
           break
         }
@@ -120,6 +130,8 @@ exports.storageEvent = new function () {
   }
 
   this.handle = async function (evt) {
+
+    let self = this
 
     let obj = {
       type: evt.key === null ? 'clear' : (evt.newValue === null ? 'remove' : 'set'),
