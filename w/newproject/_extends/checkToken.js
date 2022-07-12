@@ -11,7 +11,7 @@ exports.checkToken = function (autoRemove = false) {
     return false;
   }
 
-  let u = w.storage.jget('wxuserinfo');
+  let u = w.storage.jget('userinfo');
 
   if (parseInt(u.logintime) + parseInt(u.expires) <= Date.now()) {
     if (autoRemove) {
