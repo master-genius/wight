@@ -47,6 +47,7 @@ class htmlstate {
     this.startState = this.STATE.NONE
     this.endState = this.STATE.NONE
     this.cursor = 0
+    this.lastCursor = 0
 
     this.tagStack = []
     this.tagCloseStack = []
@@ -408,8 +409,11 @@ class htmlstate {
       else
         st = this.checkState(this.data[this.cursor], '')
 
+      if (this.curState === this.STATE.TAG_START)
+        this.lastCursor = this.cursor
+
       if (!st) {
-        this.lastErrorMsg = `${this.cursor} ${this.data[this.cursor]}: 错误的语法。`
+        this.lastErrorMsg = `${this.lastCursor} ~ ${this.cursor} ${this.data.substring(this.lastCursor, this.cursor+1)}: 错误的语法。`
         return false
       }
 
@@ -427,7 +431,8 @@ class htmlstate {
     }
 
     if (!this.diffStack()) {
-      this.lastErrorMsg = '标签包含嵌套不一致。'
+      this.lastErrorMsg = `${this.lastCursor} ~ ${this.cursor} `
+          + `${this.data.substring(this.lastCursor, this.cursor+1)} 标签包含嵌套不一致。`
       return false
     }
 
