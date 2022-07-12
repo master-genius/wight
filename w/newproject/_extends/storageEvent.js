@@ -6,6 +6,8 @@ exports.storageEvent = new function () {
 
   this.idMap = {}
 
+  this.frequency = 100
+
   this._initEventMap = function (key) {
     this.eventMap[key] = {}
 
@@ -59,6 +61,8 @@ exports.storageEvent = new function () {
       return false;
     }
 
+    if (options.mode == undefined) options.mode = 'always';
+
     if (!options.type) options.type = 'all';
 
     if (options.type === 'clear') return this._addHandle('@all', options)
@@ -69,7 +73,7 @@ exports.storageEvent = new function () {
       return this._addHandle('@all', options);
     }
 
-    return this._addHandle(key, options);
+    return this._addHandle(options.key, options);
   }
 
   this._run = async function (key, type, data) {
@@ -129,6 +133,8 @@ exports.storageEvent = new function () {
 
   }
 
+  this.frequencyRecord = {}
+
   this.handle = async function (evt) {
 
     let self = this
@@ -143,6 +149,19 @@ exports.storageEvent = new function () {
         return '::clear::'
       }
     }
+
+    let tm = Date.now()
+    let frkey = `${obj.key || '@all'} ${obj.type}`
+
+    if (this.frequencyRecord[frkey] === undefined) {
+      this.frequencyRecord[frkey] = 0
+    }
+    
+    if (this.frequency > (tm - this.frequencyRecord[frkey])) {
+      return
+    }
+
+    this.frequencyRecord[frkey] = tm
 
     this._run(obj.key || '@all', obj.type, obj)
 
