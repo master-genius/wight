@@ -6,7 +6,7 @@ exports.storageEvent = new function () {
 
   this.idMap = {}
 
-  this.frequency = 100
+  this.frequency = 500
 
   this._initEventMap = function (key) {
     this.eventMap[key] = {}
@@ -21,12 +21,19 @@ exports.storageEvent = new function () {
 
   this._setEventHandle = function (key, type, options) {
     let h = this.eventMap[key][type]
-    if (h.length >= 10) {
-      w.alertError('每个storage事件最多允许注册10个处理函数。')
+    if (h.length >= 5) {
+      !options.quiet && w.alertError('每个storage事件最多允许注册5个处理函数。')
       return false
     }
 
+    for (let a of h) {
+      if ((options.name && a.name === options.name) || options.callback === a.callback)
+        return false
+    }
+
     h.push(options)
+
+    return true
   }
 
   this._addHandle = function (key, options) {
@@ -34,13 +41,17 @@ exports.storageEvent = new function () {
 
     let id = `${Date.now()}${Math.random().toString(16).substring(2)}`
 
+    let false_count = 0
+
     if (options.type === 'all') {
       this.events.forEach(e => {
-        this._setEventHandle(key, e, options)
+        if (false === this._setEventHandle(key, e, options)) false_count += 1
       })
+
+      if (false_count === this.events.length) return false
     } else {
       if (this.events.indexOf(options.type) < 0 && options.type !== 'clear') return false
-      this._setEventHandle(key, options.type, options)
+      if (false === this._setEventHandle(key, options.type, options)) return false
     }
 
     options.id = id
@@ -62,6 +73,10 @@ exports.storageEvent = new function () {
     }
 
     if (options.mode == undefined) options.mode = 'always';
+
+    (options.quiet === undefined) && (options.quiet = false);
+
+    (options.name === undefined) && (options.name = '');
 
     if (!options.type) options.type = 'all';
 
