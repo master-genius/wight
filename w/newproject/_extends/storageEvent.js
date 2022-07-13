@@ -76,13 +76,15 @@ exports.storageEvent = new function () {
 
     (options.quiet === undefined) && (options.quiet = false);
 
-    (options.name === undefined) && (options.name = '');
-
     if (!options.type) options.type = 'all';
 
     if (options.type === 'clear') return this._addHandle('@all', options)
 
     if (options.key === undefined) options.key = '';
+
+    (options.name === undefined) && (options.name = `${w.curpagename}-${options.key || '@all'}-${options.type}`);
+
+    if (options.test) return true
 
     if (options.key === '') {
       return this._addHandle('@all', options);
@@ -126,19 +128,30 @@ exports.storageEvent = new function () {
   }
 
   this.removeHandle = function (id, type = '') {
-    let ky = this.idMap[id]
-    if (!ky) return false
+    let ky
+    let key_index = 'id'
 
-    let m = this.eventMap[ky]
+    if (id.indexOf('-') < 0) {
+      ky = this.idMap[id]
+      if (!ky) return false
+    } else {
+      let karr = id.split('-').filter(p => p.length > 0)
+      if (karr.length !== 3) return false
+      ky = karr[1]
+      type = karr[2]
+      key_index = 'name'
+    }
 
-    if (!m) return false
+    let keyHandles = this.eventMap[ky]
 
-    for (let k in m) {
+    if (!keyHandles) return false
+
+    for (let k in keyHandles) {
       if (type !== '' && k !== type) continue
-
-      for (let i = 0; i < m[k].length; i++) {
-        if (m[k][i].id === id) {
-          m[k].splice(i, 1)
+  
+      for (let i = 0; i < keyHandles[k].length; i++) {
+        if (keyHandles[k][i][key_index] === id) {
+          keyHandles[k].splice(i, 1)
           break
         }
       }
