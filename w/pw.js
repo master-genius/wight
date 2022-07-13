@@ -24,9 +24,9 @@ function delayOutError (err, info, delay = 1280) {
 /**
  * 要根据pages记录的页面去指定的目录中加载页面，并生成一些初始化的代码。
  */
-var _page_dir = __dirname;
+let _page_dir = __dirname;
 
-var wapp = function (options = {}) {
+let wapp = function (options = {}) {
 
   if (!(this instanceof wapp) ) {
     return new wapp(options);
@@ -36,9 +36,9 @@ var wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '2.1';
+  this.defaultVersion = '2.2';
 
-  this.version = '2.1';
+  this.version = '2.2';
 
   this.forceCompress = false;
 
@@ -255,6 +255,7 @@ var wapp = function (options = {}) {
             );
           }
           w.initPage();
+          initPages();
           if (w.tabs.list.length > 0) {
             w.tabsmenudom.className = 'w-tabbar-row-x';
             w.tabsmenudom.background = '${this.config.tabsBackground}';
@@ -262,23 +263,24 @@ var wapp = function (options = {}) {
           }
         };
         
-        let pname = '';
-        for (let p in w.pages) {
-          w.pages[p].view = function (data,options={}) {return w.view(p,data,options);};
-          w.pages[p].render = function (htext) {return w.fmtHTML(p, htext);};
-          w.pages[p].setScroll = function(scr) {
-            if (scr < 0) { w.pages[p].__dom__.scrollTop += scr; }
-            else { w.pages[p].__dom__.scrollTop = scr; }
-          };
-          w.pages[p].destroy = function () {w.destroyPage(w.pages[p]);};
-          w.pages[p].query = function(qstr) {return w.pages[p].__dom__.querySelector(qstr);};
-          w.pages[p].queryAll = function(qstr) {return w.pages[p].__dom__.querySelectorAll(qstr);};
-          w.pages[p].setAttr = function (data) {w.setAttr(p,data);};
-          if (!w.pages[p].data || typeof w.pages[p].data !== 'object') {
-            w.pages[p].data = {};
+        function initPages () {
+          for (let p in w.pages) {
+            w.pages[p].view = function (data,options={}) {return w.view(p,data,options);};
+            w.pages[p].render = function (htext) {return w.fmtHTML(p, htext);};
+            w.pages[p].setScroll = function(scr) {
+              if (scr < 0) { w.pages[p].__dom__.scrollTop += scr; }
+              else { w.pages[p].__dom__.scrollTop = scr; }
+            };
+            w.pages[p].destroy = function () {w.destroyPage(w.pages[p]);};
+            w.pages[p].query = function(qstr) {return w.pages[p].__dom__.querySelector(qstr);};
+            w.pages[p].queryAll = function(qstr) {return w.pages[p].__dom__.querySelectorAll(qstr);};
+            w.pages[p].setAttr = function (data) {w.setAttr(p,data);};
+            if (!w.pages[p].data || typeof w.pages[p].data !== 'object') {
+              w.pages[p].data = {};
+            }
+            w._make_page_bind(p);
+            w._page_style_bind(p);
           }
-          w._make_page_bind(p);
-          w._page_style_bind(p);
         }
 
         window.onpageshow = async function() {

@@ -150,20 +150,36 @@ exports.storageEvent = new function () {
       }
     }
 
+    if (this.frequency <= 0) {
+      this._run(tr.data.key || '@all', tr.data.type, tr.data)
+      return
+    }
+
     let tm = Date.now()
     let frkey = `${obj.key || '@all'} ${obj.type}`
 
     if (this.frequencyRecord[frkey] === undefined) {
-      this.frequencyRecord[frkey] = 0
-    }
-    
-    if (this.frequency > (tm - this.frequencyRecord[frkey])) {
-      return
+      this.frequencyRecord[frkey] = {
+        tm: tm - this.frequency,
+        timer: null,
+        data: null
+      }
     }
 
-    this.frequencyRecord[frkey] = tm
+    let tr = this.frequencyRecord[frkey]
 
-    this._run(obj.key || '@all', obj.type, obj)
+    tr.data = obj
+
+    !tr.timer &&
+      (
+        tr.timer = setTimeout(() => {
+          let obj = tr.data
+          this._run(obj.key || '@all', obj.type, obj)
+          tr.timer = null
+          tr.data = null
+          tr.tm = tm
+        }, this.frequency)
+      )
 
   };
 
