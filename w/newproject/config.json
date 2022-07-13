@@ -57,7 +57,7 @@
         "u-card"
     ],
 
-    "version": "2.1",
+    "version": "2.2",
 
     "manifest": false,
 
@@ -71,5 +71,7 @@
 
     "closePrompt": false,
 
-    "buildCompress": false
+    "buildCompress": false,
+
+    "asyncPage": true
 }

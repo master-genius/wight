@@ -2123,7 +2123,13 @@ w.genEventProxy = function (pg, funcname) {
 };
 
 w._http_preg = new RegExp('^http[s]?:/'+'/', 'i');
-w.__mod__ = {};
+
+Object.defineProperty(w, '__mod__', {
+  enumerable: false,
+  configurable: false,
+  writable: false,
+  value: Object.create(null)
+});
 
 window._import = w.import = async function (path, reload=false) {
   if (w.__mod__[path] && !reload) {
@@ -2187,15 +2193,15 @@ w.ext = new Proxy(w.__ext__, {
   }
 });
 
-window.require = async function (name, loop = 20) {
+window.require = async function (name, loop = 10) {
   try {
     if (w.__ext__[name]) return w.__ext__[name];
     
-    if (typeof loop !== 'number' || loop < 1 || loop > 50) loop = 20;
+    if (typeof loop !== 'number' || loop < 1 || loop > 20) loop = 10;
 
     for (let i = 0; i < loop; i++) {
       await new Promise((rv) => {
-        setTimeout(() => { rv(); }, 5);
+        setTimeout(() => { rv(); }, 3);
       });
 
       if (w.__ext__[name]) return w.__ext__[name];

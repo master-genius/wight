@@ -64,7 +64,8 @@ let wapp = function (options = {}) {
     components : [],
     extends: [],
     exts: [],
-    iconPath: '/favicon.ico'
+    iconPath: '/favicon.ico',
+    asyncPage: false,
   };
 
   this.jch = {
@@ -254,6 +255,9 @@ let wapp = function (options = {}) {
               document.body.firstChild
             );
           }
+
+          ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(() => {rv();}, 42);});' : ''}
+
           w.initPage();
           initPages();
 
@@ -285,10 +289,8 @@ let wapp = function (options = {}) {
         }
 
         window.onpageshow = async function() {
-          await new Promise(rv => {setTimeout(() => {rv();}, 50);});
-          if (w.init && typeof w.init === 'function') {
-            w.init();
-          }
+          await new Promise(rv => {setTimeout(() => {rv();}, 45);});
+          if (w.init && typeof w.init === 'function') w.init();
           if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
           {
             w.switchTab(w.homepage);
@@ -526,7 +528,7 @@ wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
     let testcode = `'use strict';
                 let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
                 let notify = () => {};
-                let window = {}; let document={};let exports = {};let require = async function () {};
+                let window = {}; let document={};let exports = {};let require = function (pkg) {};
                 \n${asy} () => {${ctext}};`;
 
     let t = Function(testcode);
@@ -663,23 +665,25 @@ wapp.prototype.replaceSrc = function (codetext) {
 };
 
 wapp.prototype.loadPage = function (pagefile, htmlfile, cssfile, pagename) {
-  try {
-    this.pagesCode += '\n';
-    let ctext = fs.readFileSync(pagefile, {encoding: 'utf8'});
-    this.checkCode(pagefile, ctext, {async: false});
-    this.pagesCode += `;(function(exports){${ctext}})(w.pages);`;
-  } catch (err) {
-    delayOutError(err, '--LOAD-PAGE--');
-    delayOutError('有错误或不存在，请检查', pagefile);
-  }
+  let htext = '';
 
   try {
     fs.accessSync(htmlfile);
-    let htext = fs.readFileSync(htmlfile, {encoding: 'utf8'});
+    htext = fs.readFileSync(htmlfile, {encoding: 'utf8'});
     htext = this.fmtPageHTML(htext, pagename);
-    this.pagesCode += `;w.pages.${pagename}.orgHTML=\`${htext}\`;`;
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');
+  }
+
+  try {
+    this.pagesCode += '\n';
+    let ctext = fs.readFileSync(pagefile, {encoding: 'utf8'});
+    this.checkCode(pagefile, ctext, {async: this.config.asyncPage});
+    this.pagesCode += `;(${this.config.asyncPage ? 'async ' : ''}`
+      + `function(exports){${ctext};exports.${pagename}.orgHTML=\`${htext}\`;})(w.pages);`;
+  } catch (err) {
+    delayOutError(err, '--LOAD-PAGE--');
+    delayOutError('有错误或不存在，请检查', pagefile);
   }
 
   try {
@@ -758,7 +762,8 @@ wapp.prototype.loadExt = async function (cdir) {
         
         this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
 
-        this.extends += `;((async function(exports){${orgdata}})(w.ext)).catch(err=> {console.error(err);});`;
+        this.extends += `;(async function(exports){${orgdata}})(w.ext);`;
+
       } catch (err) {
         console.error(err.message);
       }
