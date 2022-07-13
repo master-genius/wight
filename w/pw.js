@@ -256,6 +256,7 @@ let wapp = function (options = {}) {
           }
           w.initPage();
           initPages();
+
           if (w.tabs.list.length > 0) {
             w.tabsmenudom.className = 'w-tabbar-row-x';
             w.tabsmenudom.background = '${this.config.tabsBackground}';
@@ -517,13 +518,16 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
 
 };
 
-wapp.prototype.checkCode = function (filename, ctext) {
+wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
+  let asy = 'async';
+  !options.async &&(asy = ';');
+
   try {
     let testcode = `'use strict';
                 let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
                 let notify = () => {};
                 let window = {}; let document={};let exports = {};let require = async function () {};
-                \nasync () => {${ctext}};`;
+                \n${asy} () => {${ctext}};`;
 
     let t = Function(testcode);
     console.log(filename, 'ok');
@@ -662,7 +666,7 @@ wapp.prototype.loadPage = function (pagefile, htmlfile, cssfile, pagename) {
   try {
     this.pagesCode += '\n';
     let ctext = fs.readFileSync(pagefile, {encoding: 'utf8'});
-    this.checkCode(pagefile, ctext);
+    this.checkCode(pagefile, ctext, {async: false});
     this.pagesCode += `;(function(exports){${ctext}})(w.pages);`;
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');
