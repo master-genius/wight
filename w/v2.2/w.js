@@ -2204,7 +2204,7 @@ window.require = async function (name, loop = 20) {
     throw new Error(`${name}: 没有此扩展。`);
   } catch (err) {
     console.error(err.message);
-    console.error('请检查扩展是否存在循环引用。');
+    console.error('请检查扩展是否启用或是否存在循环引用。');
   }
 };
 
