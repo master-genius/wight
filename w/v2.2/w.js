@@ -2193,15 +2193,22 @@ w.ext = new Proxy(w.__ext__, {
   }
 });
 
-window.require = async function (name, loop = 10) {
+Object.defineProperty(w, '__require_loop__', {
+  value: 5,
+  configurable: false,
+  writable: false,
+  enumerable: false
+});
+
+window.require = async function (name) {
   try {
     if (w.__ext__[name]) return w.__ext__[name];
     
-    if (typeof loop !== 'number' || loop < 1 || loop > 20) loop = 10;
+    let loop = w.__require_loop__;
 
     for (let i = 0; i < loop; i++) {
       await new Promise((rv) => {
-        setTimeout(() => { rv(); }, 3);
+        setTimeout(() => { rv(); }, 2);
       });
 
       if (w.__ext__[name]) return w.__ext__[name];

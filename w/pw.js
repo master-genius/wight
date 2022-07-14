@@ -256,7 +256,7 @@ let wapp = function (options = {}) {
             );
           }
 
-          ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(() => {rv();}, 42);});' : ''}
+          ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(() => {rv();}, 10);});' : ''}
 
           w.initPage();
           initPages();
@@ -289,7 +289,7 @@ let wapp = function (options = {}) {
         }
 
         window.onpageshow = async function() {
-          await new Promise(rv => {setTimeout(() => {rv();}, 45);});
+          await new Promise(rv => {setTimeout(() => {rv();}, 25);});
           if (w.init && typeof w.init === 'function') w.init();
           if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
           {
@@ -340,7 +340,7 @@ let wapp = function (options = {}) {
             }
           }
 
-          await new Promise((rv, rj) => { setTimeout( () => { rv(); }, 20); });
+          await new Promise((rv, rj) => { setTimeout( () => { rv(); }, 15); });
 
           let parsehash = (h) => {
             let ind = h.indexOf('#');
