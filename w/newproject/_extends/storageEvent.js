@@ -115,7 +115,14 @@ exports.storageEvent = new function () {
 
       if (ret === '::stop::') break
 
+      if (ret === '::remove::') {
+        w.storage.remove(key)
+        break
+      }
+
+      //clear不会触发remove事件。
       if (ret === '::clear::') {
+        w.storage.set(`::clear::${key}-${Date.now()}`, '1')
         w.storage.remove(key)
         break
       }
@@ -167,15 +174,19 @@ exports.storageEvent = new function () {
 
     let self = this
 
+    let ur = new URL(evt.url)
+
     let obj = {
       type: evt.key === null ? 'clear' : (evt.newValue === null ? 'remove' : 'set'),
       event: evt,
       data: evt.newValue,
       key: evt.key,
+      page: ur.hash,
+      path: ur.pathname,
+      self: (ur.hash === location.hash && location.pathname === ur.pathname),
       stop: () => { return '::stop::' },
-      clear: () => {
-        return '::clear::'
-      }
+      clear: () => { return '::clear::' },
+      remove: () => { return '::remove::' }
     }
 
     if (this.frequency <= 0) {
@@ -185,6 +196,15 @@ exports.storageEvent = new function () {
 
     let tm = Date.now()
     let frkey = `${obj.key || '@all'} ${obj.type}`
+
+    if (obj.key) {
+      let keypre = '::clear::' + obj.key
+      let prelist = w.storage.getPre(keypre)
+      if (prelist.length > 0) {
+        prelist.forEach(k => { w.storage.remove(k) })
+        return
+      }
+    }
 
     if (this.frequencyRecord[frkey] === undefined) {
       this.frequencyRecord[frkey] = {
