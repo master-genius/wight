@@ -2402,7 +2402,12 @@ class Component extends HTMLElement {
 
     this.shadow = this.attachShadow({mode: 'closed'});
 
-    this.attrs = {};
+    Object.defineProperty(this, 'attrs', {
+      value: Object.create(null),
+      configurable: false,
+      writable: false,
+      enumerable: true
+    });
 
     for (let a of this.attributes) {
       this.attrs[a.name] = a.value;
