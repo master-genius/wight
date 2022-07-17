@@ -167,7 +167,7 @@
 }
 
 .w-prompt-bottom {
-  bottom: 5.35%;
+  bottom: 5%;
   min-height: 25%;
   max-height: 65%;
 }
@@ -175,7 +175,7 @@
 .w-prompt-middle {
   bottom: 50%;
   min-height: 28%;
-  max-height: 58.5%;
+  max-height: 72%;
   transform: translate(-50%, 45%);
 }
 
