@@ -2423,10 +2423,6 @@ class Component extends HTMLElement {
 
       let d = this.render() || '';
       if (typeof d === 'object') {
-        if (d.innerHTML && d.innerHTML.indexOf(cname) >= 0) {
-          w.notifyError(`${this.tagName} 存在循环引用。`);
-          return '';
-        }
         this.shadow.appendChild(d);
 
       } else if (typeof d === 'string' && d.length > 0) {

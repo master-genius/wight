@@ -1167,7 +1167,8 @@ function fmtCompsClassName (cname) {
   let end = cname.length - 1;
 
   for (let i = 0; i < cname.length; i++) {
-    if (cname[i] === '-' && i < end && (/[a-z]/i).test(cname[i+1])) {
+    if (i === 0) namearr.push(cname[i].toUpperCase());
+    else if (cname[i] === '-' && i < end && (/[a-z]/i).test(cname[i+1])) {
       namearr.push(cname[i+1].toUpperCase());
       i += 1;
     } else {
