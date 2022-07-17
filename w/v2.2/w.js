@@ -2408,7 +2408,7 @@ class Component extends HTMLElement {
       writable: false,
       enumerable: true
     });
-
+    
     for (let a of this.attributes) {
       this.attrs[a.name] = a.value;
     }
@@ -2417,14 +2417,22 @@ class Component extends HTMLElement {
       this.init();
     }
 
+    let cname = `<${this.tagName.toLowerCase()}>`;
+
     if (this.render && typeof this.render === 'function') {
+
       let d = this.render() || '';
       if (typeof d === 'object') {
+        if (d.innerHTML && d.innerHTML.indexOf(cname) >= 0) {
+          w.notifyError(`${this.tagName} 存在循环引用。`);
+          return '';
+        }
         this.shadow.appendChild(d);
 
       } else if (typeof d === 'string' && d.length > 0) {
-        if (d.indexOf(`<${this.tagName.toLowerCase()}>`) >= 0) {
-          return w.notifyError(`${this.tagName} 存在循环引用。`);
+        if (d.indexOf(cname) >= 0) {
+          w.notifyError(`${this.tagName} 存在循环引用。`);
+          return '';
         }
 
         w._htmlcheck(d) && (this.shadow.innerHTML = d);
@@ -2436,7 +2444,6 @@ class Component extends HTMLElement {
     if (this.afterRender && typeof this.afterRender === 'function') {
       this.afterRender();
     }
-
   }
 
   /**
