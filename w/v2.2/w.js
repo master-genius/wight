@@ -757,6 +757,12 @@ const w = new function () {
     this.prompt(info, options);
   };
 
+  this.promptTopGlass = function (info, options = {}) {
+    options.wh = 'top';
+    options.glass = 'glass';
+    this.prompt(info, options);
+  };
+
   this.promptTopDark = function (info, noclose = false) {
     this.promptTop(info, noclose, 'dark');
   };
@@ -772,18 +778,23 @@ const w = new function () {
 
     if (w.promptdom) {
       w.promptdom.className = `w-prompt-box w-prompt-${wh} w-prompt-display`;
-      let pcolor = '#4a4a4f';
-      if (glass === true) {
+      let pcolor = '#424242';
+
+      if (glass === true || glass === 'glass') {
         w.promptdom.className += ' w-prompt-glass';
       } else if (glass === 'dark') {
         w.promptdom.className += ' w-prompt-dark';
         pcolor = '#efefef';
       }
 
+      if (options.color) pcolor = options.color;
+
       if (noclose) {
         w.promptdom.innerHTML = `<p style="color:${pcolor};">${info}</p>`;
       } else {
         w.promptclosedom.className = 'w-prompt-close';
+        if (glass === true || glass === 'glass')
+          w.promptclosedom.className += ' w-prompt-close-glass';
         w.promptclosedom.onclick = evt => {
           w.unprompt();
         };

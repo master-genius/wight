@@ -131,7 +131,7 @@
 }
 
 .w-prompt-glass {
-  background: rgba(67,68,69, 0.28);
+  background: rgba(42,43,45, 0.037);
   color: #4a4a4f;
 }
 
@@ -159,11 +159,15 @@
 .w-prompt-close {
   z-index: 100;
   position: fixed;
-  background: rgba(58, 60, 65, 0.18);
+  background: rgba(1, 2, 3, 0.16);
   width:99.9%;
   height:99.9%;
   top:0%;
   left:0%;
+}
+
+.w-prompt-close-glass {
+  background: rgba(2, 3, 5, 0.016);
 }
 
 .w-prompt-bottom {
@@ -182,7 +186,7 @@
 .w-prompt-top {
   top: 10%;
   min-height: 28%;
-  max-height: 58%;
+  max-height: 75%;
 }
 
 .w-prompt-block {

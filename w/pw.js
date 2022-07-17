@@ -225,7 +225,10 @@ let wapp = function (options = {}) {
           window.notifyOnly = w.notifyOnly.bind(w);
           window.unnotify = w.unnotify.bind(w);
           window.promptMiddle = w.promptMiddle.bind(w);
+          window.promptTop = w.promptTop.bind(w);
           window.promptGlass = w.promptGlass.bind(w);
+          window.promptTopGlass = w.promptTopGlass.bind(w);
+          window.promptTopDark = w.promptTopDark.bind(w);
           window.promptMiddleGlass = w.promptMiddleGlass.bind(w);
           window.promptDark = w.promptDark.bind(w);
           window.promptMiddleDark = w.promptMiddleDark.bind(w);
