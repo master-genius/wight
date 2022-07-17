@@ -14,6 +14,10 @@
   animation: -w-notify-from-top 0.2s 1;
 }
 
+.w-prompt-middle {
+  animation: -w-prompt-show-middle 0.12s 1;
+}
+
 @keyframes -w-common-slide-show {
   0% {width: 15%;}
   50% {width: 35%;}
@@ -38,4 +42,10 @@
   0% {transform: translateX(90%) translateY(90%);};
   50% {transform: translateX(50%) translateY(50%);};
   100% {transform: translateX(0%) translateY(0%);};
+}
+
+@keyframes -w-prompt-show-middle {
+  0% { height: 10%; min-height: 10%; }
+  50% { height: 20%; min-height: 20%; }
+  100% { height: 28%; min-height: 28%; }
 }
