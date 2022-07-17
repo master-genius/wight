@@ -7,7 +7,7 @@
 }
 
 .w-notify-bottom {
-  animation: -w-notify-from-bottom 0.23s 1;
+  animation: -w-notify-from-bottom 0.2s 1;
 }
 
 .w-notify-top {
@@ -15,7 +15,7 @@
 }
 
 .w-prompt-middle {
-  animation: -w-prompt-show-middle 0.12s 1;
+  animation: -w-prompt-show-middle 0.1s 1;
 }
 
 .w-prompt-bottom {
