@@ -1212,7 +1212,8 @@ class ${className} extends Component {
 
   //返回字符串或DOM节点。
   render () {
-    return '${cname}组件';
+    // 也可以返回字符串 return '${cname}组件';
+    return this.plate();
   }
 
   //渲染完成后执行
@@ -1271,6 +1272,10 @@ wapp.prototype.newComps = function (cname, cdir) {
   fs.writeFileSync(`${compsdir}/explain.json`, renderExplainJSON(cname), {encoding: 'utf8'});
 
   fs.writeFileSync(`${compsdir}/${cname}.js`, renderCompsClass(cname), {encoding: 'utf8'});
+
+  fs.writeFileSync(`${compsdir}/template.html`, 
+    `<template>\n${cname}组件\n</template>\n`, 
+    {encoding: 'utf8'});
 
   return true;
 
