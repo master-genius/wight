@@ -34,6 +34,14 @@ let wapp = function (options = {}) {
 
   this.mydir = _page_dir;
 
+  this.codeTempPath = this.mydir + '/temp';
+
+  try {
+    fs.accessSync(this.codeTempPath)
+  } catch(err) {
+    fs.mkdirSync(this.codeTempPath)
+  }
+
   this.pageUrlPath = '/';
 
   this.defaultVersion = '2.2';
@@ -523,22 +531,102 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
 
 };
 
+wapp.prototype.parseErrorStack = function (stack, linestart, filename) {
+  let arr = stack.split('\n');
+
+  if (arr.length <= 0) return stack;
+
+  let first = arr[0].split(':');
+
+  if (first.length <= 1 || isNaN(parseInt(first[1].trim())) ) return stack;
+
+  let n = parseInt(first[1].trim()) - linestart - 1;
+
+  let narr = [ `${filename}:${n}` ];
+
+  for (let i = 1; i < arr.length; i++) {
+    narr.push(arr[i]);
+    if (arr[i].indexOf('SyntaxError') >= 0 || (/.*Error/ig).test(arr[i])) break;
+  }
+
+  return narr.join('\n');
+
+}
+
+//如果Function检测出现错误，这说明存在语法问题。此时为了更精确的得到问题代码，利用require的方式来打包代码进行检测。
+wapp.prototype.requireCheckCode = function (filename, ctext) {
+  let requireFile = `${this.codeTempPath}/__require_module__.js`;
+
+  let initRequireEnv = () => {
+    return `let require = async function (name) {
+      try {
+        if (w.__ext__[name]) return w.__ext__[name];
+        
+        let loop = w.__require_loop__;
+    
+        for (let i = 0; i < loop; i++) {
+          await new Promise((rv) => {
+            setTimeout(() => { rv(); }, 5);
+          });
+    
+          if (w.__ext__[name]) return w.__ext__[name];
+        }
+    
+        throw new Error(name + ' 没有此扩展。');
+      } catch (err) {
+        console.error(err.message);
+        console.error('请检查扩展是否启用或是否存在循环引用。');
+      }
+    };`;
+  }
+
+  let globalBind = () => {
+    return `for (let k in window) {
+      global[k] = window[k];
+    }
+    
+    for (let k in window.globalThis) global[k] = window(k);
+    `;
+  };
+
+  let pkgCode = `'use strict';\nconst {window,document,w} = require('../webenv');`
+              + `\n;(async (exports) => {\n${initRequireEnv()}\n;;;;;\n${ctext}\n})(w.ext);`;
+
+  let flagind = pkgCode.indexOf(';;;;;');
+  let linestart = 0;
+  for (let i = 0; i < flagind; i++) {
+    if (pkgCode[i] === '\n') linestart += 1;
+  }
+
+  fs.writeFileSync(requireFile, pkgCode, {encoding: 'utf8'});
+
+  try {
+    let r = require(requireFile);
+    console.log(filename, 'ok');
+  } catch (err) {
+    if (err.stack) delayOutError(this.parseErrorStack(err.stack, linestart, filename), '');
+    else delayOutError(err, filename);
+  }
+
+}
+
 wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
   let asy = 'async';
-  !options.async &&(asy = ';');
+  !options.async && (asy = '');
 
   try {
     let testcode = `'use strict';
                 let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
-                let notify = () => {};
+                let notify = () => {}; let confirm = () => {};
                 let window = {}; let document={};let exports = {};let require = function (pkg) {};
-                \n${asy} () => {${ctext}};`;
+                \n;${asy} (exports) => {${ctext}};`;
 
     let t = Function(testcode);
     console.log(filename, 'ok');
   } catch (err) {
-    console.error('--CHECK-CODE:', filename, err);
-    delayOutError(err, filename);
+    //console.error('--CHECK-CODE:', filename, err);
+    //delayOutError(err, filename);
+    this.requireCheckCode(filename, ctext);
   }
 };
 
