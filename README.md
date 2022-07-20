@@ -434,3 +434,9 @@ node newcomps.js [应用目录名称] [组件名称]
 - registerShareNotice 注册共享数据通知函数。
 
 - removeShareNotice 移除share通知函数。
+
+- prompt 和 confirm已被重写，confirm是通过一个扩展实现的，框架本身不提供。
+
+- promptMiddle、promptMiddleDark、promptMiddleGlass。
+
+- promptTop、promptTopDark、promptTopGlass。

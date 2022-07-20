@@ -427,7 +427,15 @@ const w = new function () {
   this.notifylog = '';
   this.notifylogcount = 0;
 
-  this.config = {};
+  Object.defineProperty(this, 'config', {
+    value: {},
+    writable: false,
+    enumerable: true,
+    configurable: false
+  });
+
+  this.config.notFound = '';
+
   this.host = '';
   this.prepath = '';
   this.homepage = null;
@@ -1214,6 +1222,23 @@ w.pageTop = function () {
 
 w.loadPageLock = false;
 
+w.handleNotFound = function () {
+  if (!w.config.notFound || typeof w.config.notFound === 'string') {
+    this.coverShadow(w.config.notFound || '<div>404: 没有此页面</div>');
+  } else {
+    if (typeof w.config.notFound === 'function') {
+      w.config.notFound();
+    } else if (typeof w.config.notFound === 'object') {
+      let obj = w.config.notFound;
+      if (obj.redirect && w.pages[obj.redirect]) {
+        w.redirect(obj.redirect);
+      } else {
+        this.coverShadow('<div>404: 没有此页面</div>');
+      }
+    }
+  }
+};
+
 w.loadPage = async function (R) {
   if (w.loadPageLock) {
     return;
@@ -1227,7 +1252,7 @@ w.loadPage = async function (R) {
 
   if (this.pages[route] === undefined) {
     w.loadPageLock = false;
-    this.alertError('<div>404: 没有此页面</div>', 1680);
+    this.handleNotFound();
     return ;
   }
 

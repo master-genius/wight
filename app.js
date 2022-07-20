@@ -51,7 +51,7 @@ var app = new titbit({
 app.autoWorker(cfg.maxWorker)
 
 if (cfg.port === undefined) {
-  cfg.port = 1211
+  cfg.port = 1213
 }
 
 if (cfg.host === undefined) {
@@ -97,7 +97,7 @@ if (process.argv.length > 2) {
     app.config.globalLog = true
     //app.config.https = false
     app.config.daemon = false
-    cfg.port = 1211
+    cfg.port = 1213
   }
 
 }

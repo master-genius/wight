@@ -554,7 +554,7 @@ wapp.prototype.parseErrorStack = function (stack, linestart, filename) {
 }
 
 //如果Function检测出现错误，这说明存在语法问题。此时为了更精确的得到问题代码，利用require的方式来打包代码进行检测。
-wapp.prototype.requireCheckCode = function (filename, ctext) {
+wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
   let requireFile = `${this.codeTempPath}/__require_module__.js`;
 
   let initRequireEnv = () => {
@@ -589,7 +589,8 @@ wapp.prototype.requireCheckCode = function (filename, ctext) {
   };
 
   let pkgCode = `'use strict';\nconst {window,document,w} = require('../webenv');`
-              + `\n;(async (exports) => {\n${initRequireEnv()}\n;;;;;\n${ctext}\n})(w.ext);`;
+              + `\n;(async (exports) => {\n${initRequireEnv()}\n;;;;;`
+              + `\n${ctext}\n})(w.${options.exportsKey || 'ext'});`;
 
   let flagind = pkgCode.indexOf(';;;;;');
   let linestart = 0;
@@ -625,7 +626,7 @@ wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
   } catch (err) {
     //console.error('--CHECK-CODE:', filename, err);
     //delayOutError(err, filename);
-    this.requireCheckCode(filename, ctext);
+    this.requireCheckCode(filename, ctext, options);
   }
 };
 
@@ -1041,6 +1042,8 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   for (let h of this.config.hooks) {
     try {
       hookData = fs.readFileSync(`${pdir}/_hooks/${h}.js`,'utf8') + '\n';
+
+      this.checkCode(`${pdir}/_hooks/${h}.js`, hookData, {exportsKey: 'hookFunc'});
       
       this.hooksText += `;w.hooks.push('${h}');(async function(exports){${hookData}})(w.hookFunc);`;
     } catch (err) {
