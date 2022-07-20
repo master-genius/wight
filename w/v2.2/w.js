@@ -2445,6 +2445,8 @@ w.loadScript = async function (src) {
 
 };
 
+w.__comps_loop__ = {};
+
 class Component extends HTMLElement {
   constructor () {
     super();
@@ -2466,8 +2468,6 @@ class Component extends HTMLElement {
       this.init();
     }
 
-    let cname = `<${this.tagName.toLowerCase()}>`;
-
     if (this.render && typeof this.render === 'function') {
 
       let d = this.render() || '';
@@ -2475,9 +2475,9 @@ class Component extends HTMLElement {
         this.shadow.appendChild(d);
 
       } else if (typeof d === 'string' && d.length > 0) {
-        if (d.indexOf(cname) >= 0) {
-          w.notifyError(`${this.tagName} 存在循环引用。`);
-          return '';
+        let st = this.checkLoopRef(d);
+        if ( st.ok === false ) {
+          return this.notifyLoopRefError(st);
         }
 
         w._htmlcheck(d) && (this.shadow.innerHTML = d);
@@ -2489,6 +2489,72 @@ class Component extends HTMLElement {
     if (this.afterRender && typeof this.afterRender === 'function') {
       this.afterRender();
     }
+  }
+
+  checkLoopRef (d) {
+    let lname = `<${this.tagName.toLowerCase()}`;
+    
+    let tagname = lname + '>';
+
+    let istart = this.outerHTML.indexOf(lname);
+    let iend = this.outerHTML.indexOf('>') + 1;
+    let outername = this.outerHTML.substring(istart, iend);
+
+    let st = {ok: true, outername, tagname};
+
+    if (typeof d === 'string') {
+      if (d.indexOf(outername) >= 0) {
+        st.ok = false;
+        return st;
+      }
+    }
+    else if (d.innerHTML.indexOf(outername) >= 0) {
+      st.ok = false;
+      return st;
+    }
+
+    let p = this.parentNode;
+
+    let localname = lname.substring(1);
+    if (!w.__comps_loop__[localname])
+      w.__comps_loop__[localname] = [];
+    
+    while (p) {
+      if (p.toString() !== '[object ShadowRoot]') {
+        return st;
+      }
+
+      w.__comps_loop__[localname].push(p.host.localName);
+
+      p = p.parentNode;
+    }
+
+    let ref_count = 1;
+
+    let loopcheck = (arr, name) => {
+      for (let a of arr) {
+        if (a === name) ref_count++;
+        if (ref_count > 2) return false;
+
+        if (w.__comps_loop__[a].length > 0) {
+          loopcheck(w.__comps_loop__[a], name);
+        }
+      }
+
+      return true;
+    };
+
+    let lr = loopcheck(w.__comps_loop__[localname]);
+
+    if (lr) st.ok = false;
+
+    return st;
+  }
+
+  notifyLoopRefError (st) {
+    let outerText = st.outername.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    w.notifyError(`${this.tagName} [${outerText}]存在循环引用${st.ref ? ' &lt;--&gt; ' : ''}${st.ref || ''}`, 20000);
+    return '';
   }
 
   /**
@@ -2512,9 +2578,9 @@ class Component extends HTMLElement {
 
     if (!nd) return false;
 
-    if (nd.innerHTML.indexOf(`<${this.tagName.toLowerCase()}>`) >= 0 ) {
-      w.notifyError(`${this.tagName} 存在循环引用`);
-      return '';
+    let st = this.checkLoopRef(nd);
+    if ( st.ok === false ) {
+      return this.notifyLoopRefError(st);
     }
 
     let d = nd.content.cloneNode(true);
