@@ -1239,6 +1239,8 @@ w.handleNotFound = function () {
   }
 };
 
+w.going = null;
+
 w.loadPage = async function (R) {
   if (w.loadPageLock) {
     return;
@@ -1261,7 +1263,7 @@ w.loadPage = async function (R) {
   //临时的解决方案，如果没有准备好，则等待一会。
   if (this.initFlag===false) {
     await new Promise((rv,rj) => {
-      setTimeout(()=>{rv();}, 64);
+      setTimeout(()=>{rv();}, 50);
     });
   }
 
@@ -1277,6 +1279,9 @@ w.loadPage = async function (R) {
   
   c.dom = pg.__dom__;
   c.loaded = pg.loaded;
+
+  c.name = pg.__name__;
+  this.going = pg.__name__;
 
   if (false === await w.runHooks(c)) {
     w.loadPageLock = false;
@@ -1366,10 +1371,18 @@ w.redirect = function (path, args = {}) {
   
   if (path[0] !== '#') path = `#${path}`;
 
-  let qrs = w.qs(args);
+  let qrs = w.qs(args.query || {});
 
-  history.replaceState({id: path}, '', `${path}${qrs.length > 0 ? '?' : ''}${qrs}`);
-  w.listenHash();
+  let startRedirect = () => {
+    history.replaceState({id: path}, '', `${path}${qrs.length > 0 ? '?' : ''}${qrs}`);
+    w.listenHash();
+  };
+
+  if (args.delay) {
+    return setTimeout(startRedirect, args.delay);
+  }
+
+  startRedirect();
 };
 
 w.fmtHTML = function (pagename, ht) {

@@ -769,6 +769,11 @@ wapp.prototype.loadPage = function (pagefile, htmlfile, cssfile, pagename) {
   try {
     this.pagesCode += '\n';
     let ctext = fs.readFileSync(pagefile, {encoding: 'utf8'});
+
+    if (this.config.asyncPage) {
+      ctext = this.replaceRequire(ctext);
+    }
+
     this.checkCode(pagefile, ctext, {async: this.config.asyncPage});
     this.pagesCode += `;(${this.config.asyncPage ? 'async ' : ''}`
       + `function(exports){${ctext};exports.${pagename}.orgHTML=\`${htext}\`;})(w.pages);`;
@@ -823,6 +828,13 @@ wapp.prototype.loadLib = function (libdir) {
   }
 };
 
+// replace <- to await require
+wapp.prototype.replaceRequire = function (ctext) {
+  return ctext.replace(/\=[\s]{0,}<-[\s]{0,}\([\s]{0,}\'/ig, '= await require(\'')
+              .replace(/\=[\s]{0,}<-[\s]{0,}\([\s]{0,}\"/ig, '= await require("')
+              .replace(/\=[\s]{0,}<-[\s]{0,}\([\s]{0,}\`/ig, '= await require(`');
+}
+
 wapp.prototype.loadExt = async function (cdir) {
   try {
     let data = '';
@@ -851,6 +863,8 @@ wapp.prototype.loadExt = async function (cdir) {
       try {
         orgdata = fs.readFileSync(`${cdir}/${names[i]}.js`, 'utf8') + '\n';
         
+        orgdata = this.replaceRequire(orgdata);
+
         this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
 
         this.extends += `;(async function(exports){${orgdata}})(w.ext);`;
@@ -1042,6 +1056,8 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   for (let h of this.config.hooks) {
     try {
       hookData = fs.readFileSync(`${pdir}/_hooks/${h}.js`,'utf8') + '\n';
+
+      hookData = this.replaceRequire(hookData);
 
       this.checkCode(`${pdir}/_hooks/${h}.js`, hookData, {exportsKey: 'hookFunc'});
       
