@@ -111,6 +111,9 @@ class htmlstate {
       return false
     }
 
+    //如果下一个状态还是空格，则维持当前状态不变
+    if (next_char === ' ') return true
+
     if (this.curState === this.STATE.TAG_ATTR_VALUE_END) {
       this.curState = this.STATE.TAG_ATTR_PRE
       return true

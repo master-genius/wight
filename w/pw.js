@@ -300,7 +300,7 @@ let wapp = function (options = {}) {
         }
 
         window.onpageshow = async function() {
-          await new Promise(rv => {setTimeout(() => {rv();}, 25);});
+          await new Promise(rv => {setTimeout(() => {rv();}, 29);});
           if (w.init && typeof w.init === 'function') w.init();
           if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
           {
@@ -619,7 +619,7 @@ wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
                 let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
                 let notify = () => {}; let confirm = () => {};
                 let window = {}; let document={};let exports = {};let require = function (pkg) {};
-                \n;${asy} (exports) => {${ctext}};`;
+                \n;(${asy} (exports) => {${ctext}})(w.ext);`;
 
     let t = Function(testcode);
     console.log(filename, 'ok');

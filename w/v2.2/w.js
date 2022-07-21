@@ -90,6 +90,8 @@ class __htmlstate {
       return false
     }
 
+    if (next_char === ' ') return true
+
     if (this.curState === this.STATE.TAG_ATTR_VALUE_END) {
       this.curState = this.STATE.TAG_ATTR_PRE
       return true
@@ -642,8 +644,10 @@ const w = new function () {
   this.notifyTimer = null;
 
   this.notify = function (info, options = {}) {
-    let tmout = options.tmout !== undefined && !isNaN(options.tmout)
-                  ? options.tmout : 2500;
+    let tmout = options.timeout || options.tmout;
+
+    tmout = tmout !== undefined && !isNaN(tmout)
+                  ? tmout : 3500;
 
     let ntype = options.ntype || 'notify';
 
@@ -1263,7 +1267,7 @@ w.loadPage = async function (R) {
   //临时的解决方案，如果没有准备好，则等待一会。
   if (this.initFlag===false) {
     await new Promise((rv,rj) => {
-      setTimeout(()=>{rv();}, 50);
+      setTimeout(()=>{rv();}, 52);
     });
   }
 
@@ -2546,7 +2550,7 @@ class Component extends HTMLElement {
 
     let lr = loopcheck(w.__comps_loop__[localname]);
 
-    if (lr) st.ok = false;
+    if (!lr) st.ok = false;
 
     return st;
   }
