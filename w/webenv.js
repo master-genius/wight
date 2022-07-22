@@ -1,6 +1,8 @@
 'use strict';
 
 let window = {};
+window.addEventListener = function () {};
+
 window.globalThis = {close: function () {},stop: function () {},focus: function () {},blur: function () {},open: function () {},alert: function () {},confirm: function () {},prompt: function () {},print: function () {},postMessage: function () {},captureEvents: function () {},releaseEvents: function () {},getSelection: function () {},getComputedStyle: function () {},matchMedia: function () {},moveTo: function () {},moveBy: function () {},resizeTo: function () {},resizeBy: function () {},scroll: function () {},scrollTo: function () {},scrollBy: function () {},getDefaultComputedStyle: function () {},scrollByLines: function () {},scrollByPages: function () {},sizeToContent: function () {},updateCommands: function () {},find: function () {},dump: function () {},setResizable: function () {},requestIdleCallback: function () {},cancelIdleCallback: function () {},requestAnimationFrame: function () {},cancelAnimationFrame: function () {},reportError: function () {},btoa: function () {},atob: function () {},setTimeout: function () {},clearTimeout: function () {},setInterval: function () {},clearInterval: function () {},queueMicrotask: function () {},createImageBitmap: function () {},structuredClone: function () {},fetch: function () {},self: {},name:'',history: {},customElements: {},locationbar: {},menubar: {},personalbar: {},scrollbars: {},statusbar: {},toolbar: {},status:'',closed:'',event:'',frames: {},length:'',opener: {},parent: {},frameElement: {},navigator: {},clientInformation: {},external: {},applicationCache: {},screen: {},innerWidth:'',innerHeight:'',scrollX:'',pageXOffset:'',scrollY:'',pageYOffset:'',screenLeft:'',screenTop:'',screenX:'',screenY:'',outerWidth:'',outerHeight:'',performance: {},mozInnerScreenX:'',mozInnerScreenY:'',devicePixelRatio:'',scrollMaxX:'',scrollMaxY:'',fullScreen:'',ondevicemotion: {},ondeviceorientation: {},onabsolutedeviceorientation: {},InstallTrigger: {},visualViewport: {},crypto: {},onabort: {},onblur: {},onfocus: {},onauxclick: {},onbeforeinput: {},oncanplay: {},oncanplaythrough: {},onchange: {},onclick: {},onclose: {},oncontextmenu: {},oncuechange: {},ondblclick: {},ondrag: {},ondragend: {},ondragenter: {},ondragexit: {},ondragleave: {},ondragover: {},ondragstart: {},ondrop: {},ondurationchange: {},onemptied: {},onended: {},onformdata: {},oninput: {},oninvalid: {},onkeydown: {},onkeypress: {},onkeyup: {},onload: function () {},onloadeddata: {},onloadedmetadata: {},onloadend: {},onloadstart: {},onmousedown: {},onmouseenter: {},onmouseleave: {},onmousemove: {},onmouseout: {},onmouseover: {},onmouseup: {},onwheel: {},onpause: {},onplay: {},onplaying: {},onprogress: {},onratechange: {},onreset: {},onresize: function () {},onscroll: function () {},onsecuritypolicyviolation: {},onseeked: {},onseeking: {},onselect: {},onslotchange: {},onstalled: {},onsubmit: {},onsuspend: {},ontimeupdate: {},onvolumechange: {},onwaiting: {},onselectstart: {},onselectionchange: {},ontoggle: {},onpointercancel: {},onpointerdown: {},onpointerup: {},onpointermove: {},onpointerout: {},onpointerover: {},onpointerenter: {},onpointerleave: {},ongotpointercapture: {},onlostpointercapture: {},onmozfullscreenchange: {},onmozfullscreenerror: {},onanimationcancel: {},onanimationend: {},onanimationiteration: {},onanimationstart: {},ontransitioncancel: {},ontransitionend: {},ontransitionrun: {},ontransitionstart: {},onwebkitanimationend: {},onwebkitanimationiteration: {},onwebkitanimationstart: {},onwebkittransitionend: {},u2f: {},onerror: {},speechSynthesis: {},onafterprint: {},onbeforeprint: {},onbeforeunload: {},onhashchange: function () {},onlanguagechange: {},onmessage: {},onmessageerror: {},onoffline: {},ononline: {},onpagehide: {},onpageshow: function () {},onpopstate: {},onrejectionhandled: {},onstorage: {},onunhandledrejection: {},onunload: function () {},ongamepadconnected: {},ongamepaddisconnected: {},localStorage: {},origin:'',crossOriginIsolated:'',isSecureContext:'',indexedDB: {},caches: {},sessionStorage: {},window: {},document: {},location: {},top: {},_import: function () {},require: function () {},__prepath__:'',unalert: function () {},alertError: function () {},notify: function () {},notice: function () {},notifyError: function () {},unprompt: function () {},notifyTop: function () {},notifyLight: function () {},notifyTopError: function () {},notifyOnly: function () {},unnotify: function () {},promptMiddle: function () {},promptTop: function () {},promptGlass: function () {},promptTopGlass: function () {},promptTopDark: function () {},promptMiddleGlass: function () {},promptDark: function () {},promptMiddleDark: function () {},acover: function () {},coverShadow: function () {},uncover: function () {},uncoverShadow: function () {},setCoverText: function () {},apicall: function () {},initPages: function () {},jump_page_forward:'',addEventListener: function () {},removeEventListener: function () {},dispatchEvent: function () {},};
 window.Boolean = function () {};
 window.Date = function () {};
@@ -3313,6 +3315,8 @@ w.ext = new Proxy(w.__ext__, {
     else {
       console.error(`${k}: 扩展名重复，请检查。`);
     }
+
+    return true;
     
   },
 
@@ -3530,6 +3534,19 @@ w.loadScript = async function (src) {
   });
 
 };
+
+class HTMLElement {
+  constructor () {
+    this.dataset = {}
+    this.contextMenu = {}
+    this.offsetHeight = 0
+    this.offsetLeft = 0
+    this.offsetTop = 0
+    this.offsetWidth = 0
+    this.style = {}
+  }
+
+}
 
 class Component extends HTMLElement {
   constructor () {
@@ -3750,3 +3767,5 @@ class Component extends HTMLElement {
 exports.window = window;
 exports.document = document;
 exports.w = w;
+exports.Component = Component;
+exports.HTMLElement = HTMLElement;

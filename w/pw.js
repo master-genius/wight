@@ -4,6 +4,7 @@ const fs = require('fs');
 const terser = require('terser');
 const csso = require('csso');
 const htmlstate = require('./htmlstate');
+const path = require('path');
 
 const fsp = fs.promises;
 
@@ -590,9 +591,9 @@ wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
     `;
   };
 
-  let pkgCode = `'use strict';\nconst {window,document,w} = require('../webenv');`
-              + `\n;(async (exports) => {\n${initRequireEnv()}\n;;;;;`
-              + `\n${ctext}\n})(w.${options.exportsKey || 'ext'});`;
+  let pkgCode = `'use strict';\nconst {window,document,w,Component} = require('../webenv.js');`
+              + `\n;(async (exports) => {\n${initRequireEnv()}\n`
+              + `\n;;;;;\n${ctext}\n})(w.${options.exportsKey || 'ext'});`;
 
   let flagind = pkgCode.indexOf(';;;;;');
   let linestart = 0;
@@ -610,6 +611,10 @@ wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
     else delayOutError(err, filename);
   }
 
+  //检测后必须删除对应的缓存。
+  delete require.cache[requireFile];
+  delete require.cache[path.resolve(requireFile+'/../../webenv.js')]
+
 }
 
 wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
@@ -621,7 +626,7 @@ wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
   try {
     let testcode = `'use strict';
                 let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
-                let notify = () => {}; let confirm = () => {};
+                let notify = () => {}; let confirm = () => {}; function Component () {};
                 let window = {}; let document={};let exports = {};let require = function (pkg) {};
                 \n;(${asy} (exports) => {${ctext}})(w.ext);`;
 
