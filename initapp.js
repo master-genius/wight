@@ -261,6 +261,13 @@ class initapp {
         decodePath: true
       }).init(app));
 
+      /* ;(new resource({
+        staticPath: `${this.appPath}/${this.prefix}/${a}/_static/_components`,
+        routePath : `/${a}/component/*`,
+        routeGroup: `${a}_static_component_`,
+        decodePath: true
+      }).init(app)); */
+
     }
 
     app.service.icoCache = {};
@@ -316,6 +323,21 @@ class initapp {
         c.res.body = '';
       }
     });
+
+    app.get('/:name/component/:comp/:src', async c => {
+      let srcname = `${c.service.appPath}/${c.service.prefix}/${c.param.name}/`
+          + `_components/${c.param.comp}/static/${c.param.src}`;
+        
+      console.log(srcname);
+
+      try {
+        await c.helper.pipe(srcname, c.reply)
+      } catch (err) {
+        console.error(err)
+        return c.status(404).send()
+      }
+
+    })
 
   }
   

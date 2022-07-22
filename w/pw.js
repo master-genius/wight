@@ -721,7 +721,7 @@ wapp.prototype.replaceCssUrl = function (codetext) {
   return codetext;
 };
 
-wapp.prototype.replaceSrc = function (codetext) {
+wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
 
   let replace_src = (url, plist, offset, text) => {
     if ((/^http[s]?:\/\//).test(url)) {
@@ -747,13 +747,42 @@ wapp.prototype.replaceSrc = function (codetext) {
   };
 
   let match_replace = m => {
-    let url = m.substring(6, m.length-1);
-    return ` src="${replace_src(url)}"`;
+    let arr = m.split(' src=');
+    
+    let q = arr[1][0];
+    let startind = 1;
+    let endind = arr[1].length - 1;
+
+    /* if (q !== '"' && q !== "'") {
+      q = '';
+      startind = 0;
+      endind++;
+    } */
+
+    let orgsrc = arr[1].substring(startind, endind);
+
+    //针对组件
+    if (is_comps) {
+      orgsrc = orgsrc.replace('./static', '/component/' + comp_name);
+    }
+
+    let final_src = `${arr[0]} src=${q}${replace_src(orgsrc)}${q}`;
+
+    return final_src;
   };
 
-  codetext = codetext.replace(/ src="[^"]+"/g, match_replace);
+  //audio embed iframe img input source track video
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src="[^"]+"/ig, 
+    match_replace);
 
-  codetext = codetext.replace(/ src='[^']+'/g, match_replace);
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src='[^']+'/ig, 
+    match_replace);
+
+  /* codetext = codetext.replace(
+      /<(audio|embed|iframe|img|input|source|track|video)[^>]* src=[^\s]+ /g, 
+      match_replace); */
 
   return codetext;
 
@@ -895,6 +924,72 @@ wapp.prototype.loadExt = async function (cdir) {
   }
 };
 
+wapp.prototype.buildCompsStatic = async function (cdir, names, stdir) {
+  
+  let d;
+  let flist;
+  let src = '';
+
+  for (let a of names) {
+    d = `${stdir}/${a}`;
+
+    await fsp.access(d).catch(err => {
+      return fsp.mkdir(d);
+    });
+
+    src = `${cdir}/${a}/static`;
+
+    try {
+      flist = await fsp.readdir(src, {withFileTypes: true});
+    } catch (err) {
+      continue;
+    }
+
+    for (let f of flist) {
+      if (!f.isFile()) continue;
+
+      await fsp.copyFile(`${src}/${f.name}`, `${d}/${f.name}`)
+                .catch(err => {
+                    console.error(err);
+                });
+    }
+    
+  }
+
+  try {
+    let dlist = await fsp.readdir(stdir, {withFileTypes: true});
+    let oldlist;
+
+    for (let r of dlist) {
+      if (!r.isDirectory()) continue;
+
+      //删除不再启用的组件。
+      if (names.indexOf(r.name) < 0) {
+        await fsp.rm(`${stdir}/${r.name}`,{recursive:true}).catch(err => {
+          console.error(err);
+        });
+        continue;
+      }
+
+      oldlist = await fsp.readdir(`${stdir}/${r.name}`, {withFileTypes: true});
+
+      for (let o of oldlist) {
+        await fsp.access(`${cdir}/${r.name}/static/${o.name}`)
+          .catch(async err => {
+            return await fsp.unlink(`${stdir}/${r.name}/${o.name}`);
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      }
+
+    }
+  } catch (err) {
+    console.error('--CLEAR-COMPONETS-STATIC--', err);
+  }
+
+};
+
 /**
  * 一个组件是一个目录，其中包括和目录同名的.js文件、explain.json文件、.html文件，若html文件不存在则表示不存在template。
  * explain.json文件描述组件的类名和组件名称，以及相关其他描述，其属性如下：
@@ -904,7 +999,7 @@ wapp.prototype.loadExt = async function (cdir) {
  * @param {string} cdir 
  */
 
-wapp.prototype.loadComps = async function (cdir) {
+wapp.prototype.loadComps = async function (cdir, appdir) {
   try {
     let data = '';
     let orgdata = '';
@@ -949,8 +1044,11 @@ wapp.prototype.loadComps = async function (cdir) {
           delayOutError(htmlparser.lastErrorMsg, `语法检测：${names[i]}/template.html`);
         } else {
           //使用div包装模板。
+          tempdata = tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
+          tempdata = this.replaceSrc(tempdata, true, names[i]);
+  
           this.templates += `<div data-id="${cex.name}">
-            ${tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '')}
+            ${tempdata.replace()}
           </div>`;
         }
       } catch (err) {}
@@ -965,14 +1063,20 @@ wapp.prototype.loadComps = async function (cdir) {
           opts = `,{extends: '${cex.options.extends}'}`;
         }
 
+        orgdata = this.replaceSrc(orgdata, true, names[i]);
+
         this.components += `;(()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
       } catch (err) {
         console.error(err.message);
       }
     }
 
+    if (this.isbuild) {
+      this.buildCompsStatic(cdir, names, appdir + '/_static/_components');
+    }
+
     //进行src替换处理
-    this.components = this.replaceSrc(this.components);
+    //this.components = this.replaceSrc(this.components, true);
 
     if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)){
       data = await terser.minify(this.components);
@@ -1040,7 +1144,7 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
 
   try {
     fs.accessSync(`${pdir}/_components`, fs.constants.F_OK);
-    await this.loadComps(`${pdir}/_components`);
+    await this.loadComps(`${pdir}/_components`, pdir);
   } catch (err){
     console.error(err);
   }
