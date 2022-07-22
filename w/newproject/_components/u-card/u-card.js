@@ -1,63 +1,39 @@
 'use strict';
-/**
- * 从w.share获取全局共享数据。
- */
-class uCard extends Component {
+
+class UCard extends Component {
 
   constructor () {
-    super();
+    super(); //必须写在最开始。
 
-    /* 到这一步即可，super之后，组件的render已经执行完毕，
-    若要在这期间精确的控制一些数据处理和逻辑，请在init中完成。*/
+    //通过this.attrs访问所有属性。this.attributes是浏览器原始提供的属性对象。
+    //this.attrs是为了方便而做的映射。
+
+    //this.shadow可以访问shadow DOM，注意这是shadowRoot。
+    //this.host用于访问组件对应的DOM，this.host指向this.shadow.host。
+
   }
 
-  //在shadow DOM创建之后，render执行之前执行init函数。
+  //在render之前执行，此时已经创建好shadow DOM。
   init () {
 
   }
 
-  showId (a) {
-    let uid = a.currentTarget.dataset.id
-
-    prompt(uid)
-  }
-
-  /**
-   * 
-   * @param {*} t 包装对象，包括属性：data、target、type
-   * @returns 
-   */
-
-  fmtList (t) {
-    let html = '';
-    let ulist = t.data;
-
-    ulist.forEach( a => {
-      html += `<div class=cell data-onclick=showId data-id="${a.id}">
-        <h4>${a.name}</h4>
-        <p>Level: ${a.level}</p>
-      </div>`;
-    });
-    
-    return html;
-  }
-
   //返回字符串或DOM节点。
   render () {
+    // 也可以返回字符串 return 'u-card组件';
+    return this.plate();
+  }
+
+  //渲染完成后执行
+  afterRender () {
     
-    let ulist = w.share.userlist;
-
-    if (!ulist) return '';
-
-    return this.plate({
-      ulist: ulist
-    });
   }
 
   onload () {
 
   }
 
+  //从DOM树中移除时触发。
   onremove () {
 
   }
@@ -66,8 +42,15 @@ class uCard extends Component {
 
   }
 
+  //被移动到新文档时触发。
   onadopted () {
 
+  }
+
+  static get observedAttributes() {
+    //如果你要监控某些属性的变化，你需要在onattrchange中处理。
+    //要在属性变化时触发onattrchange函数，你需要在此函数中返回对应的属性。
+    //return ['class', 'name']; 
   }
 
 

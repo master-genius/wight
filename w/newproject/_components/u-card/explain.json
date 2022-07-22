@@ -1,5 +1,7 @@
 {
     "name" : "u-card",
-    "className" : "uCard",
-    "detail" : "..."
+    "version": "1.0.0",
+    "className" : "UCard",
+    "detail" : "...",
+    "doc" : "readme.md"
 }
