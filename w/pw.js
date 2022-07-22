@@ -768,7 +768,6 @@ wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = ''
 
     let final_src = `${arr[0]} src=${q}${replace_src(orgsrc)}${q}`;
 
-    console.log(final_src)
     return final_src;
   };
 
