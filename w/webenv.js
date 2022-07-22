@@ -789,7 +789,7 @@ window.Proxy = function () {};
 window.RegExp = function () {};
 window._import = function () {};
 window.require = function () {};
-window.__prepath__ = '/zhuanke';
+window.__prepath__ = '';
 window.unalert = function () {};
 window.alertError = function () {};
 window.notify = function () {};
@@ -1090,7 +1090,7 @@ document.lookupNamespaceURI = function () {};
 document.isDefaultNamespace = function () {};
 document.nodeType = 9;
 document.nodeName = '#document';
-document.baseURI = 'http://localhost:1212/zhuanke#login';
+document.baseURI = '';
 document.isConnected = true;
 document.ownerDocument = {};
 document.parentNode = {};
@@ -3350,10 +3350,9 @@ window.require = async function (name) {
       if (w.__ext__[name]) return w.__ext__[name];
     }
 
-    throw new Error(`${name}: 没有此扩展。`);
+    return function () {};
   } catch (err) {
     console.error(err.message);
-    console.error('请检查扩展是否启用或是否存在循环引用。');
   }
 };
 

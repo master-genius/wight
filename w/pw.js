@@ -44,9 +44,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '2.2';
+  this.defaultVersion = '2.3';
 
-  this.version = '2.2';
+  this.version = '2.3';
 
   this.forceCompress = false;
 
@@ -614,6 +614,8 @@ wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
   let asy = 'async';
   !options.async && (asy = '');
 
+  //return this.requireCheckCode(filename, ctext, options);
+  
   try {
     let testcode = `'use strict';
                 let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
@@ -1383,7 +1385,7 @@ wapp.prototype.newComps = function (cname, cdir) {
   fs.writeFileSync(`${compsdir}/${cname}.js`, renderCompsClass(cname), {encoding: 'utf8'});
 
   fs.writeFileSync(`${compsdir}/template.html`, 
-    `<template>\n${cname}组件\n</template>\n`, 
+    `<template>\n<style>\n/* 目前浏览器part不支持组件嵌套，如果组件需要嵌套使用，可以把样式写在此处。 */\n</style>\n\n<div>${cname}组件</div>\n</template>\n`, 
     {encoding: 'utf8'});
 
   return true;
