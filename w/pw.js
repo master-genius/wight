@@ -5,6 +5,8 @@ const terser = require('terser');
 const csso = require('csso');
 const htmlstate = require('./htmlstate');
 
+const fsp = fs.promises;
+
 const htmlparser = new htmlstate();
 
 function delayOutError (err, info, delay = 1280) {
@@ -1294,8 +1296,10 @@ function renderExplainJSON (cname) {
   let className = fmtCompsClassName(cname);
   return `{
     "name" : "${cname}",
+    "version": "1.0.0",
     "className" : "${className}",
-    "detail" : "..."
+    "detail" : "...",
+    "doc" : "readme.md"
 }`;
 }
 
@@ -1380,12 +1384,16 @@ wapp.prototype.newComps = function (cname, cdir) {
 
   fs.mkdirSync(compsdir);
 
+  fs.mkdirSync(compsdir + '/static');
+
   fs.writeFileSync(`${compsdir}/explain.json`, renderExplainJSON(cname), {encoding: 'utf8'});
+
+  fs.writeFileSync(`${compsdir}/readme.md`, `# ${cname}\n`, {encoding: 'utf8'});
 
   fs.writeFileSync(`${compsdir}/${cname}.js`, renderCompsClass(cname), {encoding: 'utf8'});
 
   fs.writeFileSync(`${compsdir}/template.html`, 
-    `<template>\n<style>\n/* 目前浏览器part不支持组件嵌套，如果组件需要嵌套使用，可以把样式写在此处。 */\n</style>\n\n<div>${cname}组件</div>\n</template>\n`, 
+    `<template>\n<style>\n/* 目前浏览器part属性(参考MDN ::part)不支持组件嵌套，如果组件需要嵌套使用请注意样式问题。 */\n</style>\n\n<div>${cname}组件</div>\n</template>\n`, 
     {encoding: 'utf8'});
 
   return true;
@@ -1393,7 +1401,6 @@ wapp.prototype.newComps = function (cname, cdir) {
 };
 
 //new project
-
 wapp.prototype.newProject = function (project_dir) {
   try {
     fs.accessSync(project_dir);
@@ -1424,7 +1431,8 @@ wapp.prototype.newProject = function (project_dir) {
 
   let loopcp = [
     '_components', '_extends', '_hooks', '_static', 'home', 'user', 'test',
-    '_static/css', '_static/icon', 'list', '_lib', '_components/u-card'
+    '_static/css', '_static/icon', '_static/images','_static/_components',
+     'list', '_lib', '_components/u-card'
   ];
 
   for (let i = 0; i < loopcp.length; i++) {
