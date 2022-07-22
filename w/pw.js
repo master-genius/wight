@@ -1072,7 +1072,12 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
     }
 
     if (this.isbuild) {
-      this.buildCompsStatic(cdir, names, appdir + '/_static/_components');
+      let comp_dir = appdir + '/_static/_components';
+      await fsp.access(comp_dir).catch(err => {
+        return fsp.mkdir(comp_dir);
+      });
+
+      this.buildCompsStatic(cdir, names, comp_dir);
     }
 
     //进行src替换处理
