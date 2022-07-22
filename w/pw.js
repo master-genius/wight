@@ -768,6 +768,7 @@ wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = ''
 
     let final_src = `${arr[0]} src=${q}${replace_src(orgsrc)}${q}`;
 
+    console.log(final_src)
     return final_src;
   };
 
@@ -1047,9 +1048,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           tempdata = tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
           tempdata = this.replaceSrc(tempdata, true, names[i]);
   
-          this.templates += `<div data-id="${cex.name}">
-            ${tempdata.replace()}
-          </div>`;
+          this.templates += `<div data-id="${cex.name}">${tempdata}</div>`;
         }
       } catch (err) {}
 
@@ -1155,7 +1154,6 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   }
 
   if (this.templates.length > 0) {
-    this.templates = this.replaceSrc(this.templates);
     this.templates = this.replaceCssUrl(this.templates);
   }
 
