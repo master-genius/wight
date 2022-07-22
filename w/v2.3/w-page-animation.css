@@ -27,6 +27,6 @@
 @keyframes -w-current-page-display-back {
   0% {transform: translateX(-75%);}
   50% {transform: translateX(-55%);}
-  80% {transform: translateX(-15%);}
+  80% {transform: translateX(-20%);}
   100% {transform: translateX(0%);}
 }
