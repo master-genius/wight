@@ -109,7 +109,7 @@
 .w-global-notify-box {
   z-index:102;
   position:fixed;
-  line-height: 118%;
+  line-height: 150%;
   color: var(--w-notify-color, #f1f2f3);
   min-height: 10%;
   max-height: 46.5%;
@@ -128,8 +128,8 @@
 }
 
 .w-notify-bottom {
-  right:1.5%;
-  bottom:1.35%;
+  right:2%;
+  bottom:2.35%;
 }
 
 .w-notify-top {
