@@ -519,9 +519,11 @@ const w = new function () {
         w.alertlog = `${info}<br>${w.alertlog}`;
       }
 
-      let closeText = '<a href="javascript:w.unalert();" '
+      let closeText = '<div style="text-align:right;">'
+        +'<a href="javascript:w.unalert();" '
         +'style="color:#696365;font-size:105%;text-decoration:none;cursor:pointer;">'
-        +'&nbsp;X&nbsp;</a>';
+        +'&nbsp;X&nbsp;</a>'
+        +'</div>';
 
       if (options.notClose) {
         closeText = '';
@@ -532,11 +534,9 @@ const w = new function () {
       if (options.transparent) w[domname].className += ' w-global-alert-trans';
 
       if (typeof info === 'object') {
-        w[domname].innerHTML = `<div style="text-align:right;">`
-            +`${closeText}</div>${info.innerHTML}`;
+        w[domname].innerHTML = `${closeText}${info.innerHTML}`;
       } else {
-        w[domname].innerHTML = `<div style="text-align:right;">`
-            +`${closeText}</div><p>${w.alertlog}</p>`;
+        w[domname].innerHTML = `${closeText}${w.alertlog}`;
       }
       w.initPageDomEvents(options.context || w.curpage, w[domname]);
     }
@@ -2716,14 +2716,22 @@ class Component extends HTMLElement {
 
   naviHide () { w.naviHide(); }
 
-  cover (info, trans = false) {
+  cover (info, options = {notClose: false, transparent: false}) {
+    let notclose = !!options.notClose;
+
+    if (!notclose) {
+      info = `<div style="text-align:right;">`
+            + `<span style="user-select:none;padding:0.15rem;text-decoration:none;cursor:pointer;" data-onclick=uncover>X</span>`
+            + `</div>${info}`;
+    }
+
     w.alert(info, {
       context: this,
       replace: true,
       notClose: true,
       withCover: true,
       shadow: true,
-      transparent: trans
+      transparent: !!options.transparent
     });
   };
 
