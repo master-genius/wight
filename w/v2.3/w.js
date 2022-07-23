@@ -612,7 +612,7 @@ const w = new function () {
   };
 
   this.alertError = function (info, tmout = 0) {
-    info = `<span style="color:#e25223;">${info}</span>`;
+    info = `<span style="color:#e22349;">${info}</span>`;
     w.alert(info);
     if (tmout > 0) {
       setTimeout(() => {
