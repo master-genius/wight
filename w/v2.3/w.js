@@ -491,7 +491,7 @@ const w = new function () {
     }
 
     if (w.alertLock && !options.shadow) {
-      return w[domname];
+      return false;
     }
 
     info = w.fmtHTML(w.curpagename, info);

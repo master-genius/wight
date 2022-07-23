@@ -21,6 +21,10 @@
   --w-prompt-color: #4a4a4a;
   --w-prompt-bg-color: #fafafd;
 
+  --w-prompt-glass-bg-color: rgba(42,43,45, 0.033);
+
+  --w-cover-bg-color: rgba(22,23,25, 0.15);
+
   /* --w-notify-shadow:  */
 }
 
@@ -157,7 +161,7 @@
 }
 
 .w-prompt-glass {
-  background: rgba(42,43,45, 0.037);
+  background: var(--w-prompt-glass-bg-color, rgba(42,43,45, 0.033));
   color: #4a4a4f;
 }
 
@@ -185,9 +189,9 @@
 .w-prompt-close {
   z-index: 100;
   position: fixed;
-  background: rgba(1, 2, 3, 0.16);
-  width:99.9%;
-  height:99.9%;
+  background: rgba(7, 8, 9, 0.0235);
+  width:99.999%;
+  height:99.999%;
   top:0%;
   left:0%;
 }
@@ -279,7 +283,7 @@
   position: fixed;
   width:100%;
   height: 100%;
-  background: rgba(23,24,26, 0.15);
+  background: var(--w-cover-bg-color, rgba(22,23,25, 0.15));
 }
 
 .w-global-alert-info {
