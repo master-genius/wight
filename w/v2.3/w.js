@@ -2422,6 +2422,13 @@ Object.defineProperty(w, 'share', {
   })
 });
 
+/* Object.defineProperty(w, '__script_cache__', {
+  configurable: false,
+  writable: false,
+  value: {},
+  enumerable: false,
+});
+ */
 w.loadScript = async function (src, cname = '') {
 
   if (!w._http_preg.test(src)) {
@@ -2446,7 +2453,7 @@ w.loadScript = async function (src, cname = '') {
     };
 
     d.onload = () => {
-      rv();
+      rv({ok: true, msg: '加载成功。'});
     };
 
   });
@@ -2740,4 +2747,8 @@ class Component extends HTMLElement {
   };
 
   uncover () { w.unalert('shadow'); }
+
+  loadScript (src) {
+    return w.loadScript(src, this.tagName.toLowerCase());
+  }
 }
