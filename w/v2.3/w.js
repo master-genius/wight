@@ -2422,9 +2422,13 @@ Object.defineProperty(w, 'share', {
   })
 });
 
-w.loadScript = async function (src) {
+w.loadScript = async function (src, cname = '') {
 
   if (!w._http_preg.test(src)) {
+    if (cname && src.indexOf('./static') === 0) {
+      src = src.replace('./static', '/component/' + cname);
+    }
+
     if (src[0] !== '/') src = `/${src}`;
 
     src = `${w.prepath}${w.prepath.length > 0 ? '/' : ''}${src}`;

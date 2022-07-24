@@ -311,7 +311,7 @@ let wapp = function (options = {}) {
           } else {
             w.listenHash();
           }
-          Object.seal(w);
+          
         };
 
         window.jump_page_forward = false;
