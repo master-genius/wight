@@ -2162,7 +2162,7 @@ w.eventProxy = function (evt, pg, funcname) {
     if (wind === 0) {
       return wfunc(a);
     }
-    
+
     return pg[funcname](a);
   } catch (err) {
     w.notify(err.message, 'error');
@@ -2422,13 +2422,6 @@ Object.defineProperty(w, 'share', {
   })
 });
 
-/* Object.defineProperty(w, '__script_cache__', {
-  configurable: false,
-  writable: false,
-  value: {},
-  enumerable: false,
-});
- */
 w.loadScript = async function (src, cname = '') {
 
   if (!w._http_preg.test(src)) {
@@ -2453,7 +2446,7 @@ w.loadScript = async function (src, cname = '') {
     };
 
     d.onload = () => {
-      rv({ok: true, msg: '加载成功。'});
+      rv({ok: true, msg: 'success'});
     };
 
   });
