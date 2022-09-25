@@ -12,13 +12,13 @@
   "license": "ISC",
   "dependencies": {
     "concise.css": "^4.1.2",
-    "csso": "^5.0.4",
+    "csso": "^5.0.5",
     "gohttp": "^5.0.1",
     "qrcode": "^1.4.4",
     "terser": "^5.15.0",
     "titbit": "^23.1.0",
-    "titbit-httpc": "^2.0.2",
-    "titbit-loader": "^22.1.7",
+    "titbit-httpc": "^2.0.3",
+    "titbit-loader": "^22.1.8",
     "titbit-token": "^2.0.6",
     "titbit-toolkit": "^3.2.1"
   }
