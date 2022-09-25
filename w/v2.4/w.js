@@ -2596,7 +2596,7 @@ class Component extends HTMLElement {
       return true;
     };
 
-    let lr = loopcheck(w.__comps_loop__[localname]);
+    let lr = loopcheck(w.__comps_loop__[localname], localname);
 
     if (!lr) st.ok = false;
 
