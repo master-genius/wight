@@ -1059,7 +1059,9 @@ wapp.prototype.replaceImportCss = function (text, cdir) {
 
   if (cssfiles.length === 0) {
     let compress_css = csso.minify(text.substring(style_start+7, endind)+'\n').css;
-    return text.substring(0, style_start + 7) + compress_css + text.substring(endind);
+    return text.substring(0, style_start + 7) 
+          + this.replaceCssUrl(compress_css)
+          + text.substring(endind);
   }
 
   let csscode = this.readImportCss(cssfiles, cdir);
@@ -1069,14 +1071,14 @@ wapp.prototype.replaceImportCss = function (text, cdir) {
   let replace_end = cssfiles[ cssfiles.length - 1 ].pos.end;
 
   let replace_text = text.substring(0, replace_start) 
-                        + csscode
+                        + this.replaceCssUrl(csscode)
                         + text.substring(replace_end+1);
   
   endind = replace_text.indexOf('</style>');
 
   let compress_css = csso.minify(replace_text.substring(style_start+7, endind)+'\n').css;
   return replace_text.substring(0, style_start + 7) 
-              + compress_css 
+              + compress_css
               + replace_text.substring(endind);
 }
 
@@ -1095,7 +1097,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
   } catch (err) {
     fs.mkdirSync(cdir + '/@css');
   }
-  
+
   try {
     let data = '';
     let orgdata = '';
@@ -1139,11 +1141,13 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
         if (!htmlparser.parse(tempdata)) {
           delayOutError(htmlparser.lastErrorMsg, `语法检测：${names[i]}/template.html`);
         } else {
-          //使用div包装模板。
+          
           tempdata = tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
           tempdata = this.replaceSrc(tempdata, true, names[i]);
+          //检测是否有@import导入css文件，根据@import导入@css目录的css。
           tempdata = this.replaceImportCss(tempdata, `${cdir}/${names[i]}`);
 
+          //使用div包装模板。
           this.templates += `<div data-id="${cex.name}">${tempdata}</div>`;
         }
       } catch (err) {
