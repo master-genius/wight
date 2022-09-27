@@ -591,11 +591,13 @@ wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
     `;
   };
 
+  let flag_tag = `;/* ${Math.random()} */;`;
+
   let pkgCode = `'use strict';\nconst {window,document,w,Component} = require('../webenv.js');`
               + `\n;(async (exports) => {\n${initRequireEnv()}\n`
-              + `\n;;;;;\n${ctext}\n})(w.${options.exportsKey || 'ext'});`;
+              + `\n${flag_tag}\n${ctext}\n})(w.${options.exportsKey || 'ext'});`;
 
-  let flagind = pkgCode.indexOf(';;;;;');
+  let flagind = pkgCode.indexOf(flag_tag);
   let linestart = 0;
   for (let i = 0; i < flagind; i++) {
     if (pkgCode[i] === '\n') linestart += 1;
@@ -995,6 +997,51 @@ wapp.prototype.buildCompsStatic = async function (cdir, names, stdir) {
 
 };
 
+wapp.prototype.replaceImportCss = function (text) {
+
+  text = text.replace(/\/\*(.|[\r\n])*?\*\//mg, '');
+
+  console.log(text, '---')
+
+  let start = text.indexOf('<style>');
+  let endind = text.indexOf('</style>');
+
+  let i = 0;
+  let cssfiles = [];
+
+  let parseFile = (t) => {
+    let f = t.substring(('@import').length).trim();
+    if (f.indexOf('url(') >= 0) {
+      f = f.substring(4, f.length - 1);
+    }
+    return f.substring(1, f.length - 1);
+  }
+
+  while (start < endind) {
+    i = text.indexOf('@import', start);
+
+    if (i < 0) break;
+
+    while (start < endind && subtext[start] !== ';') {
+      start++;
+    }
+
+    cssfiles.push({
+      pos: {
+        start: i,
+        end: start
+      },
+      file: parseFile(text.substring(i, start))
+    });
+
+    i = start;
+  }
+
+  console.log(cssfiles);
+
+  return text;
+}
+
 /**
  * 一个组件是一个目录，其中包括和目录同名的.js文件、explain.json文件、.html文件，若html文件不存在则表示不存在template。
  * explain.json文件描述组件的类名和组件名称，以及相关其他描述，其属性如下：
@@ -1051,7 +1098,8 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           //使用div包装模板。
           tempdata = tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
           tempdata = this.replaceSrc(tempdata, true, names[i]);
-  
+          template = this.replaceImportCss(template);
+
           this.templates += `<div data-id="${cex.name}">${tempdata}</div>`;
         }
       } catch (err) {}
