@@ -872,7 +872,10 @@ wapp.prototype.loadLib = function (libdir) {
 wapp.prototype.replaceRequire = function (ctext) {
   return ctext.replace(/\=[\s]{0,}<-[\s]{0,}\([\s]{0,}\'/ig, '= await require(\'')
               .replace(/\=[\s]{0,}<-[\s]{0,}\([\s]{0,}\"/ig, '= await require("')
-              .replace(/\=[\s]{0,}<-[\s]{0,}\([\s]{0,}\`/ig, '= await require(`');
+              .replace(/\=[\s]{0,}<-[\s]{0,}\([\s]{0,}\`/ig, '= await require(`')
+              .replace(/\=[\s]{0,}require[\s]{0,}\([\s]{0,}\'/ig, '= await require(\'')
+              .replace(/\=[\s]{0,}require[\s]{0,}\([\s]{0,}\"/ig, '= await require("')
+              .replace(/\=[\s]{0,}require[\s]{0,}\([\s]{0,}\`/ig, '= await require(`');
 }
 
 wapp.prototype.loadExt = async function (cdir) {
