@@ -1001,12 +1001,6 @@ wapp.prototype.readImportCss = function (cssfiles, cdir) {
 
   let css_dir = cdir + '/../@css';
 
-  try {
-    fs.accessSync(css_dir);
-  } catch (err) {
-    fs.mkdirSync(css_dir);
-  }
-
   let code = '';
   let temp = '';
 
@@ -1096,6 +1090,12 @@ wapp.prototype.replaceImportCss = function (text, cdir) {
  */
 
 wapp.prototype.loadComps = async function (cdir, appdir) {
+  try {
+    fs.accessSync(cdir + '/@css');
+  } catch (err) {
+    fs.mkdirSync(cdir + '/@css');
+  }
+  
   try {
     let data = '';
     let orgdata = '';
