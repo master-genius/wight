@@ -997,12 +997,39 @@ wapp.prototype.buildCompsStatic = async function (cdir, names, stdir) {
 
 };
 
-wapp.prototype.replaceImportCss = function (text) {
+wapp.prototype.readImportCss = function (cssfiles, cdir) {
+
+  let css_dir = cdir + '/../@css';
+
+  try {
+    fs.accessSync(css_dir);
+  } catch (err) {
+    fs.mkdirSync(css_dir);
+  }
+
+  let code = '';
+  let temp = '';
+
+  for (let f of cssfiles) {
+    try {
+      temp = fs.readFileSync(`${css_dir}/${f.file}`, {encoding: 'utf8'});
+      code += csso.minify(temp + '\n').css;
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  return code;
+};
+
+wapp.prototype.replaceImportCss = function (text, cdir) {
 
   text = text.replace(/\/\*(.|[\r\n])*?\*\//mg, '');
 
-  let start = text.indexOf('<style>');
+  let style_start = text.indexOf('<style>');
   let endind = text.indexOf('</style>');
+
+  if (style_start < 0) return text;
 
   let i = 0;
   let cssfiles = [];
@@ -1016,6 +1043,8 @@ wapp.prototype.replaceImportCss = function (text) {
   }
 
   let iend = 0;
+  let start = style_start + 7;
+
   while (start < endind) {
     i = text.indexOf('@import', start);
 
@@ -1034,7 +1063,27 @@ wapp.prototype.replaceImportCss = function (text) {
     start = iend + 1;
   }
 
-  return text;
+  if (cssfiles.length === 0) {
+    let compress_css = csso.minify(text.substring(style_start+7, endind)+'\n').css;
+    return text.substring(0, style_start + 7) + compress_css + text.substring(endind);
+  }
+
+  let csscode = this.readImportCss(cssfiles, cdir);
+
+  let replace_start = cssfiles[0].pos.start;
+
+  let replace_end = cssfiles[ cssfiles.length - 1 ].pos.end;
+
+  let replace_text = text.substring(0, replace_start) 
+                        + csscode
+                        + text.substring(replace_end+1);
+  
+  endind = replace_text.indexOf('</style>');
+
+  let compress_css = csso.minify(replace_text.substring(style_start+7, endind)+'\n').css;
+  return replace_text.substring(0, style_start + 7) 
+              + compress_css 
+              + replace_text.substring(endind);
 }
 
 /**
@@ -1093,12 +1142,12 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           //使用div包装模板。
           tempdata = tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
           tempdata = this.replaceSrc(tempdata, true, names[i]);
-          tempdata = this.replaceImportCss(tempdata);
+          tempdata = this.replaceImportCss(tempdata, `${cdir}/${names[i]}`);
 
           this.templates += `<div data-id="${cex.name}">${tempdata}</div>`;
         }
       } catch (err) {
-        console.error(err)
+        
       }
 
       try {
