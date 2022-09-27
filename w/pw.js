@@ -1001,8 +1001,6 @@ wapp.prototype.replaceImportCss = function (text) {
 
   text = text.replace(/\/\*(.|[\r\n])*?\*\//mg, '');
 
-  console.log(text, '---')
-
   let start = text.indexOf('<style>');
   let endind = text.indexOf('</style>');
 
@@ -1017,27 +1015,24 @@ wapp.prototype.replaceImportCss = function (text) {
     return f.substring(1, f.length - 1);
   }
 
+  let iend = 0;
   while (start < endind) {
     i = text.indexOf('@import', start);
 
     if (i < 0) break;
 
-    while (start < endind && subtext[start] !== ';') {
-      start++;
-    }
+    iend = text.indexOf(';', i);
 
     cssfiles.push({
       pos: {
         start: i,
-        end: start
+        end: iend
       },
-      file: parseFile(text.substring(i, start))
+      file: parseFile(text.substring(i, iend))
     });
 
-    i = start;
+    start = iend + 1;
   }
-
-  console.log(cssfiles);
 
   return text;
 }
@@ -1098,11 +1093,13 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           //使用div包装模板。
           tempdata = tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
           tempdata = this.replaceSrc(tempdata, true, names[i]);
-          template = this.replaceImportCss(template);
+          tempdata = this.replaceImportCss(tempdata);
 
           this.templates += `<div data-id="${cex.name}">${tempdata}</div>`;
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error(err)
+      }
 
       try {
         orgdata = fs.readFileSync(`${cdir}/${names[i]}/${names[i]}.js`, 'utf8') + '\n';
