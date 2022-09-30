@@ -621,10 +621,11 @@ wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
 
 wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
   let asy = 'async';
+  if (options.async === undefined) options.async = true;
   !options.async && (asy = '');
 
   //return this.requireCheckCode(filename, ctext, options);
-  
+
   try {
     let testcode = `'use strict';
                 let w = {ext:{},hooks:[],events:{},config:{},__ext__:{},};let alert = () => {};
