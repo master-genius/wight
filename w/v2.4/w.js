@@ -2009,12 +2009,25 @@ w.switchTab = function (p) {
   this.listenHashLock = false;
 
   let nds = w.tabsmenudom.childNodes;
-  
+  let pind = 0;
   for (let i = 0; i < nds.length; i++) {
-    if (nds[i].id.indexOf(p) > 0) {
+    pind = nds[i].id.indexOf(p);
+    if (pind > 0 && nds[i].id.substring(pind) === p) {
       nds[i].style.background = w.tabs.selectedBackground;
+      if (w.tabs.list[i].selectedIcon && w.tabs.list[i].selectedIcon.length > 0) {
+        let imgdom = nds[i].querySelector('img')
+        if (imgdom) {
+          imgdom.src = imgdom.dataset.url + w.tabs.list[i].selectedIcon;
+        }
+      }
     } else {
       nds[i].style.background = w.tabs.background;
+      if (w.tabs.list[i].icon && w.tabs.list[i].icon.length > 0) {
+        let imgdom = nds[i].querySelector('img')
+        if (imgdom) {
+          imgdom.src = imgdom.dataset.url + w.tabs.list[i].icon;
+        }
+      }
     }
   }
 

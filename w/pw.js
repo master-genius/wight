@@ -420,11 +420,11 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
     let mtext = `<div class="w-tabbar-row-cell" id="w-t-mmmm-${m.page}" onclick="w.switchTab('${m.page}');" name="${m.page}" style="width:${width}%;">`;
     
     if (m.icon && typeof m.icon === 'string' && m.icon.length > 0) {
-      mtext += `<img src="${urlpath}${m.icon}" style="max-height: 1.35rem;height:auto;width:auto;" name="${m.page}">`;
+      mtext += `<img data-url="${urlpath}" src="${urlpath}${m.icon}" style="max-height: 1.35rem;height:auto;width:auto;" name="${m.page}">`;
     }
 
     if (m.name && typeof m.name === 'string') {
-      mtext += `<div name="${m.page}" style="font-size:81%;line-height:101%;padding-bottom:0.125rem;">${m.name}</div>`;
+      mtext += `<div name="${m.page}" style="box-sizing:border-box;font-size:81%;line-height:102%;padding-bottom:3.2px;padding-top:2px;">${m.name}</div>`;
     }
     
     mtext += `</div>`;
