@@ -612,7 +612,7 @@ const w = new function () {
   };
 
   this.alertError = function (info, tmout = 0) {
-    info = `<span style="color:#e22349;">${info}</span>`;
+    info = `<span style="color:#e73949;">${info}</span>`;
     w.alert(info);
     if (tmout > 0) {
       setTimeout(() => {
@@ -668,7 +668,7 @@ const w = new function () {
     }
 
     if (ntype.indexOf('error') >= 0) {
-      info = `<span style="color:#ef6028;font-size:95%;">${info}</span>`;
+      info = `<span style="color:#f76567;font-size:95%;">${info}</span>`;
     }
 
     let where_is = 'w-notify-bottom';
