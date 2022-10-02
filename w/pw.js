@@ -303,7 +303,7 @@ let wapp = function (options = {}) {
         }
 
         window.onpageshow = async function() {
-          await new Promise(rv => {setTimeout(() => {rv();}, 29);});
+          await new Promise(rv => {setTimeout(() => {rv();}, 30);});
           if (w.init && typeof w.init === 'function') w.init();
           if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
           {

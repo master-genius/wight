@@ -2602,7 +2602,7 @@ class Component extends HTMLElement {
         if (ref_count > 2) return false;
 
         if (w.__comps_loop__[a].length > 0) {
-          loopcheck(w.__comps_loop__[a], name);
+          if (loopcheck(w.__comps_loop__[a], name) === false) return false;
         }
       }
 
