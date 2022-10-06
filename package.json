@@ -17,7 +17,7 @@
     "gohttp": "^5.0.1",
     "qrcode": "^1.4.4",
     "terser": "^5.15.0",
-    "titbit": "^23.1.1",
+    "titbit": "^23.1.2",
     "titbit-httpc": "^2.0.3",
     "titbit-loader": "^22.1.8",
     "titbit-token": "^2.0.6",
