@@ -5,10 +5,33 @@ const fs = require('fs')
 const zlib = require('zlib')
 const wpg = require('./w/pw')
 const wkthread = require('worker_threads')
-const {resource} = require('titbit-toolkit')
+const {resource, sse} = require('titbit-toolkit')
 
 if (wkthread.isMainThread) {
   process.chdir(__dirname)
+}
+
+let sseNotice = new sse({
+  timeout: 0,
+  retry: 200,
+  timeSlice: 1000
+})
+
+sseNotice.appState = {}
+
+sseNotice.handle = async function (ctx) {
+  let name = ctx.param.name
+
+  if (ctx.sse.appState[name] == undefined) {
+    ctx.sse.appState[name] = 'none'
+  }
+
+  if (ctx.sse.appState[name] === 'update') {
+    ctx.sendmsg({event: 'update', data: 'update'})
+    ctx.sse.appState[name] = 'none'
+  }
+
+  ctx.sendmsg(':ok')
 }
 
 class initapp {
@@ -124,7 +147,9 @@ class initapp {
 
   async reloadApp (app, appname) {
     this.unloadApp(app, appname)
-    return this.makeApp(app, appname)
+    return this.makeApp(app, appname).then(r => {
+      if (r) sseNotice.appState[appname] = 'update';
+    })
   }
 
   delayReload (app, appname) {
@@ -193,6 +218,8 @@ class initapp {
       return false;
     }
 
+    let error_count = 0
+
     try {
       delete require.cache[`${pagedir}/config.json`];
       let wp = new wpg({
@@ -203,9 +230,11 @@ class initapp {
       })
 
       appdata = await wp.makeApp()
-
+      //console.log(wp.errorCount)
+      error_count = wp.errorCount
     } catch (err) {
       console.error(err)
+      error_count += 1
     }
 
     this.watch(pagedir, app, appname);
@@ -222,8 +251,10 @@ class initapp {
 
     }).then(data => {
       app.service.apps[appname] = data
+    }).then(() => {
+      return error_count > 0 ? false : true
     })
-    
+
   }
 
   appRouter (app) {
@@ -338,6 +369,12 @@ class initapp {
       }
 
     })
+
+    //sse route
+
+    app.get('/:name/sse', async c => {}, {group: '__sse__'})
+
+    app.use(sseNotice.mid(), {group: '__sse__'})
 
   }
   

@@ -5,6 +5,7 @@ const terser = require('terser');
 const csso = require('csso');
 const htmlstate = require('./htmlstate');
 const path = require('path');
+const ssecode = require('./ssecode');
 
 const fsp = fs.promises;
 
@@ -44,6 +45,8 @@ let wapp = function (options = {}) {
   } catch(err) {
     fs.mkdirSync(this.codeTempPath)
   }
+  
+  this.errorCount = 0;
 
   this.pageUrlPath = '/';
 
@@ -176,6 +179,8 @@ let wapp = function (options = {}) {
   this.buildPrePath = '';
   this.iconlink = '';
   this.templates = '';
+  this.sseCode = '';
+  this.libCode = '';
 
   this.compile = function () {
     //window.onunload = function () {return '退出？';};
@@ -407,6 +412,7 @@ let wapp = function (options = {}) {
         window.onresize = function (){w.events.resize();};
         ${closePromptText}
         </script>
+        ${this.sseCode}
         ${this.jsbottom}
       </body>
     </html>`;
@@ -605,21 +611,26 @@ wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
 
   fs.writeFileSync(requireFile, pkgCode, {encoding: 'utf8'});
 
+  let st = true;
+
   try {
     let r = require(requireFile);
     console.log(filename, 'ok');
   } catch (err) {
+    this.errorCount += 1;
+    st = false;
     if (err.stack) delayOutError(this.parseErrorStack(err.stack, linestart, filename), '');
     else delayOutError(err, filename);
   }
 
   //检测后必须删除对应的缓存。
   delete require.cache[requireFile];
-  delete require.cache[path.resolve(requireFile+'/../../webenv.js')]
+  delete require.cache[path.resolve(requireFile+'/../../webenv.js')];
 
+  return st;
 }
 
-wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
+wapp.prototype.checkCode = async function (filename, ctext, options = {async: true}) {
   let asy = 'async';
   if (options.async === undefined) options.async = true;
   !options.async && (asy = '');
@@ -638,8 +649,9 @@ wapp.prototype.checkCode = function (filename, ctext, options = {async: true}) {
   } catch (err) {
     //console.error('--CHECK-CODE:', filename, err);
     //delayOutError(err, filename);
-    this.requireCheckCode(filename, ctext, options);
+    return this.requireCheckCode(filename, ctext, options);
   }
+  return true;
 };
 
 wapp.prototype.fmtPageHTML = function (ht, pagename) {
@@ -796,7 +808,7 @@ wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = ''
 
 };
 
-wapp.prototype.loadPage = function (pagefile, htmlfile, cssfile, pagename) {
+wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename) {
   let htext = '';
 
   try {
@@ -805,6 +817,7 @@ wapp.prototype.loadPage = function (pagefile, htmlfile, cssfile, pagename) {
     htext = this.fmtPageHTML(htext, pagename);
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');
+    this.errorCount += 1;
   }
 
   try {
@@ -815,12 +828,14 @@ wapp.prototype.loadPage = function (pagefile, htmlfile, cssfile, pagename) {
       ctext = this.replaceRequire(ctext);
     }
 
-    this.checkCode(pagefile, ctext, {async: this.config.asyncPage});
+    await this.checkCode(pagefile, ctext, {async: this.config.asyncPage});
+
     this.pagesCode += `;(${this.config.asyncPage ? 'async ' : ''}`
       + `function(exports){${ctext};exports.${pagename}.orgHTML=\`${htext}\`;})(w.pages);`;
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');
     delayOutError('有错误或不存在，请检查', pagefile);
+    this.errorCount += 1;
   }
 
   try {
@@ -835,14 +850,12 @@ wapp.prototype.loadPage = function (pagefile, htmlfile, cssfile, pagename) {
 
 };
 
-wapp.prototype.libCode = '';
-
 /**
  * 
  * lib目录中的文件以!开头不加载。
  * @param {string} libdir 
  */
-wapp.prototype.loadLib = function (libdir) {
+wapp.prototype.loadLib = async function (libdir) {
   try {
     let kn = '';
     let names = [];
@@ -860,7 +873,7 @@ wapp.prototype.loadLib = function (libdir) {
 
     for (let n of names) {
       orgdata = fs.readFileSync(`${libdir}/${n}`, 'utf8') + '\n';
-      this.checkCode(`${libdir}/${n}`, orgdata);
+      await this.checkCode(`${libdir}/${n}`, orgdata);
       this.libCode += `;(function(exports){${orgdata}})(window);`;
     }
 
@@ -909,12 +922,13 @@ wapp.prototype.loadExt = async function (cdir) {
         
         orgdata = this.replaceRequire(orgdata);
 
-        this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
+        await this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
 
         this.extends += `;(async function(exports){${orgdata}})(w.ext);`;
 
       } catch (err) {
         console.error(err.message);
+        this.errorCount += 1;
       }
     }
 
@@ -1135,7 +1149,8 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
         fs.accessSync(`${cdir}/${names[i]}/${names[i]}.js`);
         cex = require(`${cdir}/${names[i]}/explain.json`);
       } catch (err) {
-        delayOutError(err, '检测组件文件是否存在', 1234);
+        delayOutError(err, '检测组件文件是否存在');
+        this.errorCount += 1;
       }
 
       tempdata = '';
@@ -1144,8 +1159,8 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
         tempdata = fs.readFileSync(`${cdir}/${names[i]}/template.html`, {encoding: 'utf8'});
         if (!htmlparser.parse(tempdata)) {
           delayOutError(htmlparser.lastErrorMsg, `语法检测：${names[i]}/template.html`);
+          this.errorCount += 1;
         } else {
-          
           tempdata = tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
           tempdata = this.replaceSrc(tempdata, true, names[i]);
           //检测是否有@import导入css文件，根据@import导入@css目录的css。
@@ -1155,13 +1170,13 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           this.templates += `<div data-id="${cex.name}">${tempdata}</div>`;
         }
       } catch (err) {
-        
+      
       }
 
       try {
         orgdata = fs.readFileSync(`${cdir}/${names[i]}/${names[i]}.js`, 'utf8') + '\n';
         
-        this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
+        await this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
 
         opts = '';
         if (cex.options && cex.options.extends) {
@@ -1173,6 +1188,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
         this.components += `;(()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
       } catch (err) {
         console.error(err.message);
+        this.errorCount += 1;
       }
     }
 
@@ -1204,6 +1220,8 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
 
 wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
 
+  this.errorCount = 0;
+
   let pdir = appdir || this.config.pagedir;
 
   let pathname = '';
@@ -1230,6 +1248,8 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   if (isbuild) {
     this.config.prepath = this.buildPrePath;
     this.config.debug = false;
+  } else {
+    this.sseCode = ssecode()
   }
 
   if (this.config.prepath.length > 0) {
@@ -1243,7 +1263,9 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
     let appcss = fs.readFileSync(`${pdir}/app.css`, {encoding: 'utf8'}) + '\n';
     appcss = this.replaceCssUrl(appcss);
     this.cssCode += appcss;
-  } catch(err){}
+  } catch(err){
+    
+  }
 
   try {
     fs.accessSync(`${pdir}/_extends`, fs.constants.F_OK);
@@ -1276,7 +1298,7 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
 
       hookData = this.replaceRequire(hookData);
 
-      this.checkCode(`${pdir}/_hooks/${h}.js`, hookData, {exportsKey: 'hookFunc'});
+      await this.checkCode(`${pdir}/_hooks/${h}.js`, hookData, {exportsKey: 'hookFunc'});
       
       this.hooksText += `;w.hooks.push('${h}');(async function(exports){${hookData}})(w.hookFunc);`;
     } catch (err) {
@@ -1361,7 +1383,7 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   }
 
   for (let page of this.config.pages) {
-    this.loadPage(
+    await this.loadPage(
       `${pdir}/${page}/${page}.js`,
       `${pdir}/${page}/${page}.html`,
       `${pdir}/${page}/${page}.css`,

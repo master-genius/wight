@@ -247,4 +247,4 @@ if (app.isWorker) {
 
 }
 
-app.daemon(cfg.port, cfg.host, cfg.worker)
+app.daemon(cfg.port, cfg.host, 1)
