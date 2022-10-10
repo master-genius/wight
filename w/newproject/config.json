@@ -9,20 +9,22 @@
 
     "host" : "https://www.a.com",
 
-    "testHost" : "http://localhost:2022",
+    "testHost" : "http://localhost:2024",
 
     "tabs" : {
         "background" : "#fafaff",
-        "selectedBackground" : "#3678c1",
+        "selectedBackground" : "#f1f2f3",
         "list" : [
             {
                 "page" : "home",
                 "icon" : "static/icon/home.png",
+                "selectedIcon": "static/icon/home2.png",
                 "name" : "首页"
             },
             {
                 "page" : "user",
                 "icon" : "static/icon/user.png",
+                "selectedIcon": "static/icon/user2.png",
                 "name" : "用户"
             }
         ]
@@ -57,7 +59,7 @@
         "u-card"
     ],
 
-    "version": "2.2",
+    "version": "2.4",
 
     "manifest": false,
 
@@ -73,5 +75,7 @@
 
     "buildCompress": false,
 
-    "asyncPage": true
+    "asyncPage": true,
+
+    "autoRefresh": true
 }

@@ -1249,7 +1249,7 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
     this.config.prepath = this.buildPrePath;
     this.config.debug = false;
   } else {
-    this.sseCode = ssecode()
+    this.config.autoRefresh && (this.sseCode = ssecode())
   }
 
   if (this.config.prepath.length > 0) {
