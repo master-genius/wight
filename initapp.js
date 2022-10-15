@@ -359,7 +359,7 @@ class initapp {
       let srcname = `${c.service.appPath}/${c.service.prefix}/${c.param.name}/`
           + `_components/${c.param.comp}/static/${c.param.src}`;
         
-      console.log(srcname);
+      //console.log(srcname);
 
       try {
         await c.helper.pipe(srcname, c.reply)

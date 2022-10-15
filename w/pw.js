@@ -50,9 +50,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '2.3';
+  this.defaultVersion = '2.5';
 
-  this.version = '2.3';
+  this.version = '2.5';
 
   this.forceCompress = false;
 
@@ -1185,7 +1185,28 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
 
         orgdata = this.replaceSrc(orgdata, true, names[i]);
 
-        this.components += `;(()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
+        let comps_jscode = `;(()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
+        if (this.config.componentModule) {
+          let mod_dir = `${appdir}/_static/module`;
+          try {
+            fs.accessSync(mod_dir);
+          } catch (err) {
+            fs.mkdirSync(mod_dir);
+          }
+          let compress_jscode = comps_jscode;
+          if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)){
+            data = await terser.minify(comps_jscode);
+            if (data.error) {
+              console.error(data.error);
+            } else {
+              compress_jscode = data.code;
+            }
+          }
+          compress_jscode = `${compress_jscode} export default '${names[i]}';`;
+          fs.writeFileSync(mod_dir + '/' + names[i] + '.js', compress_jscode, {encoding: 'utf8'});
+        } else {
+          this.components += comps_jscode;
+        }
       } catch (err) {
         console.error(err.message);
         this.errorCount += 1;
