@@ -49,7 +49,7 @@ exports.home = new function () {
 
   this.timer = null;
 
-  this.onload = function (c) {
+  this.onload = async function (c) {
 
     this.view({
       list: dataList,
@@ -66,7 +66,7 @@ exports.home = new function () {
 
   };
 
-  this.onshow = function (c) {
+  this.onshow = async function (c) {
     this.timer = setInterval(() => {
       this.view({
         timeText: this.curTime()
