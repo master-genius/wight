@@ -59,7 +59,9 @@
         "u-card"
     ],
 
-    "version": "2.4",
+    "componentModule": true,
+
+    "version": "2.5",
 
     "manifest": false,
 
@@ -73,7 +75,7 @@
 
     "closePrompt": false,
 
-    "buildCompress": false,
+    "buildCompress": true,
 
     "asyncPage": true,
 

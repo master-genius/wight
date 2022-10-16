@@ -8,7 +8,7 @@ exports.list = new function () {
     let datalist = [];
     for (let i = 0; i < total; i++) {
       datalist.push({
-        id : `${Date.now()}${parseInt(Math.random()*10000) + 1}`,
+        id : `${(new Date()).toDateString()}${parseInt(Math.random()*10000) + 1}`,
         text: `${(new Date).toLocaleString()} ${i} ${Math.random()}`
       });
     }

@@ -29,8 +29,12 @@ w.share.userlist = [
 
 exports.user = new function () {
 
-  this.onload = function (c) {
-  
+  this.onload = async function (c) {
+    acover('<div style="text-align:center;">loading</div>', true);
+    await _import('/static/module/u-card.js').then(m => { console.log(m); })
+    setTimeout(() => {
+      uncover();
+    }, 500);
   };
 
   this.onshow = function (c) {
