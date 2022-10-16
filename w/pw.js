@@ -181,6 +181,7 @@ let wapp = function (options = {}) {
   this.templates = '';
   this.sseCode = '';
   this.libCode = '';
+  this.appInitCode = '';
 
   this.compile = function () {
     //window.onunload = function () {return '退出？';};
@@ -254,11 +255,11 @@ let wapp = function (options = {}) {
           window.uncoverShadow = w.uncoverShadow.bind(w);
           window.setCoverText = w.setCoverText.bind(w);
         </script>
-        <script>'use strict';${this.libCode}</script>
         <script>'use strict';${this.extends}</script>
         <script>'use strict';${this.components}</script>
         <script>'use strict';${this.hooksText}</script>
         <script>'use strict';${this.pagesCode}</script>
+        <script>'use strict';${this.appInitCode}</script>
         <script>
         'use strict';
 
@@ -309,7 +310,7 @@ let wapp = function (options = {}) {
 
         window.onpageshow = async function() {
           await new Promise(rv => {setTimeout(() => {rv();}, 30);});
-          if (w.init && typeof w.init === 'function') w.init();
+          if (w.init && typeof w.init === 'function') await w.init();
           if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
           {
             w.switchTab(w.homepage);
@@ -545,11 +546,18 @@ wapp.prototype.parseErrorStack = function (stack, linestart, filename) {
 
   if (arr.length <= 0) return stack;
 
-  let first = arr[0].split(':');
+  let ind = arr[0].length - 1;
 
-  if (first.length <= 1 || isNaN(parseInt(first[1].trim())) ) return stack;
+  while (ind > 0) {
+    if (arr[0][ind] === ':') break;
+    ind--;
+  }
 
-  let n = parseInt(first[1].trim()) - linestart - 1;
+  let linenumber = parseInt(arr[0].substring(ind+1).trim());
+
+  if (isNaN(linenumber) ) return stack;
+
+  let n = linenumber - linestart - 1;
 
   let narr = [ `${filename}:${n}` ];
 
@@ -619,7 +627,9 @@ wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
   } catch (err) {
     this.errorCount += 1;
     st = false;
-    if (err.stack) delayOutError(this.parseErrorStack(err.stack, linestart, filename), '');
+    if (err.stack !== undefined) {
+      delayOutError(this.parseErrorStack(err.stack, linestart, filename), '');
+    }
     else delayOutError(err, filename);
   }
 
@@ -1289,6 +1299,28 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   }
 
   try {
+    let appath = `${pdir}/app.js`;
+    fs.accessSync(appath);
+    let appcode = fs.readFileSync(appath, {encoding: 'utf8'});
+    appcode = this.replaceRequire(appcode);
+    await this.checkCode(appath, appcode);
+    appcode = `w.init = async () => {${appcode}};`;
+    
+    if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)) {
+      let cdata = await terser.minify(appcode+'\n');
+      if (cdata.error) {
+        console.error(cdata.error);
+      } else if (cdata.code) {
+        appcode = cdata.code;
+      }
+      
+    }
+    this.appInitCode = `;${appcode}`;
+  } catch (err) {
+    console.error(err)
+  }
+
+  try {
     fs.accessSync(`${pdir}/_extends`, fs.constants.F_OK);
     await this.loadExt(`${pdir}/_extends`);
   } catch (err){
@@ -1305,12 +1337,13 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   if (this.templates.length > 0) {
     this.templates = this.replaceCssUrl(this.templates);
   }
-
-  try {
+  
+  //暂时废弃对lib的加载。
+  /* try {
     await this.loadLib(`${pdir}/_lib`);
   } catch (err) {
     console.error(err);
-  }
+  } */
 
   let hookData = '';
   for (let h of this.config.hooks) {
