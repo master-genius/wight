@@ -4,7 +4,7 @@ process.chdir(__dirname);
 const wpg = require('./w/pw');
 
 if (process.argv.length < 4) {
-  console.log('使用需要携带参数：[页面所在目录] [页面名称]····');
+  console.log('使用需要携带参数：[项目名称(项目的目录名)] [组件名称]····');
   console.log('示例：node newcomps.js first a-x x-image');
   process.exit(1);
 }
