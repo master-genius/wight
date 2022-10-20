@@ -1009,17 +1009,31 @@ wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
   let flist = [];
   let ctemp = '';
   let cssMap = {};
+  let notGlobal = [];
+  if (this.config.componentCss['!*'] !== undefined) {
+    if (Array.isArray(this.config.componentCss['!*'])) {
+      notGlobal = this.config.componentCss['!*'];
+    } else if (typeof this.config.componentCss['!*'] === 'string') {
+      notGlobal =[ this.config.componentCss['!*'] ];
+    }
+  }
+
   for (let k in this.config.componentCss) {
     flist = this.config.componentCss[k];
     if (typeof flist === 'string') {
       flist = [flist];
     }
 
+    if (k === '!*') continue;
+
     if (k === '*') {
       for (let c of this.config.components) {
         if (!cssMap[c]) cssMap[c] = [];
+        //如果配置了 !* 则查看是否此组件在不加载全局css的配置中。
+        if (notGlobal.indexOf(c) >= 0) continue;
+
         for (let i = flist.length - 1; i>=0; i--) {
-          //按照全局css顺序添加到已有css配置name的前面。
+          //按照全局css顺序添加到已有css配置name的前面。如果在!*配置中则不会添加。
           if (cssMap[c].indexOf(flist[i]) < 0) {
             cssMap[c].unshift(flist[i]);
           }
