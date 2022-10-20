@@ -6,6 +6,7 @@ const zlib = require('zlib')
 const wpg = require('./w/pw')
 const wkthread = require('worker_threads')
 const {resource, sse} = require('titbit-toolkit')
+const path = require('path')
 
 if (wkthread.isMainThread) {
   process.chdir(__dirname)
@@ -221,7 +222,8 @@ class initapp {
     let error_count = 0
 
     try {
-      delete require.cache[`${pagedir}/config.json`];
+      let config_realpath = path.resolve(`${pagedir}/config.json`);
+      delete require.cache[config_realpath];
       let wp = new wpg({
         closePrompt: this.closePrompt,
         debug: this.debug,

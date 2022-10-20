@@ -76,7 +76,6 @@ let wapp = function (options = {}) {
     closePrompt: true,
     pagedir : '',
     components : [],
-    conponentCss: {},
     extends: [],
     exts: [],
     iconPath: '/favicon.ico',
@@ -181,8 +180,8 @@ let wapp = function (options = {}) {
   this.iconlink = '';
   this.templates = '';
   this.sseCode = '';
+  this.libCode = '';
   this.appInitCode = '';
-  this.compsCssCode = '';
 
   this.compile = function () {
     //window.onunload = function () {return '退出？';};
@@ -413,7 +412,6 @@ let wapp = function (options = {}) {
         window.onscroll = function (){w.events.scroll();};
         window.onresize = function (){w.events.resize();};
         ${closePromptText}
-        ;(()=>{ w.__components_css__=${JSON.stringify(this.config.componentCss)};w.__css_code_map__=${this.compsCssCode}; })();
         </script>
         ${this.sseCode}
         ${this.jsbottom}
@@ -867,6 +865,38 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
 
 };
 
+/**
+ * 
+ * lib目录中的文件以!开头不加载。
+ * @param {string} libdir 
+ */
+wapp.prototype.loadLib = async function (libdir) {
+  try {
+    let kn = '';
+    let names = [];
+    let flist = fs.readdirSync(libdir, {withFileTypes: true});
+    for (let f of flist) {
+      if (!f.isFile()) continue;
+      
+      if (f.name[0] === '!' || f.name.substring(f.name.length - 3) !== '.js')
+          continue;
+      
+      names.push(f.name);
+    }
+
+    let orgdata;
+
+    for (let n of names) {
+      orgdata = fs.readFileSync(`${libdir}/${n}`, 'utf8') + '\n';
+      await this.checkCode(`${libdir}/${n}`, orgdata);
+      this.libCode += `;(function(exports){${orgdata}})(window);`;
+    }
+
+  } catch (err) {
+    delayOutError(err, '--LIB-CODE--');
+  }
+};
+
 // replace <- to await require
 wapp.prototype.replaceRequire = function (ctext) {
   return ctext.replace(/\=[\s]{0,}<-[\s]{0,}\([\s]{0,}\'/ig, '= await require(\'')
@@ -1000,39 +1030,90 @@ wapp.prototype.buildCompsStatic = async function (cdir, names, stdir) {
 
 };
 
-/**
- * 加载组件引入的css.
- * 此CSS代码通过变量存储，在加载组件时，自动创建style节点。
- */
-wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
-  let csscodemap = {};
-  let flist = [];
-  let ctemp = '';
-  for (let k in this.config.componentCss) {
-    if (this.config.components.indexOf(k) < 0) continue;
-    flist = this.config.componentCss[k];
-    if (typeof flist === 'string') {
-      flist = [flist];
-      this.config.componentCss[k] = [flist];
+wapp.prototype.readImportCss = function (cssfiles, cdir) {
+
+  let css_dir = cdir + '/../@css';
+
+  let code = '';
+  let temp = '';
+
+  for (let f of cssfiles) {
+    try {
+      temp = fs.readFileSync(`${css_dir}/${f.file}`, {encoding: 'utf8'});
+      code += csso.minify(temp + '\n').css;
+    } catch (err) {
+      console.error(err)
     }
-
-    if (!Array.isArray(flist)) continue;
-
-    for (let f of flist) {
-      if (csscodemap[f]) continue;
-      try {
-        ctemp = fs.readFileSync(`${cssdir}/${f}`, {encoding: 'utf8'})
-        ctemp = this.replaceCssUrl(ctemp)
-        csscodemap[f] = encodeURIComponent(csso.minify(ctemp).css)
-      } catch(err) {
-        console.error(err)
-      }
-    }
-
   }
 
-  this.compsCssCode = JSON.stringify(csscodemap);
+  return code;
 };
+
+wapp.prototype.replaceImportCss = function (text, cdir) {
+
+  text = text.replace(/\/\*(.|[\r\n])*?\*\//mg, '');
+
+  let style_start = text.indexOf('<style>');
+  let endind = text.indexOf('</style>');
+
+  if (style_start < 0) return text;
+
+  let i = 0;
+  let cssfiles = [];
+
+  let parseFile = (t) => {
+    let f = t.substring(('@import').length).trim();
+    if (f.indexOf('url(') >= 0) {
+      f = f.substring(4, f.length - 1);
+    }
+    return f.substring(1, f.length - 1);
+  }
+
+  let iend = 0;
+  let start = style_start + 7;
+
+  while (start < endind) {
+    i = text.indexOf('@import', start);
+
+    if (i < 0) break;
+
+    iend = text.indexOf(';', i);
+
+    cssfiles.push({
+      pos: {
+        start: i,
+        end: iend
+      },
+      file: parseFile(text.substring(i, iend))
+    });
+
+    start = iend + 1;
+  }
+
+  if (cssfiles.length === 0) {
+    let compress_css = csso.minify(text.substring(style_start+7, endind)+'\n').css;
+    return text.substring(0, style_start + 7) 
+          + this.replaceCssUrl(compress_css)
+          + text.substring(endind);
+  }
+
+  let csscode = this.readImportCss(cssfiles, cdir);
+
+  let replace_start = cssfiles[0].pos.start;
+
+  let replace_end = cssfiles[ cssfiles.length - 1 ].pos.end;
+
+  let replace_text = text.substring(0, replace_start) 
+                        + this.replaceCssUrl(csscode)
+                        + text.substring(replace_end+1);
+  
+  endind = replace_text.indexOf('</style>');
+
+  let compress_css = csso.minify(replace_text.substring(style_start+7, endind)+'\n').css;
+  return replace_text.substring(0, style_start + 7) 
+              + compress_css
+              + replace_text.substring(endind);
+}
 
 /**
  * 一个组件是一个目录，其中包括和目录同名的.js文件、explain.json文件、.html文件，若html文件不存在则表示不存在template。
@@ -1049,8 +1130,6 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
   } catch (err) {
     fs.mkdirSync(cdir + '/@css');
   }
-
-  this.loadCompsCss(cdir, `${cdir}/@css`);
 
   try {
     let data = '';
@@ -1100,7 +1179,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           tempdata = tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
           tempdata = this.replaceSrc(tempdata, true, names[i]);
           //检测是否有@import导入css文件，根据@import导入@css目录的css。
-          //tempdata = this.replaceImportCss(tempdata, `${cdir}/${names[i]}`);
+          tempdata = this.replaceImportCss(tempdata, `${cdir}/${names[i]}`);
 
           //使用div包装模板。
           this.templates += `<div data-id="${cex.name}">${tempdata}</div>`;
@@ -1263,6 +1342,13 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   if (this.templates.length > 0) {
     this.templates = this.replaceCssUrl(this.templates);
   }
+  
+  //暂时废弃对lib的加载。
+  /* try {
+    await this.loadLib(`${pdir}/_lib`);
+  } catch (err) {
+    console.error(err);
+  } */
 
   let hookData = '';
   for (let h of this.config.hooks) {
@@ -1287,6 +1373,17 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
         } else {
           this.hooksText = hookData.code;
         }
+    }
+  }
+
+  if (this.libCode.length > 0) {
+    if (this.forceCompress || (this.isbuild && this.config.buildCompress)) {
+      let libCodeCompress = await terser.minify(this.libCode);
+      if (libCodeCompress.error) {
+        console.error(libCodeCompress.error);
+      } else {
+        this.libCode = libCodeCompress.code;
+      }
     }
   }
 
@@ -1669,92 +1766,3 @@ wapp.prototype.newProject = function (project_dir) {
 };
 
 module.exports = wapp;
-
-/**
-
-wapp.prototype.readImportCss = function (cssfiles, cdir) {
-
-  let css_dir = cdir + '/../@css';
-
-  let code = '';
-  let temp = '';
-
-  for (let f of cssfiles) {
-    try {
-      temp = fs.readFileSync(`${css_dir}/${f.file}`, {encoding: 'utf8'});
-      code += csso.minify(temp + '\n').css;
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  return code;
-};
-
-wapp.prototype.replaceImportCss = function (text, cdir) {
-
-  text = text.replace(/\/\*(.|[\r\n])*?\*\//mg, '');
-
-  let style_start = text.indexOf('<style>');
-  let endind = text.indexOf('</style>');
-
-  if (style_start < 0) return text;
-
-  let i = 0;
-  let cssfiles = [];
-
-  let parseFile = (t) => {
-    let f = t.substring(('@import').length).trim();
-    if (f.indexOf('url(') >= 0) {
-      f = f.substring(4, f.length - 1);
-    }
-    return f.substring(1, f.length - 1);
-  }
-
-  let iend = 0;
-  let start = style_start + 7;
-
-  while (start < endind) {
-    i = text.indexOf('@import', start);
-
-    if (i < 0) break;
-
-    iend = text.indexOf(';', i);
-
-    cssfiles.push({
-      pos: {
-        start: i,
-        end: iend
-      },
-      file: parseFile(text.substring(i, iend))
-    });
-
-    start = iend + 1;
-  }
-
-  if (cssfiles.length === 0) {
-    let compress_css = csso.minify(text.substring(style_start+7, endind)+'\n').css;
-    return text.substring(0, style_start + 7) 
-          + this.replaceCssUrl(compress_css)
-          + text.substring(endind);
-  }
-
-  let csscode = this.readImportCss(cssfiles, cdir);
-
-  let replace_start = cssfiles[0].pos.start;
-
-  let replace_end = cssfiles[ cssfiles.length - 1 ].pos.end;
-
-  let replace_text = text.substring(0, replace_start) 
-                        + this.replaceCssUrl(csscode)
-                        + text.substring(replace_end+1);
-  
-  endind = replace_text.indexOf('</style>');
-
-  let compress_css = csso.minify(replace_text.substring(style_start+7, endind)+'\n').css;
-  return replace_text.substring(0, style_start + 7) 
-              + compress_css
-              + replace_text.substring(endind);
-}
- * 
- */
