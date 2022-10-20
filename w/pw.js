@@ -76,7 +76,7 @@ let wapp = function (options = {}) {
     closePrompt: true,
     pagedir : '',
     components : [],
-    conponentCss: {},
+    componentCss: {},
     extends: [],
     exts: [],
     iconPath: '/favicon.ico',
@@ -1008,13 +1008,47 @@ wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
   let csscodemap = {};
   let flist = [];
   let ctemp = '';
+  let cssMap = {};
   for (let k in this.config.componentCss) {
-    if (this.config.components.indexOf(k) < 0) continue;
     flist = this.config.componentCss[k];
     if (typeof flist === 'string') {
       flist = [flist];
-      this.config.componentCss[k] = [flist];
     }
+
+    if (k === '*') {
+      for (let c of this.config.components) {
+        if (!cssMap[c]) cssMap[c] = [];
+        for (let i = flist.length - 1; i>=0; i--) {
+          //按照全局css顺序添加到已有css配置name的前面。
+          if (cssMap[c].indexOf(flist[i]) < 0) {
+            cssMap[c].unshift(flist[i]);
+          }
+        }
+      }
+      continue;
+    }
+
+    if (!cssMap[k]) cssMap[k] = [];
+    for (let a of flist) {
+      if (cssMap[k].indexOf(a) < 0)
+        cssMap[k].push(a);
+    }
+
+  }
+
+  this.config.componentCss = cssMap;
+
+  for (let k in this.config.componentCss) {
+    if (this.config.components.indexOf(k) < 0) {
+      delete cssMap[k];
+    }
+  }
+
+  for (let k in this.config.componentCss) {
+  
+    if (this.config.components.indexOf(k) < 0) continue;
+
+    flist = this.config.componentCss[k];
 
     if (!Array.isArray(flist)) continue;
 
@@ -1023,7 +1057,8 @@ wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
       try {
         ctemp = fs.readFileSync(`${cssdir}/${f}`, {encoding: 'utf8'})
         ctemp = this.replaceCssUrl(ctemp)
-        csscodemap[f] = encodeURIComponent(csso.minify(ctemp).css)
+        csscodemap[f] = csso.minify(ctemp).css
+        //csscodemap[f] = encodeURIComponent(csso.minify(ctemp).css)
       } catch(err) {
         console.error(err)
       }

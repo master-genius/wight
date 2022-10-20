@@ -2652,7 +2652,8 @@ class Component extends HTMLElement {
           if (!w.__css_code_map__ || !w.__css_code_map__[csslist[i]]) continue;
           try {
             sty = document.createElement('style');
-            ctext = decodeURIComponent(w.__css_code_map__[csslist[i]]);
+            //ctext = decodeURIComponent(w.__css_code_map__[csslist[i]]);
+            ctext = w.__css_code_map__[csslist[i]];
             sty.appendChild(document.createTextNode(ctext));
             nd.content.insertBefore( sty, nd.content.firstChild);
           } catch (err) {
