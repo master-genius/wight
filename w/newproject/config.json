@@ -59,9 +59,13 @@
         "u-card"
     ],
 
+    "componentCss": {
+        "u-card" : ["mgrid.css", "basic.css"]
+    },
+
     "componentModule": true,
 
-    "version": "2.5",
+    "version": "2.6",
 
     "manifest": false,
 
