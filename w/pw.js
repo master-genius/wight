@@ -1678,7 +1678,7 @@ wapp.prototype.newProject = function (project_dir) {
   let loopcp = [
     '_components', '_extends', '_hooks', '_static', 'home', 'user', 'test',
     '_static/css', '_static/icon', '_static/images','_static/_components',
-     'list', '_components/u-card'
+     'list', '_components/u-card', '_components/@css',
   ];
 
   for (let i = 0; i < loopcp.length; i++) {
