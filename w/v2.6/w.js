@@ -2487,8 +2487,14 @@ class Component extends HTMLElement {
   __queue_task_init__() {
     if (!this.properties || typeof this.properties !== 'object') this.properties = {};
 
+    let typ;
     for (let k in this.properties) {
-      if (typeof this.properties[k] !== 'object') continue;
+      typ = typeof this.properties[k];
+      if (typ === 'string') {
+        this.properties[k] = {
+          type: this.properties[k]
+        };
+      } else if (typ !== 'object') { continue; }
       if (this.properties[k].default !== undefined) this.attrs[k] = this.properties[k].default;
     }
     
