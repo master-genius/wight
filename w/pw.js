@@ -1563,7 +1563,21 @@ class ${className} extends Component {
 
     //this.shadow可以访问shadow DOM，注意这是shadowRoot。
     //this.host用于访问组件对应的DOM，this.host指向this.shadow.host。
-
+    
+    //用于声明支持的属性和类型限制，若不需要请去掉properties的定义。
+    this.properties = {
+      tag: {
+        //type默认就是字符串
+        type: 'string',
+        default: 'xxx'
+      },
+      mode: {
+        //限制mode属性可选的值，如果不符合要求则使用default设置值。
+        //数组类型的限制，如果没有设置default则第一个元素作为默认值。
+        limit: ['mode1', 'mode2'],
+        default: 'mode1'
+      }
+    };
   }
 
   //在render之前执行，此时已经创建好shadow DOM。

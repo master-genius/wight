@@ -2481,7 +2481,16 @@ class Component extends HTMLElement {
       enumerable: true
     });
 
-    if (!this.properties || typeof this.properties !== 'object') this.properties = {}; 
+    queueMicrotask(this.__queue_task_init__.bind(this));
+  }
+
+  __queue_task_init__() {
+    if (!this.properties || typeof this.properties !== 'object') this.properties = {};
+
+    for (let k in this.properties) {
+      if (typeof this.properties[k] !== 'object') continue;
+      if (this.properties[k].default !== undefined) this.attrs[k] = this.properties[k].default;
+    }
     
     for (let a of this.attributes) {
       if (this.properties[a.name]) {
@@ -2500,7 +2509,6 @@ class Component extends HTMLElement {
       let d = this.render() || '';
       if (typeof d === 'object') {
         this.shadow.appendChild(d);
-
       } else if (typeof d === 'string' && d.length > 0) {
         let st = this.checkLoopRef(d);
         if ( st.ok === false ) {
