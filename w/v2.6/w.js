@@ -2080,13 +2080,15 @@ w.naviHide = function () {
 };
 
 w._devents = [
-  'click', 'blur', 'submit', 'input', 'dblclick', 'copy', 
-  'fullscreenchange','fullscreenerror',
-  'focus', 'focusin', 'focusout', 'keyup', 'keydown', 'scroll', 'change',
-  'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
-  'touchcancel', 'touchend', 'touchmove', 'touchstart', 'select', 'wheel', 
-  'paste', 'cut', 'contextmenu', 
-  'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 'dragenter', 'drop'
+  'animationcancel', 'animationend', 'animationiteration', 'animationstart',
+  'blur', 'click', 'copy', 'cut', 'compositionend', 'compositionstart', 'compositionupdate',
+  'change', 'contextmenu', 'dblclick', 'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 
+  'dragenter', 'drop', 'error', 'fullscreenchange', 'fullscreenerror', 'focus', 'focusin',
+  'focusout', 'input', 'keyup', 'keydown', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 
+  'mouseout', 'mouseover', 'mouseup', 'pointercancel', 'pointerdown', 'pointerenter', 
+  'pointerleave', 'pointermove', 'pointerout', 'pointerover', 'pointerup', 'paste', 
+  'submit', 'scroll', 'select', 'transitioncancel', 'transitionend', 'transitionrun',
+  'transitionstart', 'touchcancel', 'touchend', 'touchmove', 'touchstart',  'wheel', 
 ];
 
 w.initDomEvent = function (pg, dom, evtname) {
