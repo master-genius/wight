@@ -2659,22 +2659,30 @@ class Component extends HTMLElement {
 
     if (!nd) return false;
 
+    let init_style = true;
     if (w.__components_css__ && w.__components_css__[id]) {
       let csslist = w.__components_css__[id];
-      if (csslist && Array.isArray(csslist)) {
+      if (csslist && Array.isArray(csslist) && csslist.length > 0) {
         let sty = '';
         let ctext= '';
-        for (let i = csslist.length - 1; i>=0; i--) {
-          if (!w.__css_code_map__ || !w.__css_code_map__[csslist[i]]) continue;
-          try {
-            sty = document.createElement('style');
-            //ctext = decodeURIComponent(w.__css_code_map__[csslist[i]]);
-            ctext = w.__css_code_map__[csslist[i]];
-            sty.appendChild(document.createTextNode(ctext));
-            nd.content.insertBefore( sty, nd.content.firstChild);
-          } catch (err) {
-            console.error(err);
-          }
+        if (nd.content.firstChild && nd.content.firstChild.id === csslist[0]) {
+          init_style = false;
+        }
+
+        if (init_style) {
+            for (let i = csslist.length - 1; i>=0; i--) {
+              if (!w.__css_code_map__ || !w.__css_code_map__[csslist[i]]) continue;
+              try {
+                sty = document.createElement('style');
+                sty.id = csslist[i];
+                //ctext = decodeURIComponent(w.__css_code_map__[csslist[i]]);
+                ctext = w.__css_code_map__[csslist[i]];
+                sty.appendChild(document.createTextNode(ctext));
+                nd.content.insertBefore(sty, nd.content.firstChild);
+              } catch (err) {
+                console.error(err);
+              }
+            }
         }
       }
     }

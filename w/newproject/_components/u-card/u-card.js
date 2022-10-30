@@ -9,7 +9,6 @@ class UCard extends Component {
     //this.attrs是为了方便而做的映射。
 
     //this.shadow可以访问shadow DOM，注意这是shadowRoot。
-    //this.host用于访问组件对应的DOM，this.host指向this.shadow.host。
 
   }
 

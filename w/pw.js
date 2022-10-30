@@ -1562,7 +1562,6 @@ class ${className} extends Component {
     //this.attrs是为了方便而做的映射。
 
     //this.shadow可以访问shadow DOM，注意这是shadowRoot。
-    //this.host用于访问组件对应的DOM，this.host指向this.shadow.host。
     
     //用于声明支持的属性和类型限制，若不需要请去掉properties的定义。
     this.properties = {
