@@ -12,7 +12,6 @@
 
 .row, [row] {
   box-sizing: border-box;
-  flex: 0 1 auto;
   display: flex;
   flex-flow: row wrap;
   box-sizing: border-box;

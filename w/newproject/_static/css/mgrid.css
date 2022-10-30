@@ -1,21 +1,21 @@
-.fullbox, [fullbox] {
+.fullbox, [fullbox], :root ::part(fullbox) {
   margin: 0 auto;
-  padding: 0 0.35rem;
-  box-sizing: border-box;
+  padding: 0 0.2rem;
 }
 
-.page-box, .container, [page-box] {
+.page-box, .container, [page-box], :root ::part(container) {
   margin: 0 auto;
   padding: 0 0.68rem;
-  box-sizing: border-box;
 }
 
 .row, [row], :root ::part(row) {
   box-sizing: border-box;
-  flex: 0 1 auto;
   display: flex;
   flex-flow: row wrap;
-  box-sizing: border-box;
+}
+
+.flex-item, [flex-item] {
+  flex: 0 1 auto;
 }
 
 .row-nowrap, [row-nowrap],:root ::part(.row-nowrap) {
@@ -30,7 +30,6 @@
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   flex: 1;
-  box-sizing: border-box;
 }
 
 .c-1, [c-1], :root ::part(c-1) {
@@ -81,7 +80,7 @@
   width: 100%;
 }
 
-@media only screen and (max-width: 768px){
+@media only screen and (max-width: 750px){
   .hide-for-small, [hide-for-small], :root ::part(hide-for-small) {
     visibility: hidden;
     display: none;
@@ -137,7 +136,7 @@
 
 }
 
-@media only screen and (min-width:768.5px) and (max-width: 1200px){
+@media only screen and (min-width:751px) and (max-width: 1200px){
   .show-small-only, [show-small-only], :root ::part(show-small-only) {
     visibility: hidden;
     display: none;
@@ -198,7 +197,7 @@
 
 }
 
-@media only screen and (min-width: 1200.5px) {
+@media only screen and (min-width: 1201px) {
   .show-small-only, [show-small-only], :root ::part(show-small-only) {
     visibility: hidden;
     display: none;
