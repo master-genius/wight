@@ -1439,17 +1439,17 @@ wapp.prototype.build = async function (appdir, appname = '') {
 
 wapp.prototype.newPage = function (name, pagedir) {
   
-  let html = `class page {
+  let html = `'use strict';\n\nclass page {
 
   constructor() {
 
   }
 
-  onload(ctx) {
+  async onload(ctx) {
   
   }
 
-  onshow(ctx) {
+  async onshow(ctx) {
 
   }
 
