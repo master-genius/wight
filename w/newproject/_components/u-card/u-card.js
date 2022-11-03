@@ -14,7 +14,7 @@ class UCard extends Component {
 
   //在render之前执行，此时已经创建好shadow DOM。
   init () {
-
+    this.users = w.share.userList || [];
   }
 
   //返回字符串或DOM节点。
@@ -25,7 +25,17 @@ class UCard extends Component {
 
   //渲染完成后执行
   afterRender () {
-    
+    this.view({
+      users: this.users
+    });
+  }
+
+  renderUser (t) {
+    let u = t.data;
+    return `<div row card>
+          <div sm-12 md-6 lg-3>Name: ${u.name}</div>
+          <div sm-12 md-6 lg-3>Role: ${u.role}</div>
+      </div>`;
   }
 
   onload () {

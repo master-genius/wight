@@ -12,7 +12,7 @@ await new Promise((rv) => {
 
   setTimeout(() => {
     rv()
-  }, 600);
+  }, 500);
 
 })
 

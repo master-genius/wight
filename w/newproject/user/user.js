@@ -1,60 +1,62 @@
-w.share.userlist = [
+'use strict';
+
+//设置共享数据。
+w.share.userList = [
   {
-    id : 'u_001',
-    level : 1,
-    name : '两只小蜜蜂'
-  },
-  {
-    id : 'u_002',
-    level : 3,
-    name : '白日依山近'
-  },
-  {
-    id : 'u_003',
-    level : 5,
-    name : '千里共婵娟'
+    id: 'a001',
+    name: '两只小蜜蜂',
+    role: 'admin'
   },
 
   {
-    id : 'u_004',
-    level : 10,
-    name : '百万雄师过大江'
+    id: 'a002',
+    name: '胡子弯弯长睫毛',
+    role: 'user'
   },
+
   {
-    id : 'u_005',
-    level : 12,
-    name : '那些钱是我的'
+    id: 'a003',
+    name: '(null !== false) is true',
+    role: 'user'
   }
+
 ]
 
-exports.user = new function () {
+class page {
 
-  this.onload = async function (c) {
+  constructor () {
+
+  }
+
+  async onload(c) {
+    //显示加载信息，true表示背景透明。
     acover('<div style="text-align:center;">loading</div>', true);
     await _import('/static/module/u-card.js').then(m => { console.log(m); })
     setTimeout(() => {
       uncover();
     }, 500);
-  };
+  }
 
-  this.onshow = function (c) {
+  async onshow(c) {
 
-  };
+  }
 
-  this.onhide = function () {
+  onhide() {
 
-  };
+  }
 
-  this.onunload = function () {
+  onunload() {
 
-  };
+  }
 
-  this.onbottom = function () {
+  onbottom() {
 
-  };
+  }
 
-  this.onscroll = function () {
+  onscroll() {
 
-  };
+  }
 
-};
+}
+
+definePage(page);

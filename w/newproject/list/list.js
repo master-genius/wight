@@ -1,3 +1,7 @@
+/**
+ * 这种定义页面的方式是早期的形式，但是依旧被支持。
+ * 新创建的页面已经改为class的形式。
+ */
 exports.list = new function () {
   this.data = {
 
