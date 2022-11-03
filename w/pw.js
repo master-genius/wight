@@ -848,7 +848,8 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
     await this.checkCode(pagefile, ctext, {async: this.config.asyncPage});
 
     this.pagesCode += `;(${this.config.asyncPage ? 'async ' : ''}`
-      + `function(exports){${ctext};exports.${pagename}.orgHTML=\`${htext}\`;})(w.pages);`;
+      + `function(definePage,exports){${ctext};exports.${pagename}.orgHTML=\`${htext}\`;})`
+      + `(w.__bindpage__('${pagename}'),w.pages);`;
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');
     delayOutError('有错误或不存在，请检查', pagefile);
@@ -1438,41 +1439,45 @@ wapp.prototype.build = async function (appdir, appname = '') {
 
 wapp.prototype.newPage = function (name, pagedir) {
   
-  let html = `exports.${name} = new function () {
+  let html = `class page {
 
-  this.onload = function (c) {
+  constructor() {
+
+  }
+
+  onload(ctx) {
   
-  };
+  }
 
-  this.onshow = function (c) {
+  onshow(ctx) {
 
-  };
+  }
 
-  this.onhide = function () {
+  onhide() {
 
-  };
+  }
 
-  this.onunload = function () {
+  onunload () {
 
-  };
+  }
 
-  this.onbottom = function () {
+  onbottom() {
 
-  };
+  }
 
-  this.onscroll = function (scrollTop, clientHeight, scrollHeight) {
+  onscroll(scrollTop, clientHeight, scrollHeight) {
 
-  };
+  }
 
-  this.ontop = function () {
+  ontop() {
 
-  };
+  }
 
-  this.onresize = function () {
+  onresize() {
 
-  };
+  }
 
-};`;
+}\n\ndefinePage(page);\n`;
 
   let pdir = `${pagedir}/${name}/`;
   let pagefile = `${pagedir}/${name}/${name}.js`;

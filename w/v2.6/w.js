@@ -2468,6 +2468,29 @@ w.loadScript = async function (src, cname = '') {
 
 };
 
+Object.defineProperty(w, '__bindpage__', {
+  enumerable: false,
+  writable: false,
+  configurable: false,
+  value: (pname) => {
+    return (obj) => {
+      if (typeof obj === 'function') {
+        try {
+          if (obj.prototype) { w.pages[pname] = new obj(); }
+          else { w.pages[pname] = obj(); }
+        } catch (err) {w.alertError(err.message);}
+      } else if (typeof obj === 'object') {
+        w.pages[pname] = obj;
+      } else {
+        w.pages[pname] = {};
+        setTimeout(() => {
+          w.alertError(`${pname} 页面初始化有误，不是合法的object也不是函数。`);
+        }, 1500);
+      }
+    }
+  }
+});
+
 w.__comps_loop__ = {};
 
 class Component extends HTMLElement {
