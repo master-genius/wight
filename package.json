@@ -19,8 +19,8 @@
     "terser": "^5.15.1",
     "titbit": "^23.1.6",
     "titbit-httpc": "^2.0.3",
-    "titbit-loader": "^22.2.2",
+    "titbit-loader": "^22.4.1",
     "titbit-token": "^2.1.0",
-    "titbit-toolkit": "^3.3.5"
+    "titbit-toolkit": "^3.3.6"
   }
 }
