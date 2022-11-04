@@ -23,7 +23,7 @@
 }
 
 .w-prompt-top {
-  animation: -w-prompt-show-top 0.085s 1;
+  animation: -w-prompt-show-top 0.09s 1;
 }
 
 @keyframes -w-common-slide-show {
@@ -59,15 +59,15 @@
 }
 
 @keyframes -w-prompt-show-bottom {
-  0% { bottom: -10%; }
-  50% { bottom: 1%; }
-  100% { bottom: 5%; }
+  0% { bottom: -10%; overflow-y: hidden;}
+  50% { bottom: 1%; overflow-y: hidden;}
+  100% { bottom: 5%; overflow-y: auto;}
 }
 
 @keyframes -w-prompt-show-top {
-  0% { top: 0%; min-height: 23%; max-height: 69%;}
+  0% { top: 0%; min-height: 25%; max-height: 70%;overflow-y: hidden;}
   
-  50% { top: 5%; min-height: 25%; max-height: 72%;}
+  50% { top: 5%; min-height: 25%; max-height: 72%;overflow-y: hidden;}
   
-  100% { top: 10%; min-height: 28%; max-height: 75%;}
+  100% { top: 10%; min-height: 28%; max-height: 75%;overflow-y: auto;}
 }
