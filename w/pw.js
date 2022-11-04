@@ -291,7 +291,7 @@ let wapp = function (options = {}) {
         
         function initPages () {
           for (let p in w.pages) {
-            w.pages[p].view = function (data,options={}) {return w.view(p,data,options);};
+            w.pages[p].view = function (data) {return w.view(p,data);};
             w.pages[p].render = function (htext) {return w.fmtHTML(p, htext);};
             w.pages[p].setScroll = function(scr) {
               if (scr < 0) { w.pages[p].__dom__.scrollTop += scr; }
