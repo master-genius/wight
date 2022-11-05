@@ -222,6 +222,7 @@ let wapp = function (options = {}) {
           w.__title__ = '${this.config.title}';
           w.curTitle = '${this.config.title}';
           w.debug = ${this.config.debug ? 'true' : 'false'};
+          w.dev = ${this.config.test ? 'true' : 'false'};
 
           w.tabs.list = ${JSON.stringify(this.config.tabs)};
           w.tabs.pages = ${JSON.stringify(this.config.tabsPages)};
@@ -539,8 +540,8 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
           this.config[k] = cfg[k];
       }
     }
-    if (cfg.testHost && this.config.test) {
-      this.config.host = cfg.testHost;
+    if ((cfg.testHost || cfg.devHost) && this.config.test) {
+      this.config.host = cfg.testHost || cfg.devHost;
     }
   } catch (err) {
     console.error(err.message);

@@ -91,7 +91,7 @@ if (process.argv.length > 2) {
     _debug_mode = true
   }
 
-  if (process.argv.indexOf('--test') > 0) {
+  if (process.argv.indexOf('--test') > 0 || process.argv.indexOf('--dev') > 0) {
     _test_mode = true
     app.config.debug = true
     app.config.globalLog = true
