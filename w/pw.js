@@ -205,231 +205,231 @@ let wapp = function (options = {}) {
     }
 
     return `<!DOCTYPE html><html>
-      <head>
-        <title id="app-title">${this.config.title}</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0,user-scalable=no">
-        ${this.iconlink}
-        ${this.manifest}
-        ${this.csstext}
-        <style>
-          ${csso.minify(this.jch.css+'\n').css}
-          ${csso.minify(this.cssCode+'\n').css}
-        </style>
-        <style>a{outline:none;text-decoration: none;}</style>
-          ${this.jstext}
-        <script>
-          ${this.jch.js}
-        </script>
-      </head>
-      <body style="overflow-x:hidden;overflow-wrap:break-word;">
-        <div>${this.templates}</div>
-        <script>
-          'use strict';
-          w.host = '${this.config.host}';
-          window.__prepath__ = w.prepath = '${this.config.prepath}';
-          w.homepage = '${this.config.pages[0]}';
-          w.__title__ = '${this.config.title}';
-          w.curTitle = '${this.config.title}';
-          w.debug = ${this.config.debug ? 'true' : 'false'};
-          w.dev = ${this.config.test ? 'true' : 'false'};
+<head>
+  <title id="app-title">${this.config.title}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0,user-scalable=no">
+  ${this.iconlink}
+  ${this.manifest}
+  ${this.csstext}
+  <style>
+    ${csso.minify(this.jch.css+'\n').css}
+    ${csso.minify(this.cssCode+'\n').css}
+  </style>
+  <style>a{outline:none;text-decoration: none;}</style>
+    ${this.jstext}
+  <script>
+    ${this.jch.js}
+  </script>
+</head>
+<body style="overflow-x:hidden;overflow-wrap:break-word;">
+  <div>${this.templates}</div>
+  <script>
+    'use strict';
+    w.host = '${this.config.host}';
+    window.__prepath__ = w.prepath = '${this.config.prepath}';
+    w.homepage = '${this.config.pages[0]}';
+    w.__title__ = '${this.config.title}';
+    w.curTitle = '${this.config.title}';
+    w.debug = ${this.config.debug ? 'true' : 'false'};
+    w.dev = ${this.config.test ? 'true' : 'false'};
 
-          w.tabs.list = ${JSON.stringify(this.config.tabs)};
-          w.tabs.pages = ${JSON.stringify(this.config.tabsPages)};
-          w.tabs.pageIndex = ${JSON.stringify(this.config.tabsPageIndex)};
-          w.tabs.background = '${this.config.tabsBackground}';
-          w.tabs.selectedBackground = '${this.config.tabsSelectedBackground}';
-          
-          window.alert = w.alert.bind(w);
-          window.unalert = w.unalert.bind(w);
-          window.alertError = w.alertError.bind(w);
-          window.notify = w.notify.bind(w);
-          window.notice = w.notice.bind(w);
-          window.notifyError = w.notifyError.bind(w);
-          window.prompt = w.prompt.bind(w);
-          window.unprompt = w.unprompt.bind(w);
-          window.notifyTop = w.notifyTop.bind(w);
-          window.notifyLight = w.notifyLight.bind(w);
-          window.notifyTopError = w.notifyTopError.bind(w);
-          window.notifyOnly = w.notifyOnly.bind(w);
-          window.unnotify = w.unnotify.bind(w);
-          window.promptMiddle = w.promptMiddle.bind(w);
-          window.promptTop = w.promptTop.bind(w);
-          window.promptGlass = w.promptGlass.bind(w);
-          window.promptTopGlass = w.promptTopGlass.bind(w);
-          window.promptTopDark = w.promptTopDark.bind(w);
-          window.promptMiddleGlass = w.promptMiddleGlass.bind(w);
-          window.promptDark = w.promptDark.bind(w);
-          window.promptMiddleDark = w.promptMiddleDark.bind(w);
-          window.acover = w.acover.bind(w);
-          window.coverShadow = w.coverShadow.bind(w);
-          window.uncover = w.uncover.bind(w);
-          window.uncoverShadow = w.uncoverShadow.bind(w);
-          window.setCoverText = w.setCoverText.bind(w);
-        </script>
-        <script>'use strict';${this.extends}</script>
-        <script>'use strict';${this.components}</script>
-        <script>'use strict';${this.hooksText}</script>
-        <script>'use strict';${this.pagesCode}</script>
-        <script>'use strict';${this.appInitCode}</script>
-        <script>
-        'use strict';
+    w.tabs.list = ${JSON.stringify(this.config.tabs)};
+    w.tabs.pages = ${JSON.stringify(this.config.tabsPages)};
+    w.tabs.pageIndex = ${JSON.stringify(this.config.tabsPageIndex)};
+    w.tabs.background = '${this.config.tabsBackground}';
+    w.tabs.selectedBackground = '${this.config.tabsSelectedBackground}';
+    
+    window.alert = w.alert.bind(w);
+    window.unalert = w.unalert.bind(w);
+    window.alertError = w.alertError.bind(w);
+    window.notify = w.notify.bind(w);
+    window.notice = w.notice.bind(w);
+    window.notifyError = w.notifyError.bind(w);
+    window.prompt = w.prompt.bind(w);
+    window.unprompt = w.unprompt.bind(w);
+    window.notifyTop = w.notifyTop.bind(w);
+    window.notifyLight = w.notifyLight.bind(w);
+    window.notifyTopError = w.notifyTopError.bind(w);
+    window.notifyOnly = w.notifyOnly.bind(w);
+    window.unnotify = w.unnotify.bind(w);
+    window.promptMiddle = w.promptMiddle.bind(w);
+    window.promptTop = w.promptTop.bind(w);
+    window.promptGlass = w.promptGlass.bind(w);
+    window.promptTopGlass = w.promptTopGlass.bind(w);
+    window.promptTopDark = w.promptTopDark.bind(w);
+    window.promptMiddleGlass = w.promptMiddleGlass.bind(w);
+    window.promptDark = w.promptDark.bind(w);
+    window.promptMiddleDark = w.promptMiddleDark.bind(w);
+    window.acover = w.acover.bind(w);
+    window.coverShadow = w.coverShadow.bind(w);
+    window.uncover = w.uncover.bind(w);
+    window.uncoverShadow = w.uncoverShadow.bind(w);
+    window.setCoverText = w.setCoverText.bind(w);
+  </script>
+  <script>'use strict';${this.extends}</script>
+  <script>'use strict';${this.components}</script>
+  <script>'use strict';${this.hooksText}</script>
+  <script>'use strict';${this.pagesCode}</script>
+  <script>'use strict';${this.appInitCode}</script>
+  <script>
+  'use strict';
 
-        window.onload = async function () {
-          let dms = [
-            'pgcdom','coverdom','notifydom','alertdom','alertdom1', 'slidedom', 'alertcoverdom',
-            'alertcoverdom1', 'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
-          ];
+  window.onload = async function () {
+    let dms = [
+      'pgcdom','coverdom','notifydom','alertdom','alertdom1', 'slidedom', 'alertcoverdom',
+      'alertcoverdom1', 'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
+    ];
 
-          for (let i=0; i<dms.length; i++) {
-            w[ dms[i] ] = document.body.insertBefore(
-              document.createElement('div'),
-              document.body.firstChild
-            );
-          }
+    for (let i=0; i<dms.length; i++) {
+      w[ dms[i] ] = document.body.insertBefore(
+        document.createElement('div'),
+        document.body.firstChild
+      );
+    }
 
-          ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(() => {rv();}, 10);});' : ''}
+    ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(() => {rv();}, 10);});' : ''}
 
-          w.initPage();
-          initPages();
+    w.initPage();
+    initPages();
 
-          if (w.tabs.list.length > 0) {
-            w.tabsmenudom.className = 'w-tabbar-row-x';
-            w.tabsmenudom.background = '${this.config.tabsBackground}';
-            w.tabsmenudom.innerHTML = \`${this.tabsHTML}\`;
-          }
-        };
-        
-        function initPages () {
-          for (let p in w.pages) {
-            w.pages[p].view = function (data) {return w.view(p,data);};
-            w.pages[p].render = function (htext) {return w.fmtHTML(p, htext);};
-            w.pages[p].setScroll = function(scr) {
-              if (scr < 0) { w.pages[p].__dom__.scrollTop += scr; }
-              else { w.pages[p].__dom__.scrollTop = scr; }
-            };
-            w.pages[p].destroy = function () {w.destroyPage(w.pages[p]);};
-            w.pages[p].query = function(qstr) {return w.pages[p].__dom__.querySelector(qstr);};
-            w.pages[p].queryAll = function(qstr) {return w.pages[p].__dom__.querySelectorAll(qstr);};
-            w.pages[p].setAttr = function (data) {w.setAttr(p,data);};
-            if (!w.pages[p].data || typeof w.pages[p].data !== 'object') {
-              w.pages[p].data = {};
-            }
-            w._make_page_bind(p);
-            w._page_style_bind(p);
-          }
+    if (w.tabs.list.length > 0) {
+      w.tabsmenudom.className = 'w-tabbar-row-x';
+      w.tabsmenudom.background = '${this.config.tabsBackground}';
+      w.tabsmenudom.innerHTML = \`${this.tabsHTML}\`;
+    }
+  };
+  
+  function initPages () {
+    for (let p in w.pages) {
+      w.pages[p].view = function (data) {return w.view(p,data);};
+      w.pages[p].render = function (htext) {return w.fmtHTML(p, htext);};
+      w.pages[p].setScroll = function(scr) {
+        if (scr < 0) { w.pages[p].__dom__.scrollTop += scr; }
+        else { w.pages[p].__dom__.scrollTop = scr; }
+      };
+      w.pages[p].destroy = function () {w.destroyPage(w.pages[p]);};
+      w.pages[p].query = function(qstr) {return w.pages[p].__dom__.querySelector(qstr);};
+      w.pages[p].queryAll = function(qstr) {return w.pages[p].__dom__.querySelectorAll(qstr);};
+      w.pages[p].setAttr = function (data) {w.setAttr(p,data);};
+      if (!w.pages[p].data || typeof w.pages[p].data !== 'object') {
+        w.pages[p].data = {};
+      }
+      w._make_page_bind(p);
+      w._page_style_bind(p);
+    }
+  }
+
+  window.onpageshow = async function() {
+    await new Promise(rv => {setTimeout(() => {rv();}, 30);});
+    if (w.init && typeof w.init === 'function') await w.init();
+    if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
+    {
+      w.switchTab(w.homepage);
+    } else {
+      w.listenHash();
+    }
+    
+  };
+
+  window.jump_page_forward = false;
+
+  document.addEventListener('click', evt => {
+    let t = evt.target;
+    let ft = evt.currentTarget;
+    if ((!t || !t.tagName || t.tagName !== 'A') && ft) {
+      t = ft;
+    }
+
+    if (t.activeElement && t.activeElement.tagName === 'A') {
+      let href = t.activeElement.href || '';
+      if (href === 'javascript:history.back();' || href === 'javascript:history.go(-1);')
+      {
+        window.jump_page_forward = -1;
+        return;
+      }
+    }
+  
+    let url = '';
+    if (t && t.tagName && t.tagName === 'A') {
+      url = t.href;
+    } else if (t.documentURI) {
+      url = t.documentURI;
+    }
+
+    if (url) {
+      let cur_url = location.protocol + '/'+'/' + location.host + location.pathname;
+      if (url.indexOf(cur_url) === 0 && url.indexOf('#') > 0) {
+        window.jump_page_forward = true;
+      }
+    }
+  });
+
+  window.onhashchange = async function(e) {
+    if (w.hashchange && typeof w.hashchange === 'function') {
+      if (w.hashchange(e) === false) {
+        return;
+      }
+    }
+
+    await new Promise((rv, rj) => { setTimeout( () => { rv(); }, 15); });
+
+    let parsehash = (h) => {
+      let ind = h.indexOf('#');
+      if (ind < 0) return '#';
+      return h.substring(ind);
+    };
+    
+    let hashstr = parsehash(e.oldURL);
+    let new_hashstr = parsehash(e.newURL);
+
+    if (w.historyList.length > 95) {
+      for (let i = 0; i < 50; i++) {
+        w.historyList.shift();
+      }
+      w.historyList.unshift('#');
+    }
+
+    let ind = w.historyList.indexOf(hashstr);
+
+    let op = '';
+    if (w.historyLength < history.length || window.jump_page_forward === true) {
+      op = 'forward';
+      window.jump_page_forward = false;
+    } else {
+      
+      if (ind > 1) {
+        if (w.historyList[ind-1] === new_hashstr) {
+          op = 'back';
+        } else {
+          op = 'forward';
         }
+      } else {
+        op = 'back';
+      }
 
-        window.onpageshow = async function() {
-          await new Promise(rv => {setTimeout(() => {rv();}, 30);});
-          if (w.init && typeof w.init === 'function') await w.init();
-          if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
-          {
-            w.switchTab(w.homepage);
-          } else {
-            w.listenHash();
-          }
-          
-        };
-
+      if (window.jump_page_forward === -1) {
         window.jump_page_forward = false;
+        op = 'back';
+      }
 
-        document.addEventListener('click', evt => {
-          let t = evt.target;
-          let ft = evt.currentTarget;
-          if ((!t || !t.tagName || t.tagName !== 'A') && ft) {
-            t = ft;
-          }
+    }
 
-          if (t.activeElement && t.activeElement.tagName === 'A') {
-            let href = t.activeElement.href || '';
-            if (href === 'javascript:history.back();' || href === 'javascript:history.go(-1);')
-            {
-              window.jump_page_forward = -1;
-              return;
-            }
-          }
-        
-          let url = '';
-          if (t && t.tagName && t.tagName === 'A') {
-            url = t.href;
-          } else if (t.documentURI) {
-            url = t.documentURI;
-          }
+    w.historyList.push(new_hashstr);
+    w.historyLength = history.length;
 
-          if (url) {
-            let cur_url = location.protocol + '/'+'/' + location.host + location.pathname;
-            if (url.indexOf(cur_url) === 0 && url.indexOf('#') > 0) {
-              window.jump_page_forward = true;
-            }
-          }
-        });
+    w.listenHash(op);
+  };
 
-        window.onhashchange = async function(e) {
-          if (w.hashchange && typeof w.hashchange === 'function') {
-            if (w.hashchange(e) === false) {
-              return;
-            }
-          }
-
-          await new Promise((rv, rj) => { setTimeout( () => { rv(); }, 15); });
-
-          let parsehash = (h) => {
-            let ind = h.indexOf('#');
-            if (ind < 0) return '#';
-            return h.substring(ind);
-          };
-          
-          let hashstr = parsehash(e.oldURL);
-          let new_hashstr = parsehash(e.newURL);
-
-          if (w.historyList.length > 95) {
-            for (let i = 0; i < 50; i++) {
-              w.historyList.shift();
-            }
-            w.historyList.unshift('#');
-          }
-
-          let ind = w.historyList.indexOf(hashstr);
-
-          let op = '';
-          if (w.historyLength < history.length || window.jump_page_forward === true) {
-            op = 'forward';
-            window.jump_page_forward = false;
-          } else {
-            
-            if (ind > 1) {
-              if (w.historyList[ind-1] === new_hashstr) {
-                op = 'back';
-              } else {
-                op = 'forward';
-              }
-            } else {
-              op = 'back';
-            }
-
-            if (window.jump_page_forward === -1) {
-              window.jump_page_forward = false;
-              op = 'back';
-            }
-
-          }
-
-          w.historyList.push(new_hashstr);
-          w.historyLength = history.length;
-
-          w.listenHash(op);
-        };
-
-        window.onscroll = function (){w.events.scroll();};
-        window.onresize = function (){w.events.resize();};
-        ${closePromptText}
-        ;(()=>{ w.__components_css__=${JSON.stringify(this.config.componentCss)};w.__css_code_map__=${this.compsCssCode}; })();
-        </script>
-        ${this.sseCode}
-        ${this.jsbottom}
-      </body>
-    </html>`;
+  window.onscroll = function (){w.events.scroll();};
+  window.onresize = function (){w.events.resize();};
+  ${closePromptText}
+  ;(()=>{ w.__components_css__=${JSON.stringify(this.config.componentCss)};w.__css_code_map__=${this.compsCssCode}; })();
+  </script>
+  ${this.sseCode}
+  ${this.jsbottom}
+</body>
+</html>`;
   }
   
 };
