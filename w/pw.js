@@ -25,6 +25,16 @@ function delayOutError (err, info, delay = 1280) {
   }, delay);
 }
 
+function simpleComporessHTML (html) {
+  return html.replace(/\/\*(.|[\r\n])*?\*\//mg, '')
+            .replace(/>[\s]+/g, '>')
+            .replace(/[\s]+</g, '<')
+            .replace(/\}[\s]+/g, '}')
+            .replace(/\{[\s]+/g, '{')
+            .replace(/;[\r\n][\s]+/g, ';')
+            //.replace(/>[\s]+</g, '><')
+}
+
 /**
  * 要根据pages记录的页面去指定的目录中加载页面，并生成一些初始化的代码。
  */
@@ -832,6 +842,7 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
   try {
     fs.accessSync(htmlfile);
     htext = fs.readFileSync(htmlfile, {encoding: 'utf8'});
+    htext = simpleComporessHTML(htext);
     htext = this.fmtPageHTML(htext, pagename);
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');
@@ -1154,7 +1165,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           //tempdata = this.replaceImportCss(tempdata, `${cdir}/${names[i]}`);
 
           //使用div包装模板。
-          this.templates += `<div data-id="${cex.name}">${tempdata}</div>`;
+          this.templates += `<div data-id="${cex.name}">${simpleComporessHTML(tempdata)}</div>`;
         }
       } catch (err) {
       
