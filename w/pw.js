@@ -512,6 +512,8 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
         case 'animation':
           if (cfg[k] === true) {
             this.getCssCode('w-animation.css', true);
+          } else if (typeof cfg[k] === 'string' && cfg[k]) {
+            this.getCssCode(cfg[k], true);
           }
           break;
 
@@ -520,6 +522,8 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
             this.getCssCode('w-page-animation.css', true);
           } else if (cfg[k] === 'dropdown') {
             this.getCssCode('w-page-animation-dropdown.css', true);
+          } else if (typeof cfg[k] === 'string' && cfg[k]) {
+            this.getCssCode(cfg[k], true);
           }
           break;
 
