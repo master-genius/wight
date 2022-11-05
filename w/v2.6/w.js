@@ -1,6 +1,6 @@
 'use strict';
 
-class __htmlstate {
+class HtmlState_ {
 
   constructor () {
     this.STATE = {
@@ -43,6 +43,10 @@ class __htmlstate {
     this.data = ''
 
     this.is_script = false
+
+    this.script_reg = new RegExp('<SCRIPT>', 'ig')
+    this.script_end_reg = new RegExp('<\/SCRIPT>', 'ig')
+    this.html_comment_reg = new RegExp('<!--(.|[\r\n])*?-->','mg')
   }
 
   diffCloseTag () {
@@ -357,9 +361,9 @@ class __htmlstate {
       return false;
     }
 
-    this.data = data.replace(new RegExp('<SCRIPT>', 'ig'), '<script>')
-                    .replace(new RegExp('<\/SCRIPT>', 'ig'), '<\/script>')
-                    .replace(/<!--(.|[\r\n])*?-->/mg, '');
+    this.data = data.replace(this.script_reg, '<script>')
+                    .replace(this.script_end_reg, '<\/script>')
+                    .replace(this.html_comment_reg, '');
 
     if (this.data.length === 0) {
       return true
@@ -418,7 +422,6 @@ class __htmlstate {
     }
 
     return true
-
   }
 
 }
@@ -1156,7 +1159,7 @@ const w = new function () {
 
 };
 
-w._htmlparse = new __htmlstate();
+w._htmlparse = new HtmlState_();
 
 w._htmlcheck = function (data) {
   if (!w._htmlparse.parse(data)) {
@@ -1164,10 +1167,6 @@ w._htmlcheck = function (data) {
     return false;
   }
   return true;
-};
-
-w.getCoverDom = () => {
-  return w.alertcoverdom;
 };
 
 w.setCoverText = (text = '', style = '') => {
