@@ -19,7 +19,7 @@
     "terser": "^5.15.1",
     "titbit": "^23.1.8",
     "titbit-httpc": "^2.0.3",
-    "titbit-loader": "^22.4.2",
+    "titbit-loader": "^22.4.5",
     "titbit-token": "^2.1.1",
     "titbit-toolkit": "^3.3.6"
   }
