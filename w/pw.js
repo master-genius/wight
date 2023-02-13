@@ -1473,7 +1473,7 @@ wapp.prototype.newPage = function (name, pagedir) {
 
   }
 
-  onunload () {
+  onunload() {
 
   }
 
@@ -1576,7 +1576,7 @@ function renderCompsClass (cname) {
   return `'use strict';\n
 class ${className} extends Component {
 
-  constructor () {
+  constructor() {
     super(); //必须写在最开始。
 
     //通过this.attrs访问所有属性。this.attributes是浏览器原始提供的属性对象。
@@ -1601,27 +1601,27 @@ class ${className} extends Component {
   }
 
   //在render之前执行，此时已经创建好shadow DOM。
-  init () {
+  init() {
 
   }
 
   //返回字符串或DOM节点。
-  render () {
+  render() {
     // 也可以返回字符串 return '${cname}组件';
     return this.plate();
   }
 
   //渲染完成后执行
-  afterRender () {
+  afterRender() {
     
   }
 
-  onload () {
+  onload() {
 
   }
 
   //从DOM树中移除时触发。
-  onremove () {
+  onremove() {
 
   }
 
@@ -1630,7 +1630,7 @@ class ${className} extends Component {
   }
 
   //被移动到新文档时触发。
-  onadopted () {
+  onadopted() {
 
   }
 
