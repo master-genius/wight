@@ -1571,6 +1571,8 @@ w.view = function (pagename, data) {
       qcss = `[name=${k.substring(1)}]`;
     } else if (k[0] === '.') {
       qcss = `[class=${k.substring(1)}]`;
+    } else if (k[0] === ':') {
+      qcss = `[data-bind=${k.substring(1)}]`;
     } else if (k[0] === '[') {
       qcss = k;
     }
@@ -1804,7 +1806,7 @@ w._page_style_bind = function (pname) {
 
       let styleData = {}
       
-      styleData[`:${k}`] = {
+      styleData[k] = {
         style: data
       };
 
