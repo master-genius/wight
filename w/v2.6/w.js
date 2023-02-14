@@ -866,14 +866,17 @@ const w = new function () {
     if (hsp.length > 1) {
       qs = hsp[1];
     }
-    let qsp = qs.split('&');
-    let tmp = [];
-    for (let i=0; i<qsp.length; i++) {
-      tmp = qsp[i].split('=');
-      if (tmp.length < 1) {
-        tmp.push('');
+
+    if (qs) {
+      let qsp = qs.split('&');
+      let tmp = [];
+      for (let i=0; i<qsp.length; i++) {
+        tmp = qsp[i].split('=');
+        if (tmp.length < 1) {
+          tmp.push('');
+        }
+        url.query[tmp[0]] = tmp[1];
       }
-      url.query[tmp[0]] = tmp[1];
     }
     
     return url;
@@ -1907,6 +1910,21 @@ w.parseform = function (fd) {
 //抛出错误也禁止执行下一步。
 w.hooks = [];
 w.hookFunc = {};
+
+w.addHook = function (callback, name='') {
+  if (typeof callback !== 'function') {
+    return w.notifyError(`${callback}不是function`);
+  }
+
+  if (!name) name = (Math.random().toString(16).substring(2));
+
+  if (w.hookFunc[name] === undefined) {
+    w.hookFunc[name] = callback;
+    w.hooks.push(name);
+  } else {
+    w.hookFunc[name] = callback;
+  }
+};
 
 w.hashchange = null;
 
