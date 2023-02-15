@@ -67,6 +67,7 @@ let wapp = function (options = {}) {
   this.forceCompress = false;
 
   this.config = {
+    lang: '',
     manifest: '',
     test : false,
     debug: false,
@@ -204,7 +205,7 @@ let wapp = function (options = {}) {
       closePromptText = 'window.onunload = function () {w.destroyAllPage();};';
     }
 
-    return `<!DOCTYPE html><html>
+    return `<!DOCTYPE html><html${this.config.lang}>
 <head>
   <title id="app-title">${this.config.title}</title>
   <meta charset="utf-8">
@@ -548,6 +549,12 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
         case 'componentCss':
           if (typeof cfg[k] === 'object')
             this.config[k] = cfg[k];
+          break;
+
+        case 'lang':
+          if (cfg[k] && typeof cfg[k] === 'string') {
+            this.config.lang = ` lang="${cfg[k].replace(/[\'\"]/g,'').trim()}"`;
+          }
           break;
 
         default:
