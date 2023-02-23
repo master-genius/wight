@@ -1909,31 +1909,114 @@ w.parseform = function (fd) {
 //钩子是一个对象，其中要包括hook函数（async function），执行此函数时会
 //把请求上下文传递过去,如果函数返回false或null则表示禁止执行下一步，
 //抛出错误也禁止执行下一步。
-w.hooks = [];
-w.hookFunc = {};
+Object.defineProperties(w, {
+  hooks: {
+    value: [],
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  },
 
+  hookFunc: {
+    value: {},
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  }
+});
+
+//w.hooks = [];
+//w.hookFunc = {};
+
+/**
+ * 
+ * @param {function} callback 
+ * @param {string|object} name 
+ * @returns 
+ */
 w.addHook = function (callback, name='') {
   if (typeof callback !== 'function') {
     return w.notifyError(`${callback}不是function`);
   }
 
-  if (!name) name = (Math.random().toString(16).substring(2));
+  let opts = {
+    name: name,
+    page: null,
+    exclude: null,
+    mode: 'always',
+    count: 0
+  };
+
+  if (!name) opts.name = (Math.random().toString(16).substring(2));
+
+  if (typeof name === 'object') {
+    if (name.page) {
+      if (typeof name.page === 'string') {
+        name.page = [name.page];
+      }
+      if (Array.isArray(name.page)) opts.page = [...name.page];
+    }
+
+    if (name.exclude) {
+      if (typeof name.exclude === 'string') {
+        name.exclude = [name.exclude];
+      }
+
+      if (Array.isArray(name.exclude)) opts.exclude = [...name.exclude];
+    }
+
+    if (name.mode && ['always', 'once'].indexOf(name.mode) >= 0) {
+      opts.mode = name.mode;
+    }
+  }
 
   if (w.hookFunc[name] === undefined) {
-    w.hookFunc[name] = callback;
+    w.hookFunc[name] = {func: callback, options: opts};
     w.hooks.push(name);
   } else {
-    w.hookFunc[name] = callback;
+    w.hookFunc[name] = {func: callback, options: opts};
   }
+
+  return w;
+};
+
+w.removeHook = function (name) {
+  let ind = w.hooks.indexOf(name);
+  if (ind < 0) return false;
+  delete w.hookFunc[name];
+  w.hooks.splice(ind, 1);
+  return true;
+};
+
+w.resetHookCount = function (name) {
+  let ind = w.hooks.indexOf(name);
+  if (ind < 0 || !w.hookFunc[name]) return false;
+  w.hookFunc[name].options.count = 0;
 };
 
 w.hashchange = null;
 
 w.runHooks = async function (ctx) {
   try {
+    let cname = ctx.path;
+    let ch;
     for (let h of w.hooks) {
-      if (!w.hookFunc[h] || typeof w.hookFunc[h] !== 'function') continue;
-      if (false === await w.hookFunc[h](ctx)) {
+      ch = w.hookFunc[h];
+      if (!ch || !ch.func || typeof ch.func !== 'function')
+        continue;
+      if (ch.options.exclude && ch.options.exclude.indexOf(cname) >= 0) {
+        continue;
+      }
+      if (ch.options.page && ch.options.page.indexOf(cname) < 0) {
+        continue;
+      }
+
+      if (ch.options.mode === 'once' && ch.options.count > 0) {
+        continue;
+      }
+
+      ch.options.count += 1;
+      if (false === await ch.func(ctx)) {
         return false;
       }
     }
@@ -1941,6 +2024,7 @@ w.runHooks = async function (ctx) {
     w.notify(err.message, {ntype:'error'});
     return false;
   }
+
   return true;
 };
 
