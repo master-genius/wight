@@ -1570,12 +1570,19 @@ class __htmlstate {
 }
 
 const w = new function () {
-  this.alertlog = '';
-  this.alertlogcount = 0;
+  this.alertlog = {a:[], s:[]};
   this.notifylog = '';
   this.notifylogcount = 0;
 
-  this.config = {};
+  Object.defineProperty(this, 'config', {
+    value: {},
+    writable: false,
+    enumerable: true,
+    configurable: false
+  });
+
+  this.config.notFound = '';
+
   this.host = '';
   this.prepath = '';
   this.homepage = null;
@@ -1610,22 +1617,28 @@ const w = new function () {
     this.title = this.__title__;
   };
 
-  this.ua = '';
+  this.ua = navigator.userAgent;
 
   this.isFirefox = false;
+  if (navigator.userAgent.indexOf('Firefox') > 0) {
+    this.isFirefox = true;
+  }
+
   this.alertLock = false;
 
   //replace=false, notClose=false, withCover = false
   this.alert = function (info, options = {}) {
     let domname = 'alertdom';
     let coverdomname = 'alertcoverdom';
+    let logs = w.alertlog.a;
     if (options.shadow) {
       domname = 'alertdom1';
       coverdomname = 'alertcoverdom1';
+      logs = w.alertlog.s;
     }
 
     if (w.alertLock && !options.shadow) {
-      return w[domname];
+      return false;
     }
 
     info = w.fmtHTML(w.curpagename, info);
@@ -1638,24 +1651,20 @@ const w = new function () {
     }
 
     if (w[domname]) {
-      if (!options.shadow) {
-        w.alertlogcount += 1;
-
-        if (w.alertlogcount > 3) {
-          w.alertlog = '';
-          w.alertlogcount = 1;
-        }
-      }
+      ;(logs.length > 3) && (logs.pop());
 
       if (options.replace) {
-        w.alertlog = info;
+        while (logs.pop()){}
+        ;(typeof info === 'string') && info && logs.push(info);
       } else {
-        w.alertlog = `${info}<br>${w.alertlog}`;
+        ;(typeof info === 'string') && info && logs.unshift(info);
       }
 
-      let closeText = '<a href="javascript:w.unalert();" '
+      let closeText = '<div style="text-align:right;">'
+        +'<a href="javascript:w.unalert();" '
         +'style="color:#696365;font-size:105%;text-decoration:none;cursor:pointer;">'
-        +'&nbsp;X&nbsp;</a>';
+        +'&nbsp;X&nbsp;</a>'
+        +'</div>';
 
       if (options.notClose) {
         closeText = '';
@@ -1666,11 +1675,9 @@ const w = new function () {
       if (options.transparent) w[domname].className += ' w-global-alert-trans';
 
       if (typeof info === 'object') {
-        w[domname].innerHTML = `<div style="text-align:right;">`
-            +`${closeText}</div>${info.innerHTML}`;
+        w[domname].innerHTML = `${closeText}${info.innerHTML}`;
       } else {
-        w[domname].innerHTML = `<div style="text-align:right;">`
-            +`${closeText}</div><p>${w.alertlog}</p>`;
+        w[domname].innerHTML = `${closeText}${logs.join('<br>')}`;
       }
       w.initPageDomEvents(options.context || w.curpage, w[domname]);
     }
@@ -1696,10 +1703,14 @@ const w = new function () {
       cdomlist = ['alertcoverdom', 'alertcoverdom1'];
     }
 
-    if (mode !== 'shadow') {
-      this.alertLock = false;
-      w.alertlogcount = 0;
-      w.alertlog = '';
+    ;(mode !== 'shadow') && (this.alertLock = false);
+
+    if (mode === 'all' || mode === 'shadow') {
+      while(w.alertlog.s.pop()){}
+    }
+
+    if (mode === 'all' || mode === 'self') {
+      while(w.alertlog.a.pop()){}
     }
 
     for (let a of domlist) {
@@ -1746,7 +1757,7 @@ const w = new function () {
   };
 
   this.alertError = function (info, tmout = 0) {
-    info = `<span style="color:#e25223;">${info}</span>`;
+    info = `<span style="color:#e73949;">${info}</span>`;
     w.alert(info);
     if (tmout > 0) {
       setTimeout(() => {
@@ -1778,8 +1789,10 @@ const w = new function () {
   this.notifyTimer = null;
 
   this.notify = function (info, options = {}) {
-    let tmout = options.tmout !== undefined && !isNaN(options.tmout)
-                  ? options.tmout : 2500;
+    let tmout = options.timeout || options.tmout;
+
+    tmout = tmout !== undefined && !isNaN(tmout)
+                  ? tmout : 3500;
 
     let ntype = options.ntype || 'notify';
 
@@ -1800,7 +1813,7 @@ const w = new function () {
     }
 
     if (ntype.indexOf('error') >= 0) {
-      info = `<span style="color:#ea6232;font-size:95%;">${info}</span>`;
+      info = `<span style="color:#f76567;font-size:95%;">${info}</span>`;
     }
 
     let where_is = 'w-notify-bottom';
@@ -1995,14 +2008,17 @@ const w = new function () {
     if (hsp.length > 1) {
       qs = hsp[1];
     }
-    let qsp = qs.split('&');
-    let tmp = [];
-    for (let i=0; i<qsp.length; i++) {
-      tmp = qsp[i].split('=');
-      if (tmp.length < 1) {
-        tmp.push('');
+
+    if (qs) {
+      let qsp = qs.split('&');
+      let tmp = [];
+      for (let i=0; i<qsp.length; i++) {
+        tmp = qsp[i].split('=');
+        if (tmp.length < 1) {
+          tmp.push('');
+        }
+        url.query[tmp[0]] = tmp[1];
       }
-      url.query[tmp[0]] = tmp[1];
     }
     
     return url;
@@ -2288,7 +2304,7 @@ const w = new function () {
 
 };
 
-w._htmlparse = new __htmlstate();
+w._htmlparse = new HtmlState_();
 
 w._htmlcheck = function (data) {
   if (!w._htmlparse.parse(data)) {
@@ -2296,10 +2312,6 @@ w._htmlcheck = function (data) {
     return false;
   }
   return true;
-};
-
-w.getCoverDom = () => {
-  return w.alertcoverdom;
 };
 
 w.setCoverText = (text = '', style = '') => {
@@ -2358,6 +2370,25 @@ w.pageTop = function () {
 
 w.loadPageLock = false;
 
+w.handleNotFound = function () {
+  if (!w.config.notFound || typeof w.config.notFound === 'string') {
+    this.coverShadow(w.config.notFound || '<div>404: 没有此页面</div>');
+  } else {
+    if (typeof w.config.notFound === 'function') {
+      w.config.notFound();
+    } else if (typeof w.config.notFound === 'object') {
+      let obj = w.config.notFound;
+      if (obj.redirect && w.pages[obj.redirect]) {
+        w.redirect(obj.redirect);
+      } else {
+        this.coverShadow('<div>404: 没有此页面</div>');
+      }
+    }
+  }
+};
+
+w.going = null;
+
 w.loadPage = async function (R) {
   if (w.loadPageLock) {
     return;
@@ -2371,7 +2402,7 @@ w.loadPage = async function (R) {
 
   if (this.pages[route] === undefined) {
     w.loadPageLock = false;
-    this.alertError('<div>404: 没有此页面</div>', 1680);
+    this.handleNotFound();
     return ;
   }
 
@@ -2380,7 +2411,7 @@ w.loadPage = async function (R) {
   //临时的解决方案，如果没有准备好，则等待一会。
   if (this.initFlag===false) {
     await new Promise((rv,rj) => {
-      setTimeout(()=>{rv();}, 64);
+      setTimeout(()=>{rv();}, 52);
     });
   }
 
@@ -2396,6 +2427,9 @@ w.loadPage = async function (R) {
   
   c.dom = pg.__dom__;
   c.loaded = pg.loaded;
+
+  c.name = pg.__name__;
+  this.going = pg.__name__;
 
   if (false === await w.runHooks(c)) {
     w.loadPageLock = false;
@@ -2425,7 +2459,7 @@ w.loadPage = async function (R) {
   if (pg.onload && typeof pg.onload === 'function' && pg.loaded === false) {
     pg.loaded = true;
     try {
-      pg.onload(c);
+      await pg.onload(c);
     } catch (err) {
       w.notify(err.message);
     }
@@ -2433,7 +2467,7 @@ w.loadPage = async function (R) {
 
   if (pg.onshow && typeof pg.onshow === 'function') {
     try {
-      pg.onshow(c);
+      await pg.onshow(c);
     } catch (err) {
       w.notify(err.message);
     }
@@ -2485,10 +2519,18 @@ w.redirect = function (path, args = {}) {
   
   if (path[0] !== '#') path = `#${path}`;
 
-  let qrs = w.qs(args);
+  let qrs = w.qs(args.query || {});
 
-  history.replaceState({id: path}, '', `${path}${qrs.length > 0 ? '?' : ''}${qrs}`);
-  w.listenHash();
+  let startRedirect = () => {
+    history.replaceState({id: path}, '', `${path}${qrs.length > 0 ? '?' : ''}${qrs}`);
+    w.listenHash();
+  };
+
+  if (args.delay) {
+    return setTimeout(startRedirect, args.delay);
+  }
+
+  startRedirect();
 };
 
 w.fmtHTML = function (pagename, ht) {
@@ -2671,6 +2713,8 @@ w.view = function (pagename, data) {
       qcss = `[name=${k.substring(1)}]`;
     } else if (k[0] === '.') {
       qcss = `[class=${k.substring(1)}]`;
+    } else if (k[0] === ':') {
+      qcss = `[data-bind=${k.substring(1)}]`;
     } else if (k[0] === '[') {
       qcss = k;
     }
@@ -2904,7 +2948,7 @@ w._page_style_bind = function (pname) {
 
       let styleData = {}
       
-      styleData[`:${k}`] = {
+      styleData[k] = {
         style: data
       };
 
@@ -3008,16 +3052,120 @@ w.parseform = function (fd) {
 //钩子是一个对象，其中要包括hook函数（async function），执行此函数时会
 //把请求上下文传递过去,如果函数返回false或null则表示禁止执行下一步，
 //抛出错误也禁止执行下一步。
-w.hooks = [];
-w.hookFunc = {};
+Object.defineProperties(w, {
+  hooks: {
+    value: [],
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  },
+
+  hookFunc: {
+    value: {},
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  }
+});
+
+//w.hooks = [];
+//w.hookFunc = {};
+
+/**
+ * 
+ * @param {function} callback 
+ * @param {string|object} name 
+ * @returns 
+ */
+w.addHook = function (callback, name='') {
+  if (typeof callback !== 'function') {
+    return w.notifyError(`${callback}不是function`);
+  }
+
+  let opts = {
+    name: typeof name === 'string' ? name : '',
+    page: null,
+    exclude: null,
+    mode: 'always',
+    count: 0
+  };
+
+  if (typeof name === 'object') {
+    if (name.name) opts.name = name.name;
+
+    if (name.page) {
+      if (typeof name.page === 'string') {
+        name.page = [name.page];
+      }
+      if (Array.isArray(name.page)) opts.page = [...name.page];
+    }
+
+    if (name.exclude) {
+      if (typeof name.exclude === 'string') {
+        name.exclude = [name.exclude];
+      }
+
+      if (Array.isArray(name.exclude)) opts.exclude = [...name.exclude];
+    }
+
+    if (name.mode && ['always', 'once'].indexOf(name.mode) >= 0) {
+      opts.mode = name.mode;
+    }
+  }
+
+  if (!opts.name) opts.name = (Math.random().toString(16).substring(2));
+
+  if (!w.hookFunc[opts.name]) {
+    w.hookFunc[opts.name] = {func: callback, options: opts};
+    w.hooks.push(opts.name);
+  } else {
+    w.hookFunc[opts.name] = {func: callback, options: opts};
+  }
+
+  return w;
+};
+
+w.removeHook = function (name) {
+  let ind = w.hooks.indexOf(name);
+  if (ind < 0) return false;
+  delete w.hookFunc[name];
+  w.hooks.splice(ind, 1);
+  return true;
+};
+
+w.resetHookCount = function (name) {
+  let ind = w.hooks.indexOf(name);
+  if (ind < 0 || !w.hookFunc[name]) return false;
+  w.hookFunc[name].options.count = 0;
+};
 
 w.hashchange = null;
 
 w.runHooks = async function (ctx) {
   try {
+    let cname = ctx.path;
+    let ch;
     for (let h of w.hooks) {
-      if (!w.hookFunc[h] || typeof w.hookFunc[h] !== 'function') continue;
-      if (false === await w.hookFunc[h](ctx)) {
+      ch = w.hookFunc[h];
+      if (!ch || !ch.func || typeof ch.func !== 'function')
+        continue;
+      if (ch.options.exclude && ch.options.exclude.indexOf(cname) >= 0) {
+        continue;
+      }
+
+      if (ch.options.page && ch.options.page.indexOf(cname) < 0) {
+        continue;
+      }
+
+      if (ch.options.mode === 'once' && ch.options.count > 0) {
+        continue;
+      }
+
+      ch.options.count += 1;
+      ;(w.debug || w.dev)
+        &&
+      console.log('run hook function ', ch.options.name, '; current page:', cname);
+      if (false === await ch.func(ctx)) {
         return false;
       }
     }
@@ -3025,6 +3173,7 @@ w.runHooks = async function (ctx) {
     w.notify(err.message, {ntype:'error'});
     return false;
   }
+
   return true;
 };
 
@@ -3111,12 +3260,25 @@ w.switchTab = function (p) {
   this.listenHashLock = false;
 
   let nds = w.tabsmenudom.childNodes;
-  
+  let pind = 0;
   for (let i = 0; i < nds.length; i++) {
-    if (nds[i].id.indexOf(p) > 0) {
+    pind = nds[i].id.indexOf(p);
+    if (pind > 0 && nds[i].id.substring(pind) === p) {
       nds[i].style.background = w.tabs.selectedBackground;
+      if (w.tabs.list[i].selectedIcon && w.tabs.list[i].selectedIcon.length > 0) {
+        let imgdom = nds[i].querySelector('img')
+        if (imgdom) {
+          imgdom.src = imgdom.dataset.url + w.tabs.list[i].selectedIcon;
+        }
+      }
     } else {
       nds[i].style.background = w.tabs.background;
+      if (w.tabs.list[i].icon && w.tabs.list[i].icon.length > 0) {
+        let imgdom = nds[i].querySelector('img')
+        if (imgdom) {
+          imgdom.src = imgdom.dataset.url + w.tabs.list[i].icon;
+        }
+      }
     }
   }
 
@@ -3169,13 +3331,15 @@ w.naviHide = function () {
 };
 
 w._devents = [
-  'click', 'blur', 'submit', 'input', 'dblclick', 'copy', 
-  'fullscreenchange','fullscreenerror',
-  'focus', 'focusin', 'focusout', 'keyup', 'keydown', 'scroll', 'change',
-  'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
-  'touchcancel', 'touchend', 'touchmove', 'touchstart', 'select', 'wheel', 
-  'paste', 'cut', 'contextmenu', 
-  'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 'dragenter', 'drop'
+  'animationcancel', 'animationend', 'animationiteration', 'animationstart',
+  'blur', 'click', 'copy', 'cut', 'compositionend', 'compositionstart', 'compositionupdate',
+  'change', 'contextmenu', 'dblclick', 'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 
+  'dragenter', 'drop', 'error', 'fullscreenchange', 'fullscreenerror', 'focus', 'focusin',
+  'focusout', 'input', 'keyup', 'keydown', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 
+  'mouseout', 'mouseover', 'mouseup', 'pointercancel', 'pointerdown', 'pointerenter', 
+  'pointerleave', 'pointermove', 'pointerout', 'pointerover', 'pointerup', 'paste', 
+  'submit', 'scroll', 'select', 'transitioncancel', 'transitionend', 'transitionrun',
+  'transitionstart', 'touchcancel', 'touchend', 'touchmove', 'touchstart',  'wheel', 
 ];
 
 w.initDomEvent = function (pg, dom, evtname) {
@@ -3264,7 +3428,7 @@ w.eventProxy = function (evt, pg, funcname) {
     if (wind === 0) {
       return wfunc(a);
     }
-    
+
     return pg[funcname](a);
   } catch (err) {
     w.notify(err.message, 'error');
@@ -3332,8 +3496,6 @@ w.ext = new Proxy(w.__ext__, {
     else {
       console.error(`${k}: 扩展名重复，请检查。`);
     }
-
-    return true;
     
   },
 
@@ -3371,9 +3533,10 @@ window.require = async function (name) {
       if (w.__ext__[name]) return w.__ext__[name];
     }
 
-    return function () {return wproxy;};
+    throw new Error(`${name}: 没有此扩展。`);
   } catch (err) {
     console.error(err.message);
+    console.error('请检查扩展是否启用或是否存在循环引用。');
   }
 };
 
@@ -3525,9 +3688,13 @@ Object.defineProperty(w, 'share', {
   })
 });
 
-w.loadScript = async function (src) {
+w.loadScript = async function (src, cname = '') {
 
   if (!w._http_preg.test(src)) {
+    if (cname && src.indexOf('./static') === 0) {
+      src = src.replace('./static', '/component/' + cname);
+    }
+
     if (src[0] !== '/') src = `/${src}`;
 
     src = `${w.prepath}${w.prepath.length > 0 ? '/' : ''}${src}`;
@@ -3545,25 +3712,37 @@ w.loadScript = async function (src) {
     };
 
     d.onload = () => {
-      rv();
+      rv({ok: true, msg: 'success'});
     };
 
   });
 
 };
 
-class HTMLElement {
-  constructor () {
-    this.dataset = {}
-    this.contextMenu = {}
-    this.offsetHeight = 0
-    this.offsetLeft = 0
-    this.offsetTop = 0
-    this.offsetWidth = 0
-    this.style = {}
+Object.defineProperty(w, '__bindpage__', {
+  enumerable: false,
+  writable: false,
+  configurable: false,
+  value: (pname) => {
+    return (obj) => {
+      if (typeof obj === 'function') {
+        try {
+          if (obj.prototype) { w.pages[pname] = new obj(); }
+          else { w.pages[pname] = obj(); }
+        } catch (err) {w.alertError(err.message);}
+      } else if (typeof obj === 'object') {
+        w.pages[pname] = obj;
+      } else {
+        w.pages[pname] = {};
+        setTimeout(() => {
+          w.alertError(`${pname} 页面初始化有误，不是合法的object也不是函数。`);
+        }, 1500);
+      }
+    }
   }
+});
 
-}
+w.__comps_loop__ = {};
 
 class Component extends HTMLElement {
   constructor () {
@@ -3577,8 +3756,29 @@ class Component extends HTMLElement {
       writable: false,
       enumerable: true
     });
+
+    queueMicrotask(this.__queue_task_init__.bind(this));
+  }
+
+  __queue_task_init__() {
+    if (!this.properties || typeof this.properties !== 'object') this.properties = {};
+
+    let typ;
+    for (let k in this.properties) {
+      typ = typeof this.properties[k];
+      if (typ === 'string') {
+        this.properties[k] = {
+          type: this.properties[k]
+        };
+      } else if (typ !== 'object') { continue; }
+      if (this.properties[k].default !== undefined) this.attrs[k] = this.properties[k].default;
+    }
     
     for (let a of this.attributes) {
+      if (this.properties[a.name]) {
+        this.attrs[a.name] = this._propValue(this.properties[a.name], a.value);
+        continue;
+      }
       this.attrs[a.name] = a.value;
     }
 
@@ -3586,18 +3786,15 @@ class Component extends HTMLElement {
       this.init();
     }
 
-    let cname = `<${this.tagName.toLowerCase()}>`;
-
     if (this.render && typeof this.render === 'function') {
 
       let d = this.render() || '';
       if (typeof d === 'object') {
         this.shadow.appendChild(d);
-
       } else if (typeof d === 'string' && d.length > 0) {
-        if (d.indexOf(cname) >= 0) {
-          w.notifyError(`${this.tagName} 存在循环引用。`);
-          return '';
+        let st = this.checkLoopRef(d);
+        if ( st.ok === false ) {
+          return this.notifyLoopRefError(st);
         }
 
         w._htmlcheck(d) && (this.shadow.innerHTML = d);
@@ -3609,6 +3806,110 @@ class Component extends HTMLElement {
     if (this.afterRender && typeof this.afterRender === 'function') {
       this.afterRender();
     }
+  }
+
+  _propValue (obj, val) {
+    if (!obj || typeof obj !== 'object') return val;
+
+    if (!obj.type) return val;
+
+    switch (obj.type) {
+      case 'number':
+      case 'int':
+        val = parseInt(val);
+        break;
+      case 'float':
+        val = parseFloat(val);
+        break;
+
+      case 'json':
+        try {
+          val = JSON.parse(val);
+        } catch (err) {
+          val = {};
+        }
+        break;
+    }
+
+    if (typeof val !== 'object' && obj.limit !== undefined && Array.isArray(obj.limit)) {
+      if (obj.limit.indexOf(val) < 0)
+        return (obj.default !== undefined ? obj.default : obj.limit[0]);
+    } else if (typeof val === 'number') {
+      let valState = 0;
+      if (obj.min !== undefined && val < obj.min) valState = -1;
+      if (obj.max !== undefined && val > obj.max) valState = 1;
+
+      if (valState !== 0)
+        return (obj.default !== undefined ? obj.default : (valState < 0 ? obj.min : obj.max));
+    }
+
+    return val;
+  }
+
+  checkLoopRef (d) {
+    let lname = `<${this.tagName.toLowerCase()}`;
+    
+    let tagname = lname + '>';
+
+    let istart = this.outerHTML.indexOf(lname);
+    let iend = this.outerHTML.indexOf('>') + 1;
+    let outername = this.outerHTML.substring(istart, iend);
+
+    let st = {ok: true, outername, tagname};
+
+    if (typeof d === 'string') {
+      if (d.indexOf(outername) >= 0) {
+        st.ok = false;
+        return st;
+      }
+    }
+    else if (d.innerHTML.indexOf(outername) >= 0) {
+      st.ok = false;
+      return st;
+    }
+
+    let p = this.parentNode;
+
+    let localname = lname.substring(1);
+    if (!w.__comps_loop__[localname])
+      w.__comps_loop__[localname] = [];
+    
+    while (p) {
+      if (p.toString() !== '[object ShadowRoot]') {
+        return st;
+      }
+
+      w.__comps_loop__[localname].push(p.host.localName);
+
+      p = p.parentNode;
+    }
+
+    let ref_count = 1;
+
+    let loopcheck = (arr, name) => {
+      for (let a of arr) {
+        if (a === name) ref_count++;
+        if (ref_count > 2) return false;
+
+        if (w.__comps_loop__[a].length > 0) {
+          if (loopcheck(w.__comps_loop__[a], name) === false) return false;
+        }
+      }
+
+      return true;
+    };
+
+    let lr = loopcheck(w.__comps_loop__[localname], localname);
+
+    if (!lr) st.ok = false;
+
+    return st;
+  }
+
+  notifyLoopRefError (st) {
+    let outerText = st.outername.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    w.notifyError(`${this.tagName} [${outerText}]存在循环引用${st.ref ? ' &lt;--&gt; ' : ''}${st.ref || ''}`, 20000);
+    return '';
   }
 
   /**
@@ -3632,9 +3933,37 @@ class Component extends HTMLElement {
 
     if (!nd) return false;
 
-    if (nd.innerHTML.indexOf(`<${this.tagName.toLowerCase()}>`) >= 0 ) {
-      w.notifyError(`${this.tagName} 存在循环引用`);
-      return '';
+    let init_style = true;
+    if (w.__components_css__ && w.__components_css__[id]) {
+      let csslist = w.__components_css__[id];
+      if (csslist && Array.isArray(csslist) && csslist.length > 0) {
+        let sty = '';
+        let ctext= '';
+        if (nd.content.firstChild && nd.content.firstChild.id === csslist[0]) {
+          init_style = false;
+        }
+
+        if (init_style) {
+            for (let i = csslist.length - 1; i>=0; i--) {
+              if (!w.__css_code_map__ || !w.__css_code_map__[csslist[i]]) continue;
+              try {
+                sty = document.createElement('style');
+                sty.id = csslist[i];
+                //ctext = decodeURIComponent(w.__css_code_map__[csslist[i]]);
+                ctext = w.__css_code_map__[csslist[i]];
+                sty.appendChild(document.createTextNode(ctext));
+                nd.content.insertBefore(sty, nd.content.firstChild);
+              } catch (err) {
+                console.error(err);
+              }
+            }
+        }
+      }
+    }
+
+    let st = this.checkLoopRef(nd);
+    if ( st.ok === false ) {
+      return this.notifyLoopRefError(st);
     }
 
     let d = nd.content.cloneNode(true);
@@ -3766,20 +4095,31 @@ class Component extends HTMLElement {
 
   naviHide () { w.naviHide(); }
 
-  cover (info, trans = false) {
+  cover (info, options = {notClose: false, transparent: false}) {
+    let notclose = !!options.notClose;
+
+    if (!notclose) {
+      info = `<div style="text-align:right;">`
+            + `<span style="user-select:none;padding:0.15rem;text-decoration:none;cursor:pointer;" data-onclick=uncover>X</span>`
+            + `</div>${info}`;
+    }
+
     w.alert(info, {
       context: this,
       replace: true,
       notClose: true,
       withCover: true,
       shadow: true,
-      transparent: trans
+      transparent: !!options.transparent
     });
   };
 
   uncover () { w.unalert('shadow'); }
-}
 
+  loadScript (src) {
+    return w.loadScript(src, this.tagName.toLowerCase());
+  }
+}
 
 exports.window = window;
 exports.document = document;

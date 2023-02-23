@@ -2019,9 +2019,6 @@ w.runHooks = async function (ctx) {
       }
 
       ch.options.count += 1;
-      ;(w.debug || w.dev)
-        &&
-      console.log('run hook function ', ch.options.name, '; current page:', cname);
       if (false === await ch.func(ctx)) {
         return false;
       }
