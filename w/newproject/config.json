@@ -42,8 +42,6 @@
 
     "jsbottom" : [],
 
-    "hooks" : [],
-
     "extends" : [
         "token",
         "init",

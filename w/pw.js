@@ -1337,32 +1337,6 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
     this.templates = this.replaceCssUrl(this.templates);
   }
 
-  let hookData = '';
-  for (let h of this.config.hooks) {
-    try {
-      hookData = fs.readFileSync(`${pdir}/_hooks/${h}.js`,'utf8') + '\n';
-
-      hookData = this.replaceRequire(hookData);
-
-      await this.checkCode(`${pdir}/_hooks/${h}.js`, hookData, {exportsKey: 'hookFunc'});
-      
-      this.hooksText += `;w.hooks.push('${h}');(async function(exports){${hookData}})(w.hookFunc);`;
-    } catch (err) {
-      console.error(err.message);
-    }
-  }
-
-  if (this.hooksText.length > 0) {
-    if (this.config.debug === false || this.forceCompress || (this.isbuild && this.config.buildCompress)) {
-        hookData = await terser.minify(this.hooksText);
-        if (hookData.error) {
-          console.error(hookData.error);
-        } else {
-          this.hooksText = hookData.code;
-        }
-    }
-  }
-
   let makeRealSrc = (url) => {
     if ((/^http[s]?:\/\//i).test(url)) {
       return url;
@@ -1717,7 +1691,7 @@ wapp.prototype.newProject = function (project_dir) {
   }
 
   let loopcp = [
-    '_components', '_extends', '_hooks', '_static', 'home', 'user', 'test',
+    '_components', '_extends', '_static', 'home', 'user', 'test',
     '_static/css', '_static/icon', '_static/images','_static/_components',
      'list', '_components/u-card', '_components/@css',
   ];
