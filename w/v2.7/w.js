@@ -1940,16 +1940,16 @@ w.addHook = function (callback, name='') {
   }
 
   let opts = {
-    name: name,
+    name: typeof name === 'string' ? name : '',
     page: null,
     exclude: null,
     mode: 'always',
     count: 0
   };
 
-  if (!name) opts.name = (Math.random().toString(16).substring(2));
-
   if (typeof name === 'object') {
+    if (name.name) opts.name = name.name;
+
     if (name.page) {
       if (typeof name.page === 'string') {
         name.page = [name.page];
@@ -1970,11 +1970,13 @@ w.addHook = function (callback, name='') {
     }
   }
 
-  if (w.hookFunc[name] === undefined) {
-    w.hookFunc[name] = {func: callback, options: opts};
-    w.hooks.push(name);
+  if (!opts.name) opts.name = (Math.random().toString(16).substring(2));
+
+  if (!w.hookFunc[opts.name]) {
+    w.hookFunc[opts.name] = {func: callback, options: opts};
+    w.hooks.push(opts.name);
   } else {
-    w.hookFunc[name] = {func: callback, options: opts};
+    w.hookFunc[opts.name] = {func: callback, options: opts};
   }
 
   return w;
@@ -2007,6 +2009,7 @@ w.runHooks = async function (ctx) {
       if (ch.options.exclude && ch.options.exclude.indexOf(cname) >= 0) {
         continue;
       }
+
       if (ch.options.page && ch.options.page.indexOf(cname) < 0) {
         continue;
       }
@@ -2016,6 +2019,9 @@ w.runHooks = async function (ctx) {
       }
 
       ch.options.count += 1;
+      ;(w.debug || w.dev)
+        &&
+      console.log('run hook function ', ch.options.name, '; current page:', cname);
       if (false === await ch.func(ctx)) {
         return false;
       }
