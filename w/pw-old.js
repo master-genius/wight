@@ -25,6 +25,16 @@ function delayOutError (err, info, delay = 1280) {
   }, delay);
 }
 
+function simpleComporessHTML (html) {
+  return html.replace(/\/\*(.|[\r\n])*?\*\//mg, '')
+            .replace(/>[\s]+/g, '>')
+            .replace(/[\s]+</g, '<')
+            .replace(/\}[\s]+/g, '}')
+            .replace(/\{[\s]+/g, '{')
+            .replace(/;[\r\n][\s]+/g, ';')
+            //.replace(/>[\s]+</g, '><')
+}
+
 /**
  * 要根据pages记录的页面去指定的目录中加载页面，并生成一些初始化的代码。
  */
@@ -50,13 +60,14 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '2.6';
+  this.defaultVersion = '2.7';
 
-  this.version = '2.6';
+  this.version = '2.7';
 
   this.forceCompress = false;
 
   this.config = {
+    lang: '',
     manifest: '',
     test : false,
     debug: false,
@@ -76,6 +87,7 @@ let wapp = function (options = {}) {
     closePrompt: true,
     pagedir : '',
     components : [],
+    componentCss: {},
     extends: [],
     exts: [],
     iconPath: '/favicon.ico',
@@ -180,8 +192,8 @@ let wapp = function (options = {}) {
   this.iconlink = '';
   this.templates = '';
   this.sseCode = '';
-  this.libCode = '';
   this.appInitCode = '';
+  this.compsCssCode = '';
 
   this.compile = function () {
     //window.onunload = function () {return '退出？';};
@@ -193,230 +205,232 @@ let wapp = function (options = {}) {
       closePromptText = 'window.onunload = function () {w.destroyAllPage();};';
     }
 
-    return `<!DOCTYPE html><html>
-      <head>
-        <title id="app-title">${this.config.title}</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0,user-scalable=no">
-        ${this.iconlink}
-        ${this.manifest}
-        ${this.csstext}
-        <style>
-          ${csso.minify(this.jch.css+'\n').css}
-          ${csso.minify(this.cssCode+'\n').css}
-        </style>
-        <style>a{outline:none;text-decoration: none;}</style>
-          ${this.jstext}
-        <script>
-          ${this.jch.js}
-        </script>
-      </head>
-      <body style="overflow-x:hidden;overflow-wrap:break-word;">
-        <div>${this.templates}</div>
-        <script>
-          'use strict';
-          w.host = '${this.config.host}';
-          window.__prepath__ = w.prepath = '${this.config.prepath}';
-          w.homepage = '${this.config.pages[0]}';
-          w.__title__ = '${this.config.title}';
-          w.curTitle = '${this.config.title}';
-          w.debug = ${this.config.debug ? 'true' : 'false'};
+    return `<!DOCTYPE html><html${this.config.lang}>
+<head>
+  <title id="app-title">${this.config.title}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0,user-scalable=no">
+  ${this.iconlink}
+  ${this.manifest}
+  ${this.csstext}
+  <style>
+    ${csso.minify(this.jch.css+'\n').css}
+    ${csso.minify(this.cssCode+'\n').css}
+  </style>
+  <style>a{outline:none;text-decoration: none;}</style>
+    ${this.jstext}
+  <script>
+    ${this.jch.js}
+  </script>
+</head>
+<body style="overflow-x:hidden;overflow-wrap:break-word;">
+  <div>${this.templates}</div>
+  <script>
+    'use strict';
+    w.host = '${this.config.host}';
+    window.__prepath__ = w.prepath = '${this.config.prepath}';
+    w.homepage = '${this.config.pages[0]}';
+    w.__title__ = '${this.config.title}';
+    w.curTitle = '${this.config.title}';
+    w.debug = ${this.config.debug ? 'true' : 'false'};
+    w.dev = ${this.config.test ? 'true' : 'false'};
 
-          w.tabs.list = ${JSON.stringify(this.config.tabs)};
-          w.tabs.pages = ${JSON.stringify(this.config.tabsPages)};
-          w.tabs.pageIndex = ${JSON.stringify(this.config.tabsPageIndex)};
-          w.tabs.background = '${this.config.tabsBackground}';
-          w.tabs.selectedBackground = '${this.config.tabsSelectedBackground}';
-          
-          window.alert = w.alert.bind(w);
-          window.unalert = w.unalert.bind(w);
-          window.alertError = w.alertError.bind(w);
-          window.notify = w.notify.bind(w);
-          window.notice = w.notice.bind(w);
-          window.notifyError = w.notifyError.bind(w);
-          window.prompt = w.prompt.bind(w);
-          window.unprompt = w.unprompt.bind(w);
-          window.notifyTop = w.notifyTop.bind(w);
-          window.notifyLight = w.notifyLight.bind(w);
-          window.notifyTopError = w.notifyTopError.bind(w);
-          window.notifyOnly = w.notifyOnly.bind(w);
-          window.unnotify = w.unnotify.bind(w);
-          window.promptMiddle = w.promptMiddle.bind(w);
-          window.promptTop = w.promptTop.bind(w);
-          window.promptGlass = w.promptGlass.bind(w);
-          window.promptTopGlass = w.promptTopGlass.bind(w);
-          window.promptTopDark = w.promptTopDark.bind(w);
-          window.promptMiddleGlass = w.promptMiddleGlass.bind(w);
-          window.promptDark = w.promptDark.bind(w);
-          window.promptMiddleDark = w.promptMiddleDark.bind(w);
-          window.acover = w.acover.bind(w);
-          window.coverShadow = w.coverShadow.bind(w);
-          window.uncover = w.uncover.bind(w);
-          window.uncoverShadow = w.uncoverShadow.bind(w);
-          window.setCoverText = w.setCoverText.bind(w);
-        </script>
-        <script>'use strict';${this.extends}</script>
-        <script>'use strict';${this.components}</script>
-        <script>'use strict';${this.hooksText}</script>
-        <script>'use strict';${this.pagesCode}</script>
-        <script>'use strict';${this.appInitCode}</script>
-        <script>
-        'use strict';
+    w.tabs.list = ${JSON.stringify(this.config.tabs)};
+    w.tabs.pages = ${JSON.stringify(this.config.tabsPages)};
+    w.tabs.pageIndex = ${JSON.stringify(this.config.tabsPageIndex)};
+    w.tabs.background = '${this.config.tabsBackground}';
+    w.tabs.selectedBackground = '${this.config.tabsSelectedBackground}';
+    
+    window.alert = w.alert.bind(w);
+    window.unalert = w.unalert.bind(w);
+    window.alertError = w.alertError.bind(w);
+    window.notify = w.notify.bind(w);
+    window.notice = w.notice.bind(w);
+    window.notifyError = w.notifyError.bind(w);
+    window.prompt = w.prompt.bind(w);
+    window.unprompt = w.unprompt.bind(w);
+    window.notifyTop = w.notifyTop.bind(w);
+    window.notifyLight = w.notifyLight.bind(w);
+    window.notifyTopError = w.notifyTopError.bind(w);
+    window.notifyOnly = w.notifyOnly.bind(w);
+    window.unnotify = w.unnotify.bind(w);
+    window.promptMiddle = w.promptMiddle.bind(w);
+    window.promptTop = w.promptTop.bind(w);
+    window.promptGlass = w.promptGlass.bind(w);
+    window.promptTopGlass = w.promptTopGlass.bind(w);
+    window.promptTopDark = w.promptTopDark.bind(w);
+    window.promptMiddleGlass = w.promptMiddleGlass.bind(w);
+    window.promptDark = w.promptDark.bind(w);
+    window.promptMiddleDark = w.promptMiddleDark.bind(w);
+    window.acover = w.acover.bind(w);
+    window.coverShadow = w.coverShadow.bind(w);
+    window.uncover = w.uncover.bind(w);
+    window.uncoverShadow = w.uncoverShadow.bind(w);
+    window.setCoverText = w.setCoverText.bind(w);
+  </script>
+  <script>'use strict';${this.extends}</script>
+  <script>'use strict';${this.components}</script>
+  <script>'use strict';${this.hooksText}</script>
+  <script>'use strict';${this.pagesCode}</script>
+  <script>'use strict';${this.appInitCode}</script>
+  <script>
+  'use strict';
 
-        window.onload = async function () {
-          let dms = [
-            'pgcdom','coverdom','notifydom','alertdom','alertdom1', 'slidedom', 'alertcoverdom',
-            'alertcoverdom1', 'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
-          ];
+  window.onload = async function () {
+    let dms = [
+      'pgcdom','coverdom','notifydom','alertdom','alertdom1', 'slidedom', 'alertcoverdom',
+      'alertcoverdom1', 'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
+    ];
 
-          for (let i=0; i<dms.length; i++) {
-            w[ dms[i] ] = document.body.insertBefore(
-              document.createElement('div'),
-              document.body.firstChild
-            );
-          }
+    for (let i=0; i<dms.length; i++) {
+      w[ dms[i] ] = document.body.insertBefore(
+        document.createElement('div'),
+        document.body.firstChild
+      );
+    }
 
-          ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(() => {rv();}, 10);});' : ''}
+    ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(() => {rv();}, 10);});' : ''}
 
-          w.initPage();
-          initPages();
+    w.initPage();
+    initPages();
 
-          if (w.tabs.list.length > 0) {
-            w.tabsmenudom.className = 'w-tabbar-row-x';
-            w.tabsmenudom.background = '${this.config.tabsBackground}';
-            w.tabsmenudom.innerHTML = \`${this.tabsHTML}\`;
-          }
-        };
-        
-        function initPages () {
-          for (let p in w.pages) {
-            w.pages[p].view = function (data,options={}) {return w.view(p,data,options);};
-            w.pages[p].render = function (htext) {return w.fmtHTML(p, htext);};
-            w.pages[p].setScroll = function(scr) {
-              if (scr < 0) { w.pages[p].__dom__.scrollTop += scr; }
-              else { w.pages[p].__dom__.scrollTop = scr; }
-            };
-            w.pages[p].destroy = function () {w.destroyPage(w.pages[p]);};
-            w.pages[p].query = function(qstr) {return w.pages[p].__dom__.querySelector(qstr);};
-            w.pages[p].queryAll = function(qstr) {return w.pages[p].__dom__.querySelectorAll(qstr);};
-            w.pages[p].setAttr = function (data) {w.setAttr(p,data);};
-            if (!w.pages[p].data || typeof w.pages[p].data !== 'object') {
-              w.pages[p].data = {};
-            }
-            w._make_page_bind(p);
-            w._page_style_bind(p);
-          }
+    if (w.tabs.list.length > 0) {
+      w.tabsmenudom.className = 'w-tabbar-row-x';
+      w.tabsmenudom.background = '${this.config.tabsBackground}';
+      w.tabsmenudom.innerHTML = \`${this.tabsHTML}\`;
+    }
+  };
+  
+  function initPages () {
+    for (let p in w.pages) {
+      w.pages[p].view = function (data) {return w.view(p,data);};
+      w.pages[p].render = function (htext) {return w.fmtHTML(p, htext);};
+      w.pages[p].setScroll = function(scr) {
+        if (scr < 0) { w.pages[p].__dom__.scrollTop += scr; }
+        else { w.pages[p].__dom__.scrollTop = scr; }
+      };
+      w.pages[p].destroy = function () {w.destroyPage(w.pages[p]);};
+      w.pages[p].query = function(qstr) {return w.pages[p].__dom__.querySelector(qstr);};
+      w.pages[p].queryAll = function(qstr) {return w.pages[p].__dom__.querySelectorAll(qstr);};
+      w.pages[p].setAttr = function (data) {w.setAttr(p,data);};
+      if (!w.pages[p].data || typeof w.pages[p].data !== 'object') {
+        w.pages[p].data = {};
+      }
+      w._make_page_bind(p);
+      w._page_style_bind(p);
+    }
+  }
+
+  window.onpageshow = async function() {
+    await new Promise(rv => {setTimeout(() => {rv();}, 30);});
+    if (w.init && typeof w.init === 'function') await w.init();
+    if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
+    {
+      w.switchTab(w.homepage);
+    } else {
+      w.listenHash();
+    }
+    
+  };
+
+  window.jump_page_forward = false;
+
+  document.addEventListener('click', evt => {
+    let t = evt.target;
+    let ft = evt.currentTarget;
+    if ((!t || !t.tagName || t.tagName !== 'A') && ft) {
+      t = ft;
+    }
+
+    if (t.activeElement && t.activeElement.tagName === 'A') {
+      let href = t.activeElement.href || '';
+      if (href === 'javascript:history.back();' || href === 'javascript:history.go(-1);')
+      {
+        window.jump_page_forward = -1;
+        return;
+      }
+    }
+  
+    let url = '';
+    if (t && t.tagName && t.tagName === 'A') {
+      url = t.href;
+    } else if (t.documentURI) {
+      url = t.documentURI;
+    }
+
+    if (url) {
+      let cur_url = location.protocol + '/'+'/' + location.host + location.pathname;
+      if (url.indexOf(cur_url) === 0 && url.indexOf('#') > 0) {
+        window.jump_page_forward = true;
+      }
+    }
+  });
+
+  window.onhashchange = async function(e) {
+    if (w.hashchange && typeof w.hashchange === 'function') {
+      if (w.hashchange(e) === false) {
+        return;
+      }
+    }
+
+    await new Promise((rv, rj) => { setTimeout( () => { rv(); }, 15); });
+
+    let parsehash = (h) => {
+      let ind = h.indexOf('#');
+      if (ind < 0) return '#';
+      return h.substring(ind);
+    };
+    
+    let hashstr = parsehash(e.oldURL);
+    let new_hashstr = parsehash(e.newURL);
+
+    if (w.historyList.length > 95) {
+      for (let i = 0; i < 50; i++) {
+        w.historyList.shift();
+      }
+      w.historyList.unshift('#');
+    }
+
+    let ind = w.historyList.indexOf(hashstr);
+
+    let op = '';
+    if (w.historyLength < history.length || window.jump_page_forward === true) {
+      op = 'forward';
+      window.jump_page_forward = false;
+    } else {
+      
+      if (ind > 1) {
+        if (w.historyList[ind-1] === new_hashstr) {
+          op = 'back';
+        } else {
+          op = 'forward';
         }
+      } else {
+        op = 'back';
+      }
 
-        window.onpageshow = async function() {
-          await new Promise(rv => {setTimeout(() => {rv();}, 30);});
-          if (w.init && typeof w.init === 'function') await w.init();
-          if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
-          {
-            w.switchTab(w.homepage);
-          } else {
-            w.listenHash();
-          }
-          
-        };
-
+      if (window.jump_page_forward === -1) {
         window.jump_page_forward = false;
+        op = 'back';
+      }
 
-        document.addEventListener('click', evt => {
-          let t = evt.target;
-          let ft = evt.currentTarget;
-          if ((!t || !t.tagName || t.tagName !== 'A') && ft) {
-            t = ft;
-          }
+    }
 
-          if (t.activeElement && t.activeElement.tagName === 'A') {
-            let href = t.activeElement.href || '';
-            if (href === 'javascript:history.back();' || href === 'javascript:history.go(-1);')
-            {
-              window.jump_page_forward = -1;
-              return;
-            }
-          }
-        
-          let url = '';
-          if (t && t.tagName && t.tagName === 'A') {
-            url = t.href;
-          } else if (t.documentURI) {
-            url = t.documentURI;
-          }
+    w.historyList.push(new_hashstr);
+    w.historyLength = history.length;
 
-          if (url) {
-            let cur_url = location.protocol + '/'+'/' + location.host + location.pathname;
-            if (url.indexOf(cur_url) === 0 && url.indexOf('#') > 0) {
-              window.jump_page_forward = true;
-            }
-          }
-        });
+    w.listenHash(op);
+  };
 
-        window.onhashchange = async function(e) {
-          if (w.hashchange && typeof w.hashchange === 'function') {
-            if (w.hashchange(e) === false) {
-              return;
-            }
-          }
-
-          await new Promise((rv, rj) => { setTimeout( () => { rv(); }, 15); });
-
-          let parsehash = (h) => {
-            let ind = h.indexOf('#');
-            if (ind < 0) return '#';
-            return h.substring(ind);
-          };
-          
-          let hashstr = parsehash(e.oldURL);
-          let new_hashstr = parsehash(e.newURL);
-
-          if (w.historyList.length > 95) {
-            for (let i = 0; i < 50; i++) {
-              w.historyList.shift();
-            }
-            w.historyList.unshift('#');
-          }
-
-          let ind = w.historyList.indexOf(hashstr);
-
-          let op = '';
-          if (w.historyLength < history.length || window.jump_page_forward === true) {
-            op = 'forward';
-            window.jump_page_forward = false;
-          } else {
-            
-            if (ind > 1) {
-              if (w.historyList[ind-1] === new_hashstr) {
-                op = 'back';
-              } else {
-                op = 'forward';
-              }
-            } else {
-              op = 'back';
-            }
-
-            if (window.jump_page_forward === -1) {
-              window.jump_page_forward = false;
-              op = 'back';
-            }
-
-          }
-
-          w.historyList.push(new_hashstr);
-          w.historyLength = history.length;
-
-          w.listenHash(op);
-        };
-
-        window.onscroll = function (){w.events.scroll();};
-        window.onresize = function (){w.events.resize();};
-        ${closePromptText}
-        </script>
-        ${this.sseCode}
-        ${this.jsbottom}
-      </body>
-    </html>`;
+  window.onscroll = function (){w.events.scroll();};
+  window.onresize = function (){w.events.resize();};
+  ${closePromptText}
+  ;(()=>{ w.__components_css__=${JSON.stringify(this.config.componentCss)};w.__css_code_map__=${this.compsCssCode}; })();
+  </script>
+  ${this.sseCode}
+  ${this.jsbottom}
+</body>
+</html>`;
   }
   
 };
@@ -499,6 +513,8 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
         case 'animation':
           if (cfg[k] === true) {
             this.getCssCode('w-animation.css', true);
+          } else if (typeof cfg[k] === 'string' && cfg[k]) {
+            this.getCssCode(cfg[k], true);
           }
           break;
 
@@ -507,6 +523,8 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
             this.getCssCode('w-page-animation.css', true);
           } else if (cfg[k] === 'dropdown') {
             this.getCssCode('w-page-animation-dropdown.css', true);
+          } else if (typeof cfg[k] === 'string' && cfg[k]) {
+            this.getCssCode(cfg[k], true);
           }
           break;
 
@@ -533,12 +551,18 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
             this.config[k] = cfg[k];
           break;
 
+        case 'lang':
+          if (cfg[k] && typeof cfg[k] === 'string') {
+            this.config.lang = ` lang="${cfg[k].replace(/[\'\"]/g,'').trim()}"`;
+          }
+          break;
+
         default:
           this.config[k] = cfg[k];
       }
     }
-    if (cfg.testHost && this.config.test) {
-      this.config.host = cfg.testHost;
+    if ((cfg.testHost || cfg.devHost) && this.config.test) {
+      this.config.host = cfg.testHost || cfg.devHost;
     }
   } catch (err) {
     console.error(err.message);
@@ -829,6 +853,7 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
   try {
     fs.accessSync(htmlfile);
     htext = fs.readFileSync(htmlfile, {encoding: 'utf8'});
+    htext = simpleComporessHTML(htext);
     htext = this.fmtPageHTML(htext, pagename);
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');
@@ -846,7 +871,8 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
     await this.checkCode(pagefile, ctext, {async: this.config.asyncPage});
 
     this.pagesCode += `;(${this.config.asyncPage ? 'async ' : ''}`
-      + `function(exports){${ctext};exports.${pagename}.orgHTML=\`${htext}\`;})(w.pages);`;
+      + `function(definePage,exports){${ctext};exports.${pagename}.orgHTML=\`${htext}\`;})`
+      + `(w.__bindpage__('${pagename}'),w.pages);`;
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');
     delayOutError('有错误或不存在，请检查', pagefile);
@@ -863,38 +889,6 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
     //console.error(err.message);
   }
 
-};
-
-/**
- * 
- * lib目录中的文件以!开头不加载。
- * @param {string} libdir 
- */
-wapp.prototype.loadLib = async function (libdir) {
-  try {
-    let kn = '';
-    let names = [];
-    let flist = fs.readdirSync(libdir, {withFileTypes: true});
-    for (let f of flist) {
-      if (!f.isFile()) continue;
-      
-      if (f.name[0] === '!' || f.name.substring(f.name.length - 3) !== '.js')
-          continue;
-      
-      names.push(f.name);
-    }
-
-    let orgdata;
-
-    for (let n of names) {
-      orgdata = fs.readFileSync(`${libdir}/${n}`, 'utf8') + '\n';
-      await this.checkCode(`${libdir}/${n}`, orgdata);
-      this.libCode += `;(function(exports){${orgdata}})(window);`;
-    }
-
-  } catch (err) {
-    delayOutError(err, '--LIB-CODE--');
-  }
 };
 
 // replace <- to await require
@@ -1030,90 +1024,88 @@ wapp.prototype.buildCompsStatic = async function (cdir, names, stdir) {
 
 };
 
-wapp.prototype.readImportCss = function (cssfiles, cdir) {
-
-  let css_dir = cdir + '/../@css';
-
-  let code = '';
-  let temp = '';
-
-  for (let f of cssfiles) {
-    try {
-      temp = fs.readFileSync(`${css_dir}/${f.file}`, {encoding: 'utf8'});
-      code += csso.minify(temp + '\n').css;
-    } catch (err) {
-      console.error(err)
+/**
+ * 加载组件引入的css.
+ * 此CSS代码通过变量存储，在加载组件时，自动创建style节点。
+ */
+wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
+  let csscodemap = {};
+  let flist = [];
+  let ctemp = '';
+  let cssMap = {};
+  let notGlobal = [];
+  if (this.config.componentCss['!*'] !== undefined) {
+    if (Array.isArray(this.config.componentCss['!*'])) {
+      notGlobal = this.config.componentCss['!*'];
+    } else if (typeof this.config.componentCss['!*'] === 'string') {
+      notGlobal =[ this.config.componentCss['!*'] ];
     }
   }
 
-  return code;
-};
-
-wapp.prototype.replaceImportCss = function (text, cdir) {
-
-  text = text.replace(/\/\*(.|[\r\n])*?\*\//mg, '');
-
-  let style_start = text.indexOf('<style>');
-  let endind = text.indexOf('</style>');
-
-  if (style_start < 0) return text;
-
-  let i = 0;
-  let cssfiles = [];
-
-  let parseFile = (t) => {
-    let f = t.substring(('@import').length).trim();
-    if (f.indexOf('url(') >= 0) {
-      f = f.substring(4, f.length - 1);
+  for (let k in this.config.componentCss) {
+    flist = this.config.componentCss[k];
+    if (typeof flist === 'string') {
+      flist = [flist];
     }
-    return f.substring(1, f.length - 1);
+
+    if (k === '!*') continue;
+
+    if (k === '*') {
+      for (let c of this.config.components) {
+        if (!cssMap[c]) cssMap[c] = [];
+        //如果配置了 !* 则查看是否此组件在不加载全局css的配置中。
+        if (notGlobal.indexOf(c) >= 0) continue;
+
+        for (let i = flist.length - 1; i>=0; i--) {
+          //按照全局css顺序添加到已有css配置name的前面。如果在!*配置中则不会添加。
+          if (cssMap[c].indexOf(flist[i]) < 0) {
+            cssMap[c].unshift(flist[i]);
+          }
+        }
+      }
+      continue;
+    }
+
+    if (!cssMap[k]) cssMap[k] = [];
+    for (let a of flist) {
+      if (cssMap[k].indexOf(a) < 0)
+        cssMap[k].push(a);
+    }
+
   }
 
-  let iend = 0;
-  let start = style_start + 7;
+  this.config.componentCss = cssMap;
 
-  while (start < endind) {
-    i = text.indexOf('@import', start);
-
-    if (i < 0) break;
-
-    iend = text.indexOf(';', i);
-
-    cssfiles.push({
-      pos: {
-        start: i,
-        end: iend
-      },
-      file: parseFile(text.substring(i, iend))
-    });
-
-    start = iend + 1;
+  for (let k in this.config.componentCss) {
+    if (this.config.components.indexOf(k) < 0) {
+      delete cssMap[k];
+    }
   }
 
-  if (cssfiles.length === 0) {
-    let compress_css = csso.minify(text.substring(style_start+7, endind)+'\n').css;
-    return text.substring(0, style_start + 7) 
-          + this.replaceCssUrl(compress_css)
-          + text.substring(endind);
-  }
-
-  let csscode = this.readImportCss(cssfiles, cdir);
-
-  let replace_start = cssfiles[0].pos.start;
-
-  let replace_end = cssfiles[ cssfiles.length - 1 ].pos.end;
-
-  let replace_text = text.substring(0, replace_start) 
-                        + this.replaceCssUrl(csscode)
-                        + text.substring(replace_end+1);
+  for (let k in this.config.componentCss) {
   
-  endind = replace_text.indexOf('</style>');
+    if (this.config.components.indexOf(k) < 0) continue;
 
-  let compress_css = csso.minify(replace_text.substring(style_start+7, endind)+'\n').css;
-  return replace_text.substring(0, style_start + 7) 
-              + compress_css
-              + replace_text.substring(endind);
-}
+    flist = this.config.componentCss[k];
+
+    if (!Array.isArray(flist)) continue;
+
+    for (let f of flist) {
+      if (csscodemap[f]) continue;
+      try {
+        ctemp = fs.readFileSync(`${cssdir}/${f}`, {encoding: 'utf8'})
+        ctemp = this.replaceCssUrl(ctemp)
+        csscodemap[f] = csso.minify(ctemp).css
+        //csscodemap[f] = encodeURIComponent(csso.minify(ctemp).css)
+      } catch(err) {
+        console.error(err)
+      }
+    }
+
+  }
+
+  this.compsCssCode = JSON.stringify(csscodemap);
+};
 
 /**
  * 一个组件是一个目录，其中包括和目录同名的.js文件、explain.json文件、.html文件，若html文件不存在则表示不存在template。
@@ -1130,6 +1122,8 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
   } catch (err) {
     fs.mkdirSync(cdir + '/@css');
   }
+
+  this.loadCompsCss(cdir, `${cdir}/@css`);
 
   try {
     let data = '';
@@ -1179,10 +1173,10 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           tempdata = tempdata.replace(/<!--(.|[\r\n])*?-->/mg, '');
           tempdata = this.replaceSrc(tempdata, true, names[i]);
           //检测是否有@import导入css文件，根据@import导入@css目录的css。
-          tempdata = this.replaceImportCss(tempdata, `${cdir}/${names[i]}`);
+          //tempdata = this.replaceImportCss(tempdata, `${cdir}/${names[i]}`);
 
           //使用div包装模板。
-          this.templates += `<div data-id="${cex.name}">${tempdata}</div>`;
+          this.templates += `<div data-id="${cex.name}">${simpleComporessHTML(tempdata)}</div>`;
         }
       } catch (err) {
       
@@ -1342,13 +1336,6 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   if (this.templates.length > 0) {
     this.templates = this.replaceCssUrl(this.templates);
   }
-  
-  //暂时废弃对lib的加载。
-  /* try {
-    await this.loadLib(`${pdir}/_lib`);
-  } catch (err) {
-    console.error(err);
-  } */
 
   let hookData = '';
   for (let h of this.config.hooks) {
@@ -1373,17 +1360,6 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
         } else {
           this.hooksText = hookData.code;
         }
-    }
-  }
-
-  if (this.libCode.length > 0) {
-    if (this.forceCompress || (this.isbuild && this.config.buildCompress)) {
-      let libCodeCompress = await terser.minify(this.libCode);
-      if (libCodeCompress.error) {
-        console.error(libCodeCompress.error);
-      } else {
-        this.libCode = libCodeCompress.code;
-      }
     }
   }
 
@@ -1486,41 +1462,45 @@ wapp.prototype.build = async function (appdir, appname = '') {
 
 wapp.prototype.newPage = function (name, pagedir) {
   
-  let html = `exports.${name} = new function () {
+  let html = `'use strict';\n\nclass page {
 
-  this.onload = function (c) {
+  constructor() {
+
+  }
+
+  async onload(ctx) {
   
-  };
+  }
 
-  this.onshow = function (c) {
+  async onshow(ctx) {
 
-  };
+  }
 
-  this.onhide = function () {
+  onhide() {
 
-  };
+  }
 
-  this.onunload = function () {
+  onunload() {
 
-  };
+  }
 
-  this.onbottom = function () {
+  onbottom() {
 
-  };
+  }
 
-  this.onscroll = function (scrollTop, clientHeight, scrollHeight) {
+  onscroll(scrollTop, clientHeight, scrollHeight) {
 
-  };
+  }
 
-  this.ontop = function () {
+  ontop() {
 
-  };
+  }
 
-  this.onresize = function () {
+  onresize() {
 
-  };
+  }
 
-};`;
+}\n\ndefinePage(page);\n`;
 
   let pdir = `${pagedir}/${name}/`;
   let pagefile = `${pagedir}/${name}/${name}.js`;
@@ -1603,39 +1583,52 @@ function renderCompsClass (cname) {
   return `'use strict';\n
 class ${className} extends Component {
 
-  constructor () {
+  constructor() {
     super(); //必须写在最开始。
 
     //通过this.attrs访问所有属性。this.attributes是浏览器原始提供的属性对象。
     //this.attrs是为了方便而做的映射。
 
     //this.shadow可以访问shadow DOM，注意这是shadowRoot。
-    //this.host用于访问组件对应的DOM，this.host指向this.shadow.host。
-
+    
+    //用于声明支持的属性和类型限制，若不需要请去掉properties的定义。
+    this.properties = {
+      tag: {
+        //type默认就是字符串
+        type: 'string',
+        default: 'xxx'
+      },
+      mode: {
+        //限制mode属性可选的值，如果不符合要求则使用default设置值。
+        //数组类型的限制，如果没有设置default则第一个元素作为默认值。
+        limit: ['mode1', 'mode2'],
+        default: 'mode1'
+      }
+    };
   }
 
   //在render之前执行，此时已经创建好shadow DOM。
-  init () {
+  init() {
 
   }
 
   //返回字符串或DOM节点。
-  render () {
+  render() {
     // 也可以返回字符串 return '${cname}组件';
     return this.plate();
   }
 
   //渲染完成后执行
-  afterRender () {
+  afterRender() {
     
   }
 
-  onload () {
+  onload() {
 
   }
 
   //从DOM树中移除时触发。
-  onremove () {
+  onremove() {
 
   }
 
@@ -1644,7 +1637,7 @@ class ${className} extends Component {
   }
 
   //被移动到新文档时触发。
-  onadopted () {
+  onadopted() {
 
   }
 
@@ -1726,7 +1719,7 @@ wapp.prototype.newProject = function (project_dir) {
   let loopcp = [
     '_components', '_extends', '_hooks', '_static', 'home', 'user', 'test',
     '_static/css', '_static/icon', '_static/images','_static/_components',
-     'list', '_components/u-card'
+     'list', '_components/u-card', '_components/@css',
   ];
 
   for (let i = 0; i < loopcp.length; i++) {
@@ -1766,3 +1759,92 @@ wapp.prototype.newProject = function (project_dir) {
 };
 
 module.exports = wapp;
+
+/**
+
+wapp.prototype.readImportCss = function (cssfiles, cdir) {
+
+  let css_dir = cdir + '/../@css';
+
+  let code = '';
+  let temp = '';
+
+  for (let f of cssfiles) {
+    try {
+      temp = fs.readFileSync(`${css_dir}/${f.file}`, {encoding: 'utf8'});
+      code += csso.minify(temp + '\n').css;
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  return code;
+};
+
+wapp.prototype.replaceImportCss = function (text, cdir) {
+
+  text = text.replace(/\/\*(.|[\r\n])*?\*\//mg, '');
+
+  let style_start = text.indexOf('<style>');
+  let endind = text.indexOf('</style>');
+
+  if (style_start < 0) return text;
+
+  let i = 0;
+  let cssfiles = [];
+
+  let parseFile = (t) => {
+    let f = t.substring(('@import').length).trim();
+    if (f.indexOf('url(') >= 0) {
+      f = f.substring(4, f.length - 1);
+    }
+    return f.substring(1, f.length - 1);
+  }
+
+  let iend = 0;
+  let start = style_start + 7;
+
+  while (start < endind) {
+    i = text.indexOf('@import', start);
+
+    if (i < 0) break;
+
+    iend = text.indexOf(';', i);
+
+    cssfiles.push({
+      pos: {
+        start: i,
+        end: iend
+      },
+      file: parseFile(text.substring(i, iend))
+    });
+
+    start = iend + 1;
+  }
+
+  if (cssfiles.length === 0) {
+    let compress_css = csso.minify(text.substring(style_start+7, endind)+'\n').css;
+    return text.substring(0, style_start + 7) 
+          + this.replaceCssUrl(compress_css)
+          + text.substring(endind);
+  }
+
+  let csscode = this.readImportCss(cssfiles, cdir);
+
+  let replace_start = cssfiles[0].pos.start;
+
+  let replace_end = cssfiles[ cssfiles.length - 1 ].pos.end;
+
+  let replace_text = text.substring(0, replace_start) 
+                        + this.replaceCssUrl(csscode)
+                        + text.substring(replace_end+1);
+  
+  endind = replace_text.indexOf('</style>');
+
+  let compress_css = csso.minify(replace_text.substring(style_start+7, endind)+'\n').css;
+  return replace_text.substring(0, style_start + 7) 
+              + compress_css
+              + replace_text.substring(endind);
+}
+ * 
+ */
