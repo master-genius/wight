@@ -14,13 +14,13 @@
   "dependencies": {
     "concise.css": "^4.1.2",
     "csso": "^5.0.5",
-    "gohttp": "^5.0.1",
+    "gohttp": "^5.0.2",
     "qrcode": "^1.5.1",
     "terser": "^5.16.3",
-    "titbit": "^23.1.9",
-    "titbit-httpc": "^2.0.3",
-    "titbit-loader": "^22.5.1",
+    "titbit": "^23.2.1",
+    "titbit-httpc": "^2.0.4",
+    "titbit-loader": "^22.5.2",
     "titbit-token": "^2.1.1",
-    "titbit-toolkit": "^3.3.7"
+    "titbit-toolkit": "^3.4.1"
   }
 }
