@@ -1337,11 +1337,12 @@ w.loadPage = async function (R) {
 w.reload = function (force = true) {
   let pg = w.curpage;
 
+  w.destroyPage(pg);
+
   if (!pg || force) {
     return w.listenHash();
   }
 
-  w.destroyPage(pg);
   let R = w.parseHashUrl(pg.__name__);
   w.loadPage(R);
 };
