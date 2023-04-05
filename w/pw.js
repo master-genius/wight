@@ -60,9 +60,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '2.7';
+  this.defaultVersion = '2.8';
 
-  this.version = '2.7';
+  this.version = '2.8';
 
   this.forceCompress = false;
 
