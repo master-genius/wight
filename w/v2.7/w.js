@@ -1604,7 +1604,7 @@ w._setData = function (pagename, pg, nds, data) {
   let dataType = typeof data;
 
   for (let i = 0; i < nds.length; i++) {
-
+    
     if (nds[i].dataset.map && typeof pg[nds[i].dataset.map] === 'function') {
       dtemp = pg[nds[i].dataset.map]({
         data: data,
@@ -1613,7 +1613,7 @@ w._setData = function (pagename, pg, nds, data) {
         dataType}) || '';
 
     } else if (nds[i].dataset.list && typeof pg[nds[i].dataset.list] === 'function') {
-      if (data instanceof Array) {
+      if (Array.isArray(data)) {
         data.forEach((a, ind) => {
           dtemp += pg[nds[i].dataset.list]({
             data: a, 
