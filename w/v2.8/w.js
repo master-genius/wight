@@ -149,7 +149,6 @@ class HtmlState_ {
     }
 
     return false
-
   }
 
   checkTagEnd (cur_char, next_char) {
@@ -198,10 +197,27 @@ class HtmlState_ {
 
     if (this.curState === this.STATE.TAG_ATTR_VALUE || this.curState === this.STATE.TAG_ATTR_VALUE_START)
     {
+      // a="''" or a='""'
       if (cur_char !== this.attrType) {
-        console.log(cur_char, next_char, this.attrType, this.curState === this.STATE.TAG_ATTR_VALUE_START)
-        return false
+        if (this.curState === this.STATE.TAG_ATTR_VALUE_START) {
+          //中间的属性值允许出现空格
+          if (next_char === '\n') {
+            return false
+          }
+          this.curState = this.STATE.TAG_ATTR_VALUE
+          return true
+        }
+        
+        if (next_char === '\n') {
+          return false
+        }
+        //this.STATE.TAG_ATTR_VALUE 不用改
+        return true
       }
+
+      /* if (cur_char !== this.attrType) {
+        return false
+      } */
       this.curState = this.STATE.TAG_ATTR_VALUE_END
       return true
     }
