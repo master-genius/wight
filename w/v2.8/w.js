@@ -1618,14 +1618,14 @@ w.resetView = function(pagename, qss) {
   if (!Array.isArray(qss)) {
     qss = [qss];
   }
-
+  
+  let data = {};
   for (let q of qss) {
-    let data = {};
     if (q && typeof q === 'string') {
       data[q] = null;
-      w.view(pagename, data);
     }
   }
+  w.view(pagename, data);
 };
 
 w._resetData = function (pagename, pg, nds) {
@@ -2905,10 +2905,12 @@ class Component extends HTMLElement {
     let nds;
     
     for (let k in data) {
-      
       qcss = this._fmtquery(k);
-  
       nds = this.shadow.querySelectorAll(qcss);
+      if (data[k] === null) {
+        w._resetData(0, this, nds);
+        continue;
+      }
 
       try {
         w._setData(0, this, nds, data[k]);
@@ -2921,6 +2923,17 @@ class Component extends HTMLElement {
         }
       }
     }
+  }
+
+  resetView(qss) {
+    if (!Array.isArray(qss)) qss = [qss];
+    let data = {};
+    for (let q of qss) {
+      if (q && typeof q === 'string') {
+        data[q] = null;
+      }
+    }
+    this.view(data);
   }
 
   setAttr (data) {
