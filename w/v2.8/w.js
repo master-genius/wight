@@ -249,16 +249,15 @@ class HtmlState_ {
   }
 
   checkChar(cur_char, next_char) {
-
     if (cur_char === '/' && next_char && next_char === '>') {
       if ( (this.attrType === '' && this.curState === this.STATE.TAG_ATTR_VALUE)
         || this.STATE.TAG_NAME === this.curState
         || this.STATE.TAG_ATTR === this.curState
         || this.STATE.TAG_ATTR_PRE === this.curState
       ) {
-        this.cursor += 1;
-        this.curState = this.STATE.TAG_CLOSE_END;
-        return true;
+        this.cursor += 1
+        this.curState = this.STATE.TAG_CLOSE_END
+        return true
       }
     }
 
@@ -299,7 +298,7 @@ class HtmlState_ {
       return true
     }
     
-    return true;
+    return true
   }
 
   checkState (cur_char, next_char) {
