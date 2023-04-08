@@ -1574,7 +1574,6 @@ w.view = function (pagename, data) {
 
   let qcss = '';
   let nds = '';
-  
 
   for (let k in data) {
     qcss = `[data-name=${k}]`;
@@ -1597,6 +1596,11 @@ w.view = function (pagename, data) {
       nds = w._queryGlobal(qcss);
     }
 
+    if (data[k] === null) {
+      w._resetData(pagename, pg, nds);
+      continue;
+    }
+
     try {
       w._setData(pagename, pg, nds, data[k]);
     } catch (err) {
@@ -1608,7 +1612,42 @@ w.view = function (pagename, data) {
       }
     }
   }
+};
 
+w.resetView = function(pagename, qss) {
+  if (!Array.isArray(qss)) {
+    qss = [qss];
+  }
+
+  for (let q of qss) {
+    let data = {};
+    if (q && typeof q === 'string') {
+      data[q] = null;
+      w.view(pagename, data);
+    }
+  }
+};
+
+w._resetData = function (pagename, pg, nds) {
+  for (let d of nds) {
+    if (d.tagName === 'IMG') {
+      d.src = '';
+      continue;
+    }
+    
+    if (d.tagName === 'INPUT') {
+      if (['checkbox', 'radio'].indexOf(d.type) >= 0) {
+        d.checked = false;
+        continue;
+      }
+    }
+
+    if (d.value !== undefined && d.tagName !== 'SELECT') {
+      d.value = '';
+    } else {
+      d.innerHTML = '';
+    }
+  }
 };
 
 w._setData = function (pagename, pg, nds, data) {
