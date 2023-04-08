@@ -1642,8 +1642,8 @@ w._resetData = function (pagename, pg, nds) {
       }
     }
 
-    if (d.value !== undefined && d.tagName !== 'SELECT') {
-      d.value = '';
+    if (d.value !== undefined) {
+      ;(d.tagName !== 'SELECT') && (d.value = '');
     } else {
       d.innerHTML = '';
     }
