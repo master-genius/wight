@@ -57,12 +57,13 @@
     ],
 
     "componentCss": {
-        "u-card" : ["mgrid.css", "basic.css"]
+        "*" : ["mgrid.css", "basic.css", "concise.min.css", "concise-ui.min.css"],
+        "!*" : []
     },
 
     "componentModule": true,
 
-    "version": "2.7",
+    "version": "2.8",
 
     "manifest": false,
 

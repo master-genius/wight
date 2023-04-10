@@ -10,29 +10,26 @@
 :root {
   font-size: 16px;
   font-family: 'JetBrainsMono,Helvetica,Arial,sans-serif';
+  --w-prompt-bg-color: #f7f9fc;
 }
 
 h1,h2,h3,h4,h5,h6,p,span,div {
   font-family: 'JetBrainsMono,Helvetica,Arial,sans-serif';
 }
 
-/* .w-current-page-display {
-  background: #4a4a4a;
-} */
-
-button,input, :root ::part(btn) {
+button {
   border-radius: 0.08rem;
 }
 
-.short-input, :root ::part(short-input) {
+.short-input,[short-input] {
   width: 60%;
 }
 
-.middle-input, :root ::part(middle-input) {
+.middle-input,[middle-input] {
   width: 80%;
 }
 
-.long-input, :root ::part(long-input) {
+.long-input,[long-input] {
   width:100%;
 }
 
@@ -42,12 +39,12 @@ button,input, :root ::part(btn) {
   margin-top: 0.15rem;
 }
 
-.btn-circle, :root ::part(btn-circle) {
+.btn-circle,[btn-circle] {
   width: 2.64rem;
   height: 2.64rem;
   border-radius: 1.32rem;
   background-color: #f5f6f8;
-  box-shadow: -0.12rem 0.2rem 0.23rem rgba(125, 125, 125, 0.56);
+  box-shadow: var(--w-common-shadow, -0.12rem 0.2rem 0.23rem rgba(125, 125, 125, 0.56));
   line-height: 2.64rem;
   text-align: center;
   font-size: 89%;
@@ -60,7 +57,7 @@ button,input, :root ::part(btn) {
   user-select: none;
 }
 
-.btn-block, :root ::part(btn-block) {
+.btn-block,[btn-block] {
   width: 2.8rem;
   height: 2rem;
   line-height: 2rem;
@@ -72,27 +69,27 @@ button,input, :root ::part(btn) {
   color: #424345;
 }
 
-.btn-circle-gray, :root ::part(btn-circle-gray) {
+.btn-circle-gray {
   background: #d1d2d5;
   color: #424345;
 }
 
-.btn-circle-light-gray, :root ::part(btn-circle-light-gray) {
+.btn-circle-light-gray {
   background: #dfdfe1;
   color: #424345;
 }
 
-.btn-circle-dark, :root ::part(btn-circle-dark) {
+.btn-circle-dark {
   background: #6a6a6a;
   color: #dfdfdf;
 }
 
-.btn-circle-dark-rgba, :root ::part(btn-circle-dark-rgba) {
+.btn-circle-dark-rgba {
   background: rgba(105, 105, 105, 0.58);
   color: #dfdfdf;
 }
 
-.btn-circle-ok, :root ::part(btn-circle-ok) {
+.btn-circle-ok {
   background: #4268df;
   color: #38373d;
 }
@@ -120,12 +117,12 @@ input[ok] {
 }
 
 .set-btn {
-  background: #d3d2df;
+  background: #e44a82;
   color: #424345;
 }
 
 .search-btn {
-  background: #dcdce7;
+  background: #5e5ef5;
   color: #424345;
 }
 
@@ -134,12 +131,12 @@ input[ok] {
   color: #fafafa;
 }
 
-.a-menu, :root ::part(a) {
+.a-menu,[a-menu] {
   text-decoration: none;
   color: #4a4a59;
 }
 
-.spana,:root ::part(spana) {
+.spana,[spana] {
   cursor: pointer;
   padding: 0.25rem;
   color: #4a4a68;
@@ -147,19 +144,19 @@ input[ok] {
   user-select: none;
 }
 
-.spana-middle {
+.spana-middle,[spana-middle] {
   font-size: 92%;
 }
 
-.spana-small {
+.spana-small,[spana-small] {
   font-size: 86%;
 }
 
-.spana-tiny {
+.spana-tiny,[spana-tiny] {
   font-size: 80%;
 }
 
-.align-center, [align-center], :root ::part(align-center) {
+.align-center,[align-center] {
   text-align: center;
 }
 
@@ -167,7 +164,7 @@ input[ok] {
   text-align: left;
 }
 
-.align-right, [align-right], :root ::part(align-right) {
+.align-right,[align-right] {
   text-align: right;
 }
 
@@ -175,62 +172,70 @@ input[ok] {
   color: #d93516;
 }
 
-.small, [small], :root ::part(small) {
+.middle,[middle] {
+  font-size: 92%;
+}
+
+.small,[small] {
   font-size: 85%;
 }
 
-.tiny, [tiny], :root ::part(tiny) {
-  font-size: 80%;
+.tiny,[tiny] {
+  font-size: 78%;
 }
 
-.helper, [helper], :root ::part(helper) {
+.helper, [helper] {
   font-size: 85%;
   color: #676869;
 }
 
-.italic, [italic], :root ::part(italic) {
+.italic,[italic] {
   font-style: italic;
 }
 
-.helper-light, [helper-light], :root ::part(helper-light) {
+.helper-light, [helper-light] {
   font-size: 86%;
   color: #dfdfe2;
 }
 
-.padding-25, [padding-25], :root ::part(padding-25) {
+.padding-2-5,[padding-2-5] {
   padding: 0.25rem;
 }
 
-.padding-5, [padding-5], :root ::part(padding-5) {
+.padding-5,[padding-5] {
   padding: 0.5rem;
 }
 
-.padding-8, [padding-8], :root ::part(padding-8) {
+.padding-0-8,[padding-0-8] {
   padding: 0.8rem;
 }
 
-.padding, [padding], :root ::part(padding) {
+.padding,[padding] {
   padding: 1rem;
 }
 
-.mtop5, [mtop5], :root ::part(mtop5) {
+.mtop-0-5,[mtop-0-5] {
   margin-top: 0.5rem;
 }
 
-.mleft5,[mleft5], :root ::part(mleft5) {
+.mleft-0-5,[mleft-0-5] {
   margin-left: 0.5rem;
 }
 
-.mright5,[mright5], :root ::part(mright5) {
+.mright-0-5,[mright-0-5] {
   margin-right: 0.5rem;
 }
 
-.mbottom5,[mbottom5], :root ::part(mbottom5) {
+.mbottom-0-5,[mbottom-0-5] {
   margin-bottom: 0.5rem;
 }
 
-.mtop, [mtop], :root ::part(mtop) {
+.mtop,[mtop] {
   margin-top: 1rem;
+}
+
+.mbottom,[mbottom] {
+  margin-bottom: 1rem;
 }
 
 .loadinfo-worker {
@@ -241,52 +246,52 @@ input[ok] {
   border: 0.05rem solid #676869;
 }
 
-.image, :root ::part(image) {
+.image,[image] {
   width: auto;
   height: auto;
   max-width: 100%;
   border-radius: 0.1rem;
 }
 
-.card-head, [card-head], :root ::part(card-head) {
+.card-head,[card-head] {
   font-weight: 680;
 }
 
-.card, [card], :root ::part(card) {
+.card, [card] {
   padding: 0.6rem;
   border-radius: 0.18rem;
   box-shadow: 0.2rem 0.2rem 0.2rem #efeff2;
   margin: 0.8rem auto;
 }
 
-.inset-shadow, [inset-shadow], :root ::part(inset-shadow) {
+.inset-shadow,[inset-shadow] {
   box-shadow: 0px 0.1rem 1.2rem 0.1rem rgba(15, 15, 15, 0.1),inset 0px -0.1rem 0px 0px rgba(15,15,15,0.1);
 }
 
-.card-space, [card-space], :root ::part(card-space) {
+.card-space, [card-space] {
   margin: 0.38rem auto;
 }
 
-.icon, [icon], :root ::part(icon) {
+.icon, [icon] {
   width: 1.1rem;
   height: auto;
 }
 
-.icon-large, [icon-large], :root ::part(icon-large) {
+.icon-large,[icon-large] {
   width: 1.6rem;
   height: auto;
 }
 
-.block {
+.block,[block] {
   border: #e5e8e9 solid 0.05rem;
   padding: 0.35rem;
 }
 
-.select {
+.select,[select] {
   background: #efeff2;
 }
 
-.select-blue {
+.select-blue,[select-blue] {
   background: #5689f9;
 }
 
@@ -300,22 +305,22 @@ table {
   width: 100%;
 }
 
-.lh158, [lh158], :root ::part(lh158) {
+.lh158,[lh158] {
   line-height: 158%;
 }
 
-.lh2, [lh2], :root ::part(lh2) {
+.lh2,[lh2] {
   line-height: 200%;
 }
 
-.line, :root ::part(line) {
+.line,[line] {
   width: 100%;
   height: 0.25rem;
   margin-bottom: 0.58rem;
   border-bottom: solid #cdcdcf 0.08rem;
 }
 
-.rotate, :root ::part(rotate) {
+.rotate,[rotate] {
   animation: rotating 0.36s infinite;
 }
 
@@ -329,39 +334,43 @@ table {
   100% {transform: rotateZ(360deg);}
 }
 
-.blue-dark {
+.blue-dark, [blue-dark] {
   color: #1573b6;
 }
 
-.blue, :root ::part(blue) {
+.blue,[blue] {
   color: #2298ed;
 }
 
-.dark, :root ::part(dark) {
+.dark,[dark] {
   color: #32373d;
 }
 
-.dark-light {
+.dark-light,[dark-light] {
   color: #4f4f4f;
 }
 
-.red, :root ::part(red) {
+.red,[red] {
   color: #cd5245;
 }
 
-.red-light, :root ::part(red-light) {
+.pink-red,[pink-red] {
+  color:#db3186;
+}
+
+.red-light,[red-light] {
   color: #dc3c3c;
 }
 
-.red-dark, :root ::part(red-dark) {
+.red-dark,[red-dark] {
   color: #b73333;
 }
 
-.orange, :root ::part(orange) {
+.orange,[orange] {
   color: #F17F42;
 }
 
-.gray, :root ::part(gray) {
+.gray,[gray] {
   color: #666666;
 }
 
@@ -370,60 +379,24 @@ table {
   color: #dfdfdf;
 }
 
-.hide, :root ::part(hide) {
+.hide,[hide] {
   display: none;
   visibility: hidden;
 }
 
-.click, [click], :root ::part(click) {
+.click,[click] {
   cursor: pointer;
 }
 
-.select-none, [select-none], :root ::part(select-none) {
+.select-none,[select-none] {
   user-select: none;
 }
 
-:root ::part(btn) {
-  cursor: pointer;
-  font-size: .83333rem;
-  line-height: 2.25rem;
-  padding: 0 1.5em;
-  -webkit-transition: background-color .15s;
-  transition: background-color .15s;
-  white-space: nowrap;
-}
-
-:root ::part(border-red) {
-  background-color: transparent;
-  border: 1px solid #c65146;
-  color: #c65146;
-}
-
-:root ::part(border-green) {
-  border-color: #10a887;
-  background-color: transparent;
-  color: #10a887;
-}
-
-:root ::part(border-blue) {
-  border-color: #66a1ee;
-  background-color: transparent;
-  color: #66a1ee;
-}
-
-:root ::part(btn-gray) {
-  background-color: rgba(0,0,0,.15);
-  display: inline-block;
-  margin-left: 1.25em;
-  padding: 0 1em;
-  vertical-align: 0;
-}
-
-.center, [center], :root ::part(center) {
+.center,[center] {
   display: grid;
   place-items: center;
 }
 
-.circle-image, [circle-image], :root ::part(circle-image) {
+.circle-image,[circle-image] {
   border-radius: 50%;
 }
