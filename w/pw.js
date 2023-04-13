@@ -872,7 +872,7 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
     await this.checkCode(pagefile, ctext, {async: this.config.asyncPage});
 
     this.pagesCode += `;(${this.config.asyncPage ? 'async ' : ''}`
-      + `function(definePage,exports){${ctext};exports.${pagename}.orgHTML=\`${htext}\`;})`
+      + `function(definePage,exports){${ctext};exports['${pagename}'].orgHTML=\`${htext}\`;})`
       + `(w.__bindpage__('${pagename}'),w.pages);`;
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');

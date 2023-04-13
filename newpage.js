@@ -26,7 +26,7 @@ for (let i=3; i<process.argv.length; i++) {
     pagename = pagename.substring(0, pagename.length - 3);
   }
 
-  pagename = pagename.replace(/[\s]+/g, '');
+  pagename = pagename.replace(/[\'\"\#\[\]\{\}\:\/\?\<\>\s]+/g, '');
 
   webapp.newPage(pagename, `${__dirname}/apps/${pdir}`);
 }
