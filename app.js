@@ -239,7 +239,9 @@ if (app.isWorker) {
 
   if (proxy_host) {
     pxy = new proxy({
-      methods: ['GET'],
+      methods: [
+        'GET'
+      ],
       host: proxy_host
     });
     pxy.init(app);
