@@ -92,6 +92,8 @@ let wapp = function (options = {}) {
     exts: [],
     iconPath: '/favicon.ico',
     asyncPage: false,
+    metaDescription: '',
+    metaKeywords: ''
   };
 
   this.jch = {
@@ -210,6 +212,8 @@ let wapp = function (options = {}) {
   <title id="app-title">${this.config.title}</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0,user-scalable=no">
+  ${this.config.metaDescription}
+  ${this.config.metaKeywords}
   ${this.iconlink}
   ${this.manifest}
   ${this.csstext}
@@ -555,6 +559,19 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
         case 'lang':
           if (cfg[k] && typeof cfg[k] === 'string') {
             this.config.lang = ` lang="${cfg[k].replace(/[\'\"]/g,'').trim()}"`;
+          }
+          break;
+        
+        case 'description':
+          if (cfg[k] && typeof cfg[k] === 'string') {
+            this.config.metaDescription = `<meta name="description" content="${cfg[k].replaceAll('"', '')}">`;
+          }
+          break;
+
+        case 'keywords':
+          if (cfg[k]) {
+            let kwdtext = Array.isArray(cfg[k]) ? cfg[k].join(',') : cfg[k];
+            this.config.metaKeywords = `<meta name="keywords" content="${kwdtext.replaceAll('"', '')}">`;
           }
           break;
 

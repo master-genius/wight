@@ -83,5 +83,9 @@
 
     "autoRefresh": true,
 
-    "lang": ""
+    "lang": "",
+
+    "description": "",
+    
+    "keywords": []
 }
