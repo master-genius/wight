@@ -1469,7 +1469,7 @@ w.setAttr = function (pagename, data) {
       qcss = `[name=${k.substring(1)}]`;
     } else if (k[0] === '.') {
       qcss = `[class=${k.substring(1)}]`;
-    } else if (k[0] === '[') {
+    } else if (k.indexOf('[') >= 0) {
       qcss = k;
     } else if (k[0] === ':') {
       qcss = `[data-bind=${k.substring(1)}]`;
