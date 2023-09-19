@@ -16,11 +16,11 @@
     "csso": "^5.0.5",
     "gohttp": "^5.0.3",
     "qrcode": "^1.5.1",
-    "terser": "^5.16.8",
-    "titbit": "^23.2.2",
+    "terser": "^5.19.4",
+    "titbit": "^23.2.4",
     "titbit-httpc": "^2.0.4",
     "titbit-loader": "^22.5.2",
-    "titbit-token": "^2.1.1",
+    "titbit-token": "^2.1.2",
     "titbit-toolkit": "^3.5.1"
   }
 }
