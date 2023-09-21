@@ -37,6 +37,11 @@
   box-sizing: border-box;
 }
 
+.c-0-5, [c-0-5], :root ::part(c-0-5) {
+  width: 4.15%;
+  box-sizing: border-box;
+}
+
 .c-1, [c-1], :root ::part(c-1) {
   width: 8.333333%;
   box-sizing: border-box;
@@ -165,7 +170,7 @@
 
 }
 
-@media only screen and (min-width:751px) and (max-width: 1200px){
+@media only screen and (min-width:751px) and (max-width: 1280px){
   .show-small-only, [show-small-only], :root ::part(show-small-only) {
     visibility: hidden;
     display: none;
@@ -238,7 +243,7 @@
 
 }
 
-@media only screen and (min-width: 1201px) {
+@media only screen and (min-width: 1281px) {
   .show-small-only, [show-small-only], :root ::part(show-small-only) {
     visibility: hidden;
     display: none;
