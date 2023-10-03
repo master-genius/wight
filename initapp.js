@@ -175,7 +175,7 @@ class initapp {
       let tmpfile;
       for (let f of flist) {
         if (f.isDirectory()) {
-          if (f.name === '_static' || f.name === '.git') continue;
+          if (f.name === 'static' || f.name === '.git') continue;
 
           tmpfile = `${pd}/${f.name}`;
 
@@ -186,7 +186,7 @@ class initapp {
             
           });
 
-          if (f.name === '_components') {
+          if (f.name === 'components') {
             let comps = fs.readdirSync(`${pd}/${f.name}`, {withFileTypes: true});
 
             for (let c of comps) {
@@ -281,23 +281,23 @@ class initapp {
 
     for (let a of this.appList) {
       ;(new resource({
-        staticPath: `${this.appPath}/${this.prefix}/${a}/_static`,
+        staticPath: `${this.appPath}/${this.prefix}/${a}/static`,
         routePath : `/${a}/static/*`,
-        routeGroup: `${a}_static`,
-        decodePath: true
-      }).init(app));
-
-      ;(new resource({
-        staticPath: `${this.appPath}/${this.prefix}/${a}/_static`,
-        routePath : `/${a}/_static/*`,
-        routeGroup: `${a}_static_`,
+        routeGroup: `${a}static`,
         decodePath: true
       }).init(app));
 
       /* ;(new resource({
-        staticPath: `${this.appPath}/${this.prefix}/${a}/_static/_components`,
+        staticPath: `${this.appPath}/${this.prefix}/${a}/static`,
+        routePath : `/${a}/static/*`,
+        routeGroup: `${a}static_`,
+        decodePath: true
+      }).init(app)); */
+
+      /* ;(new resource({
+        staticPath: `${this.appPath}/${this.prefix}/${a}/static/components`,
         routePath : `/${a}/component/*`,
-        routeGroup: `${a}_static_component_`,
+        routeGroup: `${a}static_component_`,
         decodePath: true
       }).init(app)); */
 
@@ -359,7 +359,7 @@ class initapp {
 
     app.get('/:name/component/:comp/:src', async c => {
       let srcname = `${c.service.appPath}/${c.service.prefix}/${c.param.name}/`
-          + `_components/${c.param.comp}/static/${c.param.src}`;
+          + `components/${c.param.comp}/static/${c.param.src}`;
         
       //console.log(srcname);
 

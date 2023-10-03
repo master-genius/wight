@@ -430,7 +430,7 @@ let wapp = function (options = {}) {
   window.onscroll = function (){w.events.scroll();};
   window.onresize = function (){w.events.resize();};
   ${closePromptText}
-  ;(()=>{ w.__components_css__=${JSON.stringify(this.config.componentCss)};w.__css_code_map__=${this.compsCssCode}; })();
+  ;(()=>{ w._components_css__=${JSON.stringify(this.config.componentCss)};w.__css_code_map__=${this.compsCssCode}; })();
   </script>
   ${this.sseCode}
   ${this.jsbottom}
@@ -1214,7 +1214,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
 
         let comps_jscode = `;(()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
         if (this.config.componentModule) {
-          let mod_dir = `${appdir}/_static/module`;
+          let mod_dir = `${appdir}/static/module`;
           try {
             fs.accessSync(mod_dir);
           } catch (err) {
@@ -1241,7 +1241,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
     }
 
     if (this.isbuild) {
-      let comp_dir = appdir + '/_static/_components';
+      let comp_dir = appdir + '/static/components';
       await fsp.access(comp_dir).catch(err => {
         return fsp.mkdir(comp_dir);
       });
@@ -1338,15 +1338,15 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   }
 
   try {
-    fs.accessSync(`${pdir}/_extends`, fs.constants.F_OK);
-    await this.loadExt(`${pdir}/_extends`);
+    fs.accessSync(`${pdir}/extends`, fs.constants.F_OK);
+    await this.loadExt(`${pdir}/extends`);
   } catch (err){
     console.error(err);
   }
 
   try {
-    fs.accessSync(`${pdir}/_components`, fs.constants.F_OK);
-    await this.loadComps(`${pdir}/_components`, pdir);
+    fs.accessSync(`${pdir}/components`, fs.constants.F_OK);
+    await this.loadComps(`${pdir}/components`, pdir);
   } catch (err){
     console.error(err);
   }
@@ -1411,9 +1411,9 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
 
   for (let page of this.config.pages) {
     await this.loadPage(
-      `${pdir}/${page}/${page}.js`,
-      `${pdir}/${page}/${page}.html`,
-      `${pdir}/${page}/${page}.css`,
+      `${pdir}/pages/${page}/${page}.js`,
+      `${pdir}/pages/${page}/${page}.html`,
+      `${pdir}/pages/${page}/${page}.css`,
       page
     );
   }
@@ -1494,10 +1494,16 @@ wapp.prototype.newPage = function (name, pagedir) {
 
 }\n\ndefinePage(page);\n`;
 
-  let pdir = `${pagedir}/${name}/`;
-  let pagefile = `${pagedir}/${name}/${name}.js`;
-  let htmlfile = `${pagedir}/${name}/${name}.html`;
-  let cssfile = `${pagedir}/${name}/${name}.css`;
+  try {
+    fs.accessSync(`${pagedir}/pages`)
+  } catch (err) {
+    fs.mkdirSync(`${pagedir}/pages`)
+  }
+
+  let pdir = `${pagedir}/pages/${name}/`;
+  let pagefile = `${pagedir}/pages/${name}/${name}.js`;
+  let htmlfile = `${pagedir}/pages/${name}/${name}.html`;
+  let cssfile = `${pagedir}/pages/${name}/${name}.css`;
 
   try {
     fs.accessSync(pdir);
@@ -1651,7 +1657,7 @@ wapp.prototype.newComps = function (cname, cdir) {
     return false;
   }
 
-  let compsdir = `${cdir}/_components/${cname}`;
+  let compsdir = `${cdir}/components/${cname}`;
 
   try {
     fs.accessSync(compsdir)
@@ -1709,9 +1715,10 @@ wapp.prototype.newProject = function (project_dir) {
   }
 
   let loopcp = [
-    '_components', '_extends', '_static', 'home', 'user', 'test',
-    '_static/css', '_static/icon', '_static/images','_static/_components',
-     'list', '_components/u-card', '_components/@css',
+    'components', 'extends', 'static', 'pages',
+    'static/css', 'static/icon', 'static/images','static/components',
+    'components/u-card', 'components/@css', 'pages/home',
+    'pages/user', 'pages/list', 'pages/test'
   ];
 
   for (let i = 0; i < loopcp.length; i++) {
