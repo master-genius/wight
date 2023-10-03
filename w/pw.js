@@ -430,7 +430,7 @@ let wapp = function (options = {}) {
   window.onscroll = function (){w.events.scroll();};
   window.onresize = function (){w.events.resize();};
   ${closePromptText}
-  ;(()=>{ w._components_css__=${JSON.stringify(this.config.componentCss)};w.__css_code_map__=${this.compsCssCode}; })();
+  ;(()=>{ w.__components_css__=${JSON.stringify(this.config.componentCss)};w.__css_code_map__=${this.compsCssCode}; })();
   </script>
   ${this.sseCode}
   ${this.jsbottom}
