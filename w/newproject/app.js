@@ -26,6 +26,7 @@ w.addHook((c) => {
 
 
 //测试代码，在app.js文件中你可以直接在顶层使用await。
+/*
 notice('正在加载···')
 
 await new Promise((rv) => {
@@ -37,3 +38,4 @@ await new Promise((rv) => {
 })
 
 unnotify()
+ */
