@@ -186,7 +186,7 @@ class initapp {
             
           });
 
-          if (f.name === 'components') {
+          if (f.name === 'components' || f.name === 'pages') {
             let comps = fs.readdirSync(`${pd}/${f.name}`, {withFileTypes: true});
 
             for (let c of comps) {
