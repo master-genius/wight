@@ -1,6 +1,6 @@
 # 框架整体设计
 
-![](./wight-design.jpg)
+![](./images/wight-design.jpg)
 
 
 整体设计和当前主流的方式不同，它主要特点如下：
