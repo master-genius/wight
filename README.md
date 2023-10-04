@@ -8,15 +8,13 @@
 
 它具备以下特点：
 
-- 没有虚拟DOM，虚拟DOM其实问题也很多。
+- 没有虚拟DOM，虚拟DOM其实问题也很多。目前的前端API基本统一，尽可能使用浏览器的原生API。
 
-- 目前的前端API基本统一，尽可能使用浏览器的原生API。
+- 使用封装模板字符串的函数进行HTML渲染。
 
-- 绝大部分情况下使用封装模板字符串的函数进行HTML渲染。
+- 提供onload、onshow、onhide、onunload、onscroll、onbottom、onresize等事件函数支持。
 
-- 提供onload、onshow、onhide、onunload、onscroll、onbottom、onresize事件函数支持。
-
-- 每个页面是独立的目录，存在对应的.js, .html, .css文件。
+- 每个页面是独立的目录，存在对应的.js, .html, .css文件(注意这里css文件没有域的支持)。
 
 - 使用config.json进行项目的配置。
 
@@ -38,7 +36,7 @@
 
 - 通过config.json配置直接可以启用底部菜单栏，方便移动端开发。
 
-- 静态资源都统一放在 _static 目录中，访问路径以static开头，也可以_static开头。
+- 静态资源都统一放在 static 目录中。
 
 
 **在运行时，渲染会检测模板字符串是否合法。**
