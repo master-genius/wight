@@ -1393,6 +1393,14 @@ w.go = function (path, args = {}, op = 'forward') {
   location.hash = `${path}${qrs.length>0?'?':''}${qrs}`;
 };
 
+w.goBack = function () {
+  if (window.history.length > 1) {
+    window.history.back();
+    return true;
+  }
+  return false;
+}
+
 w.redirect = function (path, args = {}) {
   this.pageShowTypeLock = true;
   w.pageShowType = 'forward';
