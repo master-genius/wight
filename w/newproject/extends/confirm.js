@@ -60,9 +60,9 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
 
   let atext = `<div style="text-align:center;font-size:89%;color:#4a4a4f;">
     <p>${opts.text || ''}</p>
-    <button class="small" style="font-weight:bold;background:#df3456;" onclick="w.ext.confirmExec('${id}');">确定</button>
+    <button class="small" style="font-weight:bold;background:#dc5378;" onclick="w.ext.confirmExec('${id}');">确定</button>
     &nbsp;&nbsp;&nbsp;
-    <button class="small inverse" style="background:#676869;" onclick="w.ext.confirmCancel('${id}');">取消</button>
+    <button class="small inverse" style="background:#777879;" onclick="w.ext.confirmCancel('${id}');">取消</button>
   </div>`;
 
   unalert('all');

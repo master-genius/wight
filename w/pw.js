@@ -1410,6 +1410,12 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   }
 
   for (let page of this.config.pages) {
+    try {
+      fs.accessSync(`${pdir}/pages/${page}`)
+    } catch (err) {
+      this.newPage(page, pdir)
+    }
+
     await this.loadPage(
       `${pdir}/pages/${page}/${page}.js`,
       `${pdir}/pages/${page}/${page}.html`,
