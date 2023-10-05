@@ -258,6 +258,8 @@ lr的值可以是right，默认是left，在左侧。up表示是否向上的位�
 
 ### w.import
 
+关于动态导入模块的文档，请参考 [MDN import](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/import)
+
 ```javascript
 //函数定义
 window._import = w.import = async function(path, reload=false){}
