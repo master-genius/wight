@@ -87,5 +87,7 @@
 
     "description": "",
     
-    "keywords": []
+    "keywords": [],
+
+    "iconPath": "/favicon.ico"
 }
