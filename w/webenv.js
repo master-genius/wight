@@ -1148,7 +1148,11 @@ window.document = document;
 for (let k in window) !global[k] && (global[k] = window[k]);
 for (let k in window.globalThis) !global[k] && (global[k] = window.globalThis[k]);
 
-class __htmlstate {
+/** -------------  */
+
+'use strict';
+
+class HtmlState_ {
 
   constructor () {
     this.STATE = {
@@ -1191,6 +1195,10 @@ class __htmlstate {
     this.data = ''
 
     this.is_script = false
+
+    this.script_reg = new RegExp('<SCRIPT>', 'ig')
+    this.script_end_reg = new RegExp('<\/SCRIPT>', 'ig')
+    this.html_comment_reg = new RegExp('<!--(.|[\r\n])*?-->','mg')
   }
 
   diffCloseTag () {
@@ -1237,6 +1245,8 @@ class __htmlstate {
     if (this.STATE.TAG_START === this.curState || this.STATE.TAG_CLOSE === this.curState) {
       return false
     }
+
+    if (next_char === ' ') return true
 
     if (this.curState === this.STATE.TAG_ATTR_VALUE_END) {
       this.curState = this.STATE.TAG_ATTR_PRE
@@ -1291,7 +1301,6 @@ class __htmlstate {
     }
 
     return false
-
   }
 
   checkTagEnd (cur_char, next_char) {
@@ -1340,9 +1349,27 @@ class __htmlstate {
 
     if (this.curState === this.STATE.TAG_ATTR_VALUE || this.curState === this.STATE.TAG_ATTR_VALUE_START)
     {
+      // a="''" or a='""'
       if (cur_char !== this.attrType) {
-        return false
+        if (this.curState === this.STATE.TAG_ATTR_VALUE_START) {
+          //中间的属性值允许出现空格
+          if (next_char === '\n') {
+            return false
+          }
+          this.curState = this.STATE.TAG_ATTR_VALUE
+          return true
+        }
+        
+        if (next_char === '\n') {
+          return false
+        }
+        //this.STATE.TAG_ATTR_VALUE 不用改
+        return true
       }
+
+      /* if (cur_char !== this.attrType) {
+        return false
+      } */
       this.curState = this.STATE.TAG_ATTR_VALUE_END
       return true
     }
@@ -1374,16 +1401,15 @@ class __htmlstate {
   }
 
   checkChar(cur_char, next_char) {
-
     if (cur_char === '/' && next_char && next_char === '>') {
       if ( (this.attrType === '' && this.curState === this.STATE.TAG_ATTR_VALUE)
         || this.STATE.TAG_NAME === this.curState
         || this.STATE.TAG_ATTR === this.curState
         || this.STATE.TAG_ATTR_PRE === this.curState
       ) {
-        this.cursor += 1;
-        this.curState = this.STATE.TAG_CLOSE_END;
-        return true;
+        this.cursor += 1
+        this.curState = this.STATE.TAG_CLOSE_END
+        return true
       }
     }
 
@@ -1424,7 +1450,7 @@ class __htmlstate {
       return true
     }
     
-    return true;
+    return true
   }
 
   checkState (cur_char, next_char) {
@@ -1471,7 +1497,6 @@ class __htmlstate {
   }
 
   diffStack () {
-
     if (this.tagStack.length !== this.tagCloseStack.length) {
       return false
     }
@@ -1493,8 +1518,7 @@ class __htmlstate {
     
     this.init();
 
-    if (typeof data !== 'string') {
-      console.error('data is not string.')
+    if ( !(typeof data === 'string' || (data instanceof String)) ) {
       return true;
     }
 
@@ -1503,9 +1527,9 @@ class __htmlstate {
       return false;
     }
 
-    this.data = data.replace(new RegExp('<SCRIPT>', 'ig'), '<script>')
-                    .replace(new RegExp('<\/SCRIPT>', 'ig'), '<\/script>')
-                    .replace(/<!--(.|[\r\n])*?-->/mg, '');
+    this.data = data.replace(this.script_reg, '<script>')
+                    .replace(this.script_end_reg, '<\/script>')
+                    .replace(this.html_comment_reg, '');
 
     if (this.data.length === 0) {
       return true
@@ -1564,7 +1588,6 @@ class __htmlstate {
     }
 
     return true
-
   }
 
 }
@@ -1609,7 +1632,7 @@ const w = new function () {
     }
   });
 
-  this.setTitle = (t) => {
+  this.attachTitle = (t) => {
     this.title = `${this.__title__}${t}`;
   };
 
@@ -1766,11 +1789,11 @@ const w = new function () {
     }
   };
 
-  this.notifyError = function (info, tmout = 2000) {
+  this.notifyError = function (info, tmout = 2500) {
     w.notify(info, {tmout: tmout, ntype: 'error'});
   };
 
-  this.notifyLight = function (info, tmout = 2000) {
+  this.notifyLight = function (info, tmout = 2500) {
     w.notify(info, {tmout: tmout, ntype: 'light'});
   };
 
@@ -2360,11 +2383,19 @@ w.hideSliderPage = function () {
     w.slidedom.innerHTML = '';
   }
 };
+
 w.hideSlider = w.hideSliderPage;
 
-w.pageTop = function () {
-  if (w.curpage) {
-    w.curpage.__dom__.scrollTop = 0;
+w.scrollTop = function (bh='smooth') {
+  w.scroll({
+    top: 0,
+    behavior: bh
+  });
+};
+
+w.scroll = function (x, y) {
+  if (w.curpage && w.curpage.__dom__) {
+    w.curpage.__dom__.scroll(x, y);
   }
 };
 
@@ -2480,11 +2511,12 @@ w.loadPage = async function (R) {
 w.reload = function (force = true) {
   let pg = w.curpage;
 
+  w.destroyPage(pg);
+
   if (!pg || force) {
     return w.listenHash();
   }
 
-  w.destroyPage(pg);
   let R = w.parseHashUrl(pg.__name__);
   w.loadPage(R);
 };
@@ -2513,6 +2545,14 @@ w.go = function (path, args = {}, op = 'forward') {
   location.hash = `${path}${qrs.length>0?'?':''}${qrs}`;
 };
 
+w.goBack = function () {
+  if (window.history.length > 1) {
+    window.history.back();
+    return true;
+  }
+  return false;
+}
+
 w.redirect = function (path, args = {}) {
   this.pageShowTypeLock = true;
   w.pageShowType = 'forward';
@@ -2526,7 +2566,7 @@ w.redirect = function (path, args = {}) {
     w.listenHash();
   };
 
-  if (args.delay) {
+  if (args.delay && typeof args.delay === 'number') {
     return setTimeout(startRedirect, args.delay);
   }
 
@@ -2597,7 +2637,7 @@ w.setAttr = function (pagename, data) {
       qcss = `[name=${k.substring(1)}]`;
     } else if (k[0] === '.') {
       qcss = `[class=${k.substring(1)}]`;
-    } else if (k[0] === '[') {
+    } else if (k.indexOf('[') >= 0) {
       qcss = k;
     } else if (k[0] === ':') {
       qcss = `[data-bind=${k.substring(1)}]`;
@@ -2702,7 +2742,6 @@ w.view = function (pagename, data) {
 
   let qcss = '';
   let nds = '';
-  
 
   for (let k in data) {
     qcss = `[data-name=${k}]`;
@@ -2725,6 +2764,11 @@ w.view = function (pagename, data) {
       nds = w._queryGlobal(qcss);
     }
 
+    if (data[k] === null) {
+      w._resetData(pagename, pg, nds);
+      continue;
+    }
+
     try {
       w._setData(pagename, pg, nds, data[k]);
     } catch (err) {
@@ -2736,7 +2780,42 @@ w.view = function (pagename, data) {
       }
     }
   }
+};
 
+w.resetView = function(pagename, qss) {
+  if (!Array.isArray(qss)) {
+    qss = [qss];
+  }
+  
+  let data = {};
+  for (let q of qss) {
+    if (q && typeof q === 'string') {
+      data[q] = null;
+    }
+  }
+  w.view(pagename, data);
+};
+
+w._resetData = function (pagename, pg, nds) {
+  for (let d of nds) {
+    if (d.tagName === 'IMG') {
+      d.src = '';
+      continue;
+    }
+    
+    if (d.tagName === 'INPUT') {
+      if (['checkbox', 'radio'].indexOf(d.type) >= 0) {
+        d.checked = false;
+        continue;
+      }
+    }
+
+    if (d.value !== undefined) {
+      ;(d.tagName !== 'SELECT') && (d.value = '');
+    } else {
+      d.innerHTML = '';
+    }
+  }
 };
 
 w._setData = function (pagename, pg, nds, data) {
@@ -2746,7 +2825,7 @@ w._setData = function (pagename, pg, nds, data) {
   let dataType = typeof data;
 
   for (let i = 0; i < nds.length; i++) {
-
+    
     if (nds[i].dataset.map && typeof pg[nds[i].dataset.map] === 'function') {
       dtemp = pg[nds[i].dataset.map]({
         data: data,
@@ -2755,7 +2834,7 @@ w._setData = function (pagename, pg, nds, data) {
         dataType}) || '';
 
     } else if (nds[i].dataset.list && typeof pg[nds[i].dataset.list] === 'function') {
-      if (data instanceof Array) {
+      if (Array.isArray(data)) {
         data.forEach((a, ind) => {
           dtemp += pg[nds[i].dataset.list]({
             data: a, 
@@ -3162,9 +3241,6 @@ w.runHooks = async function (ctx) {
       }
 
       ch.options.count += 1;
-      ;(w.debug || w.dev)
-        &&
-      console.log('run hook function ', ch.options.name, '; current page:', cname);
       if (false === await ch.func(ctx)) {
         return false;
       }
@@ -3997,10 +4073,12 @@ class Component extends HTMLElement {
     let nds;
     
     for (let k in data) {
-      
       qcss = this._fmtquery(k);
-  
       nds = this.shadow.querySelectorAll(qcss);
+      if (data[k] === null) {
+        w._resetData(0, this, nds);
+        continue;
+      }
 
       try {
         w._setData(0, this, nds, data[k]);
@@ -4013,6 +4091,17 @@ class Component extends HTMLElement {
         }
       }
     }
+  }
+
+  resetView(qss) {
+    if (!Array.isArray(qss)) qss = [qss];
+    let data = {};
+    for (let q of qss) {
+      if (q && typeof q === 'string') {
+        data[q] = null;
+      }
+    }
+    this.view(data);
   }
 
   setAttr (data) {
