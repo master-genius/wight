@@ -1382,8 +1382,18 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
       this.config.jsurl = [this.config.jsurl];
     }
 
+    let attr = '';
+
     for (let j of this.config.jsurl) {
-      this.jstext += `<script src="${makeRealSrc(j)}"></script>`;
+      attr = '';
+      if (typeof j === 'string') {
+        this.jstext += `<script src="${makeRealSrc(j)}"></script>`;
+      } else if (typeof j === 'object' && j.url) {
+        if (j.defer) {
+          attr = ' defer';
+        }
+        this.jstext += `<script src="${makeRealSrc(j.url)}"${attr}></script>`;
+      }
     }
 
   }
@@ -1393,8 +1403,19 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
       this.config.jsbottom = [ this.config.jsbottom ];
     }
 
+    let attr = '';
+
     for (let jb of this.config.jsbottom) {
-      this.jsbottom += `<script src="${makeRealSrc(jb)}"></script>`;
+      attr = '';
+      if (typeof jb === 'string') {
+        this.jsbottom += `<script src="${makeRealSrc(jb)}"></script>`;
+      } else if (typeof jb === 'object' && jb.url) {
+        if (jb.async) {
+          attr = ' async';
+        }
+
+        this.jsbottom += `<script src="${makeRealSrc(jb.url)}"${attr}></script>`;
+      }
     }
   }
 
