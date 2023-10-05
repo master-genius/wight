@@ -2,9 +2,7 @@
     "title" : "新项目",
     "pages" : [
         "home",
-        "user",
-        "test",
-        "list"
+        "user"
     ],
 
     "host" : "https://www.a.com",
@@ -13,7 +11,7 @@
 
     "tabs" : {
         "background" : "#fafaff",
-        "selectedBackground" : "#f1f2f3",
+        "selectedBackground" : "#fdad45",
         "list" : [
             {
                 "page" : "home",
@@ -53,7 +51,7 @@
     ],
 
     "components" : [
-        "u-card"
+
     ],
 
     "componentCss": {

@@ -181,3 +181,100 @@ w.notify('<h2>消息</h2><p>这是消息</p>', {
 
 超时，默认为3500毫秒，超时后就会自动隐藏通知，这也是和alert一个大的区别，alert是需要手动关闭的。
 
+基于notify封装了一些方法用于提高效率：
+
+- notifyError(info, timeout=2500)
+
+- notifyTopError(info, timeout=2000)
+
+- notifyTop(info, timeout=2500)
+
+- notifyOnly(info, timeout=2500)
+
+- notifyLight(info, timeout=2500)
+
+
+### prompt弹出模态框
+
+浏览器也有prompt，这里的prompt和浏览器的有区别，并且这个也是重写了window.prompt。prompt默认从底部弹出一个模态框，显示的内容其实和notify以及alert差不多，主要是显示效果和功能有区别。
+
+```javascript
+//函数定义
+w.prompt = function (info, options) {}
+```
+
+**options**
+
+- noclose 不显示关闭按钮
+
+- glass 玻璃效果，glass设置为true就是透明背景，设置为字符串dark表示暗色模式
+
+- wh 位置，where的前两个字母，可以是bottom、top、middle
+
+基于prompt封装了快速调用api：
+
+- promptMiddle(info)
+
+- promptDark(info)
+
+- promptGlass(info)
+
+- promptMiddleDark(info)
+
+- promptTopDark(info)
+
+- promptMiddleDark(info)
+
+- promptMiddleGlass(info)
+
+- promptTopGlass(info)
+
+
+### 侧边导航：w.navi和w.naviHide
+
+navi是navigate缩写。w.navi用于显示一个侧边导航条。
+
+w.naviHide用于隐藏导航条。
+
+但是导航条的具体内容是自己定义，也就是传递html文本。
+
+```javascript
+w.navi = function(text, options={}){}
+```
+
+基于navi封装了快速调用：
+
+- w.naviGlass(text, lr='left', up=false)
+
+lr的值可以是right，默认是left，在左侧。up表示是否向上的位置显示，默认的导航条是在底部。
+
+
+> ----
+> ## 属性和其他相关操作
+> ----
+
+### w.title
+
+w.title是一个getter和setter，访问w.title可以获取应用的标题，设置w.title可以改变应用的标题，也就是浏览器页面的标签显示名称会发生变化。
+
+### w.attachTitle()
+
+从原始标题后面追加一个标题，设置为新的标题：
+
+```javascript
+//如果应用的名称是IT资讯，则标题变成：IT资讯 - 内容详情
+w.attachTitle(' - 内容详情')
+```
+
+### w.resetTitle()
+
+重置为原始标题。
+
+### w.config
+
+配置项，由开发者自行扩展的配置项，这个属性不能被直接赋值，只能添加或删除属性。
+
+### w.curpage
+
+当前页面，在任何位置，都可以通过此属性获取当前是哪个页面正在显示。
+

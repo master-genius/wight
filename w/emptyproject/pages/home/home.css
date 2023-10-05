@@ -1,0 +1,8 @@
+/**CSS文件，建议在样式名前面统一加上页面名称**/
+
+.submit-button {
+  border: solid 0.05rem #dfdfef;
+  padding: 0.5rem;
+  text-align: center;
+  line-height: 125%;
+}

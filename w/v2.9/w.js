@@ -637,11 +637,11 @@ const w = new function () {
     }
   };
 
-  this.notifyError = function (info, tmout = 2000) {
+  this.notifyError = function (info, tmout = 2500) {
     w.notify(info, {tmout: tmout, ntype: 'error'});
   };
 
-  this.notifyLight = function (info, tmout = 2000) {
+  this.notifyLight = function (info, tmout = 2500) {
     w.notify(info, {tmout: tmout, ntype: 'light'});
   };
 

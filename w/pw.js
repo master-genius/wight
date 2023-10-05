@@ -1691,8 +1691,10 @@ wapp.prototype.newComps = function (cname, cdir) {
 
 };
 
+
+
 //new project
-wapp.prototype.newProject = function (project_dir) {
+wapp.prototype.newProject = function (project_dir, project_template='newproject') {
   try {
     fs.accessSync(project_dir);
     console.log(project_dir, '已经存在，如果需要重新创建，可以删除此目录或重命名。');
@@ -1708,7 +1710,9 @@ wapp.prototype.newProject = function (project_dir) {
     return false;
   }
 
-  let new_project_dir = __dirname + '/newproject';
+  if (!project_template) project_template = 'newproject';
+
+  let new_project_dir = __dirname + '/' + project_template;
 
   let cpfiles = ['app.js', 'app.css', 'config.json', 'favicon.ico', 'manifest.json'];
 
@@ -1723,9 +1727,12 @@ wapp.prototype.newProject = function (project_dir) {
   let loopcp = [
     'components', 'extends', 'static', 'pages',
     'static/css', 'static/icon', 'static/images','static/components',
-    'components/u-card', 'components/@css', 'pages/home',
-    'pages/user', 'pages/list', 'pages/test'
+    'components/@css', 'pages/home', 'pages/user'
   ];
+
+  if (project_template === 'newproject') {
+    loopcp.push('pages/list', 'pages/test', 'components/u-card');
+  }
 
   for (let i = 0; i < loopcp.length; i++) {
     try {
@@ -1754,7 +1761,7 @@ wapp.prototype.newProject = function (project_dir) {
     try {
       fs.accessSync(`${new_project_dir}/${loopcp[i]}`, fs.constants.F_OK);
     } catch (err) {
-      console.error(err.message);
+      //console.error(err.message);
       continue;
     }
 
