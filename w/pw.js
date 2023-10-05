@@ -280,7 +280,7 @@ let wapp = function (options = {}) {
   <script>
   'use strict';
 
-  window.onload = async function () {
+  window.addEventListener('load', async function () {
     let dms = [
       'pgcdom','coverdom','notifydom','alertdom','alertdom1', 'slidedom', 'alertcoverdom',
       'alertcoverdom1', 'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
@@ -303,7 +303,7 @@ let wapp = function (options = {}) {
       w.tabsmenudom.background = '${this.config.tabsBackground}';
       w.tabsmenudom.innerHTML = \`${this.tabsHTML}\`;
     }
-  };
+  });
   
   function initPages () {
     for (let p in w.pages) {
@@ -326,7 +326,7 @@ let wapp = function (options = {}) {
     }
   }
 
-  window.onpageshow = async function() {
+  window.addEventListener('pageshow', async function() {
     await new Promise(rv => {setTimeout(() => {rv();}, 30);});
     if (w.init && typeof w.init === 'function') await w.init();
     if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
@@ -336,7 +336,7 @@ let wapp = function (options = {}) {
       w.listenHash();
     }
     
-  };
+  });
 
   window.jump_page_forward = false;
 
@@ -371,7 +371,7 @@ let wapp = function (options = {}) {
     }
   });
 
-  window.onhashchange = async function(e) {
+  window.addEventListener('hashchange', async function(e) {
     if (w.hashchange && typeof w.hashchange === 'function') {
       if (w.hashchange(e) === false) {
         return;
@@ -425,10 +425,10 @@ let wapp = function (options = {}) {
     w.historyLength = history.length;
 
     w.listenHash(op);
-  };
+  });
 
-  window.onscroll = function (){w.events.scroll();};
-  window.onresize = function (){w.events.resize();};
+  window.addEventListener('scroll', function (){w.events.scroll();});
+  window.addEventListener('resize', function (){w.events.resize();});
   ${closePromptText}
   ;(()=>{ w.__components_css__=${JSON.stringify(this.config.componentCss)};w.__css_code_map__=${this.compsCssCode}; })();
   </script>
