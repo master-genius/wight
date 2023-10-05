@@ -1702,7 +1702,14 @@ w._setData = function (pagename, pg, nds, data) {
         dtemp = pg[nds[i].dataset.list]({data: data, target: nds[i], type: 'list', dataType}) || '';
       }
     } else {
-      if (typeof data === 'object') {
+      if (pg.display && typeof pg.display === 'object' 
+        && pg.display[nds[i].dataset.name]
+        && typeof pg.display[nds[i].dataset.name] === 'function')
+      {
+        dtemp = pg.display[nds[i].dataset.name]({
+          data: data, target: nds[i], type: 'display', dataType
+        }) || (typeof data === 'object' ? JSON.stringify(data) : data);
+      } else if (typeof data === 'object') {
         dtemp = JSON.stringify(data);
       } else {
         dtemp = data;
