@@ -1,13 +1,12 @@
-/**
- * 这种定义页面的方式是早期的形式，但是依旧被支持。
- * 新创建的页面已经改为class的形式。
- */
-exports.test = new function () {
-  this.data = {
+'use strict';
 
-  };
+class page {
 
-  this.testConfirm = (t) => {
+  constructor() {
+
+  }
+
+  testConfirm(t) {
     confirm({
       text: '确认？',
       callback: () => {
@@ -18,30 +17,40 @@ exports.test = new function () {
         notify('CANCEL')
       }
     })
-  };
+  }
 
-  this.onload = function (c) {
+  async onload(ctx) {
   
-  };
+  }
 
-  this.onshow = function (c) {
+  async onshow(ctx) {
 
-  };
+  }
 
-  this.onhide = function () {
+  onhide() {
 
-  };
+  }
 
-  this.onunload = function () {
+  onunload() {
 
-  };
+  }
 
-  this.onbottom = function () {
+  onbottom() {
 
-  };
+  }
 
-  this.onscroll = function () {
+  onscroll(scrollTop, clientHeight, scrollHeight) {
 
-  };
+  }
 
-};
+  ontop() {
+
+  }
+
+  onresize() {
+
+  }
+
+}
+
+definePage(page);

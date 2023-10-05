@@ -1,13 +1,12 @@
-/**
- * 这种定义页面的方式是早期的形式，但是依旧被支持。
- * 新创建的页面已经改为class的形式。
- */
-exports.list = new function () {
-  this.data = {
+'use strict';
 
-  };
+class page {
 
-  this.makeList = () => {
+  constructor() {
+
+  }
+
+  makeList() {
     let total = parseInt(Math.random() * 9) + 8;
     let datalist = [];
     for (let i = 0; i < total; i++) {
@@ -17,15 +16,9 @@ exports.list = new function () {
       });
     }
     return datalist;
-  };
+  }
 
-  /**
-   * d包含属性：data、target、type
-   * type为map或list，表示是通过data-map还是通过data-list执行的函数。
-   * data是具体的数值，target是目前执行的DOM节点。
-   * @param {object} d 
-   */
-  this.renderList = (d) => {
+  renderList(d) {
     let htext = '';
     let randcolor = (n = 100, rn = 150) => {
       let r = parseInt(Math.random() * rn) + n;
@@ -46,43 +39,44 @@ exports.list = new function () {
     });
 
     return htext;
-  };
+  }
 
-  this.onload = function (c) {
+  async onload(ctx) {
     this.view({
       list: this.makeList()
     });
-  };
+  }
 
-  this.onshow = function (c) {
+  async onshow(ctx) {
 
-  };
+  }
 
-  this.onhide = function () {
+  onhide() {
 
-  };
+  }
 
-  this.onunload = function () {
+  onunload() {
 
-  };
+  }
 
-  this.onbottom = function () {
+  onbottom() {
     this.view({
       list: this.makeList()
     });
+  }
 
-  };
+  onscroll(scrollTop, clientHeight, scrollHeight) {
 
-  this.onscroll = function (scrollTop, clientHeight, scrollHeight) {
+  }
 
-  };
+  ontop() {
 
-  this.ontop = function () {
-  
-  };
+  }
 
-  this.onresize = function () {
+  onresize() {
 
-  };
+  }
 
-};
+}
+
+definePage(page);
