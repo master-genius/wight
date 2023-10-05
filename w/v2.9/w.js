@@ -480,7 +480,7 @@ const w = new function () {
     }
   });
 
-  this.setTitle = (t) => {
+  this.attachTitle = (t) => {
     this.title = `${this.__title__}${t}`;
   };
 
@@ -1414,7 +1414,7 @@ w.redirect = function (path, args = {}) {
     w.listenHash();
   };
 
-  if (args.delay) {
+  if (args.delay && typeof args.delay === 'number') {
     return setTimeout(startRedirect, args.delay);
   }
 
