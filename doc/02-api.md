@@ -248,6 +248,26 @@ w.navi = function(text, options={}){}
 
 lr的值可以是right，默认是left，在左侧。up表示是否向上的位置显示，默认的导航条是在底部。
 
+> ----
+> ## 模块相关
+> ----
+
+### require
+
+提供了全局函数require用于导入扩展，扩展就是extends目录中的模块。启用的扩展都被挂载到w.ext，但是强烈推荐你使用require的方式去导入，这在后续代码的维护升级都是有好处的。
+
+### w.import
+
+```javascript
+//函数定义
+window._import = w.import = async function(path, reload=false){}
+```
+
+你可以使用浏览器默认的import，w.import是对import的封装，加入了缓存机制，如果已经导入过，则直接返回结果。
+
+可以通过第二个参数reload指定为true表示不使用缓存。
+
+w.import另一个好处是会自动加入前缀路径，而直接使用浏览器的import则要自己构建url，就是要使用w.prepath属性进行拼接。
 
 > ----
 > ## 属性和其他相关操作

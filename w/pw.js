@@ -197,6 +197,15 @@ let wapp = function (options = {}) {
   this.appInitCode = '';
   this.compsCssCode = '';
 
+  /**
+   * Object.defineProperty(w, 'prepath', {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: '${this.config.prepath}'
+    });
+   */
+
   this.compile = function () {
     //window.onunload = function () {return '退出？';};
     let closePromptText = `window.onbeforeunload = function (e) {return e.returnValue = '退出应用？';};`
