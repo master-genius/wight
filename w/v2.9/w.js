@@ -2837,7 +2837,7 @@ class Component extends HTMLElement {
     w.notifyError(`${this.tagName} [${outerText}]存在循环引用${st.ref ? ' &lt;--&gt; ' : ''}${st.ref || ''}`, 20000);
     return '';
   }
-
+  
   //不会重复初始化基础结构。
   initPlateTemplate(id=null, d=null) {
     if (this.__init_flag__) {
