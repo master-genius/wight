@@ -41,3 +41,15 @@ explain.json是组件的说明文件。
 ```html
 <div data-onclick="clickHandle">Event Test</div>
 ```
+
+## 组件的可用方法
+
+- query和queryAll，就是对querySelector的封装，但是查询的节点仅限于组件内。
+
+- sliderPage和hideSliderPage，对w.sliderPage和w.hideSlidePage的封装。
+
+- render 用于渲染的逻辑操作。
+
+- view 用于渲染数据。
+
+- plate 

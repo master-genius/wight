@@ -2845,8 +2845,8 @@ class Component extends HTMLElement {
     }
 
     if (!d) d = this.plate(id);
-
-    if (typeof d === 'object') {
+  
+    if (typeof d === 'object' && d) {
       this.shadow.appendChild(d);
     } else if (typeof d === 'string' && d.length > 0) {
       let st = this.checkLoopRef(d);
@@ -2872,23 +2872,26 @@ class Component extends HTMLElement {
   plate (id = null, data = {}) {
     if (typeof id === 'object' || !id) {
       data = id || {};
-      id = this.tagName.toLowerCase();
+      id = null;
     }
+
+    let tempid = this.tagName.toLowerCase();
     
-    if (id[0] === '#') id = id.substring(1);
+    if (id && id[0] === '#') id = id.substring(1);
 
-    let nd = w.__templatedom__.querySelector(`template[id=${id}]`);
-
-    if (!nd) {
-      nd = w.__templatedom__.querySelector(`div[data-templateid=${id}]`);
-      if (nd) nd = nd.querySelector('template');
+    let nd = w.__templatedom__.querySelector(`div[data-templateid=${tempid}]`);
+    if (!nd) return false;
+    if (id) {
+      nd = nd.querySelector(`template[id=${id}]`);
+    } else {
+      nd = nd.querySelector('template');
     }
 
     if (!nd) return false;
 
     let init_style = true;
-    if (w.__components_css__ && w.__components_css__[id]) {
-      let csslist = w.__components_css__[id];
+    if (w.__components_css__ && w.__components_css__[tempid]) {
+      let csslist = w.__components_css__[tempid];
       if (csslist && Array.isArray(csslist) && csslist.length > 0) {
         let sty = '';
         let ctext= '';
@@ -2947,7 +2950,7 @@ class Component extends HTMLElement {
 
   view (data) {
     if (!this.__init_flag__) {
-      this.initPlateTemplate();
+      this.initPlateTemplate(null, null);
     }
 
     let qcss = '';
