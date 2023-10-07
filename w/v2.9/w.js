@@ -2877,10 +2877,10 @@ class Component extends HTMLElement {
     
     if (id[0] === '#') id = id.substring(1);
 
-    let nd = document.querySelector(`template[id=${id}]`);
+    let nd = w.__templatedom__.querySelector(`template[id=${id}]`);
 
     if (!nd) {
-      nd = document.querySelector(`div[data-id=${id}]`);
+      nd = w.__templatedom__.querySelector(`div[data-templateid=${id}]`);
       if (nd) nd = nd.querySelector('template');
     }
 

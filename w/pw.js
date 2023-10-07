@@ -197,6 +197,8 @@ let wapp = function (options = {}) {
   this.appInitCode = '';
   this.compsCssCode = '';
 
+  this.oid = Math.random().toString(16).substring(2);
+
   /**
    * Object.defineProperty(w, 'prepath', {
       enumerable: true,
@@ -237,9 +239,13 @@ let wapp = function (options = {}) {
   </script>
 </head>
 <body style="overflow-x:hidden;overflow-wrap:break-word;">
-  <div>${this.templates}</div>
+  <div id="templates-${this.oid}">${this.templates}</div>
   <script>
     'use strict';
+    w.__templatedom__ = document.querySelector('#templates-${this.oid}');
+    if (!w.__templatedom__) {
+      w.notifyTopError('无法获取template容器节点');
+    }
     w.host = '${this.config.host}';
     window.__prepath__ = w.prepath = '${this.config.prepath}';
     w.homepage = '${this.config.pages[0]}';
@@ -1203,7 +1209,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           //tempdata = this.replaceImportCss(tempdata, `${cdir}/${names[i]}`);
 
           //使用div包装模板。
-          this.templates += `<div data-id="${cex.name}">${simpleComporessHTML(tempdata)}</div>`;
+          this.templates += `<div data-templateid="${cex.name}">${simpleComporessHTML(tempdata)}</div>`;
         }
       } catch (err) {
       
