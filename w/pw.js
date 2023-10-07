@@ -239,13 +239,18 @@ let wapp = function (options = {}) {
   </script>
 </head>
 <body style="overflow-x:hidden;overflow-wrap:break-word;">
-  <div id="templates-${this.oid}">${this.templates}</div>
+  <div id="w-pages-container-${this.oid}"></div>
+  <div id="w-templates-${this.oid}">${this.templates}</div>
+  <div id="w-interface-${this.oid}"></div>
   <script>
     'use strict';
-    w.__templatedom__ = document.querySelector('#templates-${this.oid}');
+    w.pgcdom = document.querySelector('#w-pages-container-${this.oid}');
+    w.interfacedom = document.querySelector('#w-interface-${this.oid}');
+    w.__templatedom__ = document.querySelector('#w-templates-${this.oid}');
     if (!w.__templatedom__) {
       w.notifyTopError('无法获取template容器节点');
     }
+    w.pageNameList = ["${this.config.pages.join('","')}"];
     w.host = '${this.config.host}';
     window.__prepath__ = w.prepath = '${this.config.prepath}';
     w.homepage = '${this.config.pages[0]}';
@@ -297,21 +302,20 @@ let wapp = function (options = {}) {
 
   window.addEventListener('load', async function () {
     let dms = [
-      'pgcdom','coverdom','notifydom','alertdom','alertdom1', 'slidedom', 'alertcoverdom',
+      'coverdom','notifydom','alertdom','alertdom1', 'slidedom', 'alertcoverdom',
       'alertcoverdom1', 'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
     ];
 
     for (let i=0; i<dms.length; i++) {
-      w[ dms[i] ] = document.body.insertBefore(
+      w[ dms[i] ] = w.interfacedom.insertBefore(
         document.createElement('div'),
-        document.body.firstChild
+        w.interfacedom.firstChild
       );
     }
 
-    ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(() => {rv();}, 10);});' : ''}
+    ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(rv, 5);});' : ''}
 
     w.initPage();
-    initPages();
 
     if (w.tabs.list.length > 0) {
       w.tabsmenudom.className = 'w-tabbar-row-x';
@@ -319,27 +323,6 @@ let wapp = function (options = {}) {
       w.tabsmenudom.innerHTML = \`${this.tabsHTML}\`;
     }
   });
-  
-  function initPages () {
-    for (let p in w.pages) {
-      w.pages[p].view = function (data) {return w.view(p,data);};
-      w.pages[p].resetView = function (data) {return w.resetView(p,data);};
-      w.pages[p].render = function (htext) {return w.fmtHTML(p, htext);};
-      w.pages[p].setScroll = function(scr) {
-        if (scr < 0) { w.pages[p].__dom__.scrollTop += scr; }
-        else { w.pages[p].__dom__.scrollTop = scr; }
-      };
-      w.pages[p].destroy = function () {w.destroyPage(w.pages[p]);};
-      w.pages[p].query = function(qstr) {return w.pages[p].__dom__.querySelector(qstr);};
-      w.pages[p].queryAll = function(qstr) {return w.pages[p].__dom__.querySelectorAll(qstr);};
-      w.pages[p].setAttr = function (data) {w.setAttr(p,data);};
-      if (!w.pages[p].data || typeof w.pages[p].data !== 'object') {
-        w.pages[p].data = {};
-      }
-      w._make_page_bind(p);
-      w._page_style_bind(p);
-    }
-  }
 
   window.addEventListener('pageshow', async function() {
     await new Promise(rv => {setTimeout(() => {rv();}, 35);});
@@ -393,7 +376,7 @@ let wapp = function (options = {}) {
       }
     }
 
-    await new Promise((rv, rj) => { setTimeout( () => { rv(); }, 15); });
+    await new Promise((rv, rj) => { setTimeout(rv, 15); });
 
     let parsehash = (h) => {
       let ind = h.indexOf('#');

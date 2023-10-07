@@ -944,7 +944,14 @@ const w = new function () {
     }
   };
 
-  this.pages = {};
+  this.pageNameList=[];
+  Object.defineProperty(this, 'pages', {
+    value: Object.create(null),
+    enumerable: true,
+    configurable: false,
+    writable: false
+  });
+
   this.curpage = null;
   this.curpagename = null;
 
@@ -1047,32 +1054,58 @@ const w = new function () {
 
   this.initFlag = false;
 
+  this.initOnePage = function (name, obj=null) {
+    let pg = this.pages[name];
+    if (!pg) {
+      pg = this.pages[name] = obj || {};
+    }
+
+    if (pg.state) {
+      return false;
+    }
+
+    pg.__dom__ = this.pgcdom.insertBefore(document.createElement('div'),
+                                          this.pgcdom.firstChild);
+    pg.initCount = 0;
+    pg.loaded = false;
+    pg.scroll = 0;
+    pg.bottomTime = 0;
+    pg.pageKey = name;
+    pg.__name__ = name;
+    pg.init = false;
+    pg.__dom__.onscroll = w.events.scroll;
+    pg.state = true;
+    pg.tabsPlace = '';
+
+    if (w.tabs.list.length > 0) {
+        pg.tabsPlace = '<div style="height:3.8rem;">&nbsp;</div>';
+
+        if (w.tabs.pages.indexOf(name) >= 0) {
+          pg.__dom__.style.cssText = 'z-index:1;';
+        }
+    }
+
+    pg.view = function (data) {return w.view(name, data);};
+    pg.resetView = function (data) {return w.resetView(name, data);};
+    pg.render = function (htext) {return w.fmtHTML(name, htext);};
+    pg.setScroll = function(scr) {
+        if (scr < 0) { w.pages[name].__dom__.scrollTop += scr; }
+        else { w.pages[name].__dom__.scrollTop = scr; }
+    };
+    pg.destroy = function () {w.destroyPage(w.pages[name]);};
+    pg.query = function(qstr) {return w.pages[name].__dom__.querySelector(qstr);};
+    pg.queryAll = function(qstr) {return w.pages[name].__dom__.querySelectorAll(qstr);};
+    pg.setAttr = function (data) {w.setAttr(name, data);};
+    if (!w.pages[name].data || typeof w.pages[name].data !== 'object') {
+        w.pages[name].data = {};
+    }
+    w._make_page_bind(name);
+    w._page_style_bind(name);
+  }
+
   this.initPage = function () {
     for (let k in this.pages) {
-      this.pages[k].__dom__ = this.pgcdom.insertBefore(
-                  document.createElement('div'),
-                  this.pgcdom.firstChild
-                );
-      this.pages[k].initCount = 0;
-      this.pages[k].loaded = false;
-      this.pages[k].scroll = 0;
-      this.pages[k].bottomTime = 0;
-      this.pages[k].pageKey = k;
-      this.pages[k].__name__ = k;
-      this.pages[k].init = false;
-      this.pages[k].__dom__.onscroll = w.events.scroll;
-      
-      this.pages[k].tabsPlace = '';
-
-      if (w.tabs.list.length > 0) {
-
-        this.pages[k].tabsPlace = '<div style="height:3.8rem;">&nbsp;</div>';
-
-        if (w.tabs.pages.indexOf(k) >= 0) {
-          this.pages[k].__dom__.style.cssText = 'z-index:1;';
-        }
-      }
-
+      this.initOnePage(k);
     }
     this.initFlag = true;
   };
@@ -1279,18 +1312,34 @@ w.loadPage = async function (R) {
     route = this.homepage;
   }
 
+  if (this.pages[route] === undefined && w.pageNameList.indexOf(route) >= 0) {
+    w.acover('正在等待页面初始化···');
+  
+    for (let i = 0; i < 100; i++) {
+      await new Promise(rv => {setTimeout(rv, 5)});
+      if (this.pages[route] && this.pages[route].state) break;
+    }
+
+    w.uncover();
+
+    if (this.pages[route] === undefined) {
+      w.notify('此页面准备时间超时！', {ntype: 'top error noclose'});
+      await new Promise(rv => {setTimeout(rv, 1280)});
+    }
+
+  }
+
   if (this.pages[route] === undefined) {
-    w.loadPageLock = false;
-    this.handleNotFound();
-    return ;
+      w.loadPageLock = false;
+      this.handleNotFound();
+      return false;
   }
 
   let pg = this.pages[route];
 
-  //临时的解决方案，如果没有准备好，则等待一会。
   if (this.initFlag===false) {
     await new Promise((rv,rj) => {
-      setTimeout(()=>{rv();}, 52);
+      setTimeout(()=>{rv();}, 5);
     });
   }
 
@@ -2669,6 +2718,8 @@ Object.defineProperty(w, '__bindpage__', {
           w.alertError(`${pname} 页面初始化有误，不是合法的object也不是函数。`);
         }, 1500);
       }
+
+      w.initOnePage(pname);
     }
   }
 });
