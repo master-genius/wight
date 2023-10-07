@@ -1183,6 +1183,17 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
     let opts = '';
     let tempdata = '';
 
+    //判断一个组件是否编译成模块
+    let checkIfToModule = (name) => {
+      let cmod = this.config.componentModule;
+
+      if (cmod === true || (Array.isArray(cmod) && cmod.indexOf(name) >= 0)) {
+        return true;
+      }
+
+      return false;
+    };
+
     for (let i=0; i < names.length; i++) {
 
       //检测组件是否存在相关文件。
@@ -1228,13 +1239,15 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
         orgdata = this.replaceSrc(orgdata, true, names[i]);
 
         let comps_jscode = `;(()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
-        if (this.config.componentModule) {
+
+        if (checkIfToModule(names[i])) {
           let mod_dir = `${appdir}/static/module`;
           try {
             fs.accessSync(mod_dir);
           } catch (err) {
             fs.mkdirSync(mod_dir);
           }
+
           let compress_jscode = comps_jscode;
           if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)){
             data = await terser.minify(comps_jscode);
