@@ -234,6 +234,10 @@ input[ok] {
   margin-top: 1rem;
 }
 
+.mtop-2, [mtop-2] {
+  margin-top: 2rem;
+}
+
 .mbottom,[mbottom] {
   margin-bottom: 1rem;
 }
@@ -386,6 +390,15 @@ table {
 
 .click,[click] {
   cursor: pointer;
+}
+
+a:hover,.click:hover,[click]:hover {
+  color: #1372b5;
+}
+
+a:active,.click:active,[click]:active {
+  font-size: 95%;
+  transform: scale(0.85);
 }
 
 .select-none,[select-none] {
