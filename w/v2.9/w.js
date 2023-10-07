@@ -2688,6 +2688,13 @@ class Component extends HTMLElement {
       enumerable: true
     });
 
+    Object.defineProperty(this, '__init_flag__', {
+      value: false,
+      configurable: false,
+      writable: true,
+      enumerable: false
+    });
+
     queueMicrotask(this.__queue_task_init__.bind(this));
   }
 
@@ -2718,21 +2725,9 @@ class Component extends HTMLElement {
     }
 
     if (this.render && typeof this.render === 'function') {
-
       let d = this.render() || '';
-      if (typeof d === 'object') {
-        this.shadow.appendChild(d);
-      } else if (typeof d === 'string' && d.length > 0) {
-        let st = this.checkLoopRef(d);
-        if ( st.ok === false ) {
-          return this.notifyLoopRefError(st);
-        }
-
-        w._htmlcheck(d) && (this.shadow.innerHTML = d);
-      }
+      this.initPlateTemplate(null, d);
     }
-
-    w.initPageDomEvents(this, this.shadow);
 
     if (this.afterRender && typeof this.afterRender === 'function') {
       this.afterRender();
@@ -2843,7 +2838,34 @@ class Component extends HTMLElement {
     return '';
   }
 
+  //不会重复初始化基础结构。
+  initPlateTemplate(id=null, d=null) {
+    if (this.__init_flag__) {
+      return true;
+    }
+
+    if (!d) d = this.plate(id);
+
+    if (typeof d === 'object') {
+      this.shadow.appendChild(d);
+    } else if (typeof d === 'string' && d.length > 0) {
+      let st = this.checkLoopRef(d);
+      if ( st.ok === false ) {
+        return this.notifyLoopRefError(st);
+      }
+
+      w._htmlcheck(d) && (this.shadow.innerHTML = d);
+    }
+
+    this.__init_flag__ = true;
+
+    w.initPageDomEvents(this, this.shadow);
+
+    return true;
+  }
+
   /**
+   * 一个组件对应于一个template，plate可以有选择的使用不同的template。
    * @param {string} id 
    * @param {object} data 
    */
@@ -2924,6 +2946,10 @@ class Component extends HTMLElement {
   }
 
   view (data) {
+    if (!this.__init_flag__) {
+      this.initPlateTemplate();
+    }
+
     let qcss = '';
     let nds;
     
