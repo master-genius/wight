@@ -2491,8 +2491,8 @@ Object.defineProperties(w, {
  */
 w.registerShareNotice = function (options) {
 
-  if (w.shareNoticeList.length >= 500) {
-    w.notifyError('注册通知函数已达上限，不能超过500。');
+  if (w.shareNoticeList.length >= 111) {
+    w.notifyError('注册通知函数已达上限，不能超过111个。');
     return false;
   }
 
@@ -3063,4 +3063,13 @@ class Component extends HTMLElement {
   loadScript (src) {
     return w.loadScript(src, this.tagName.toLowerCase());
   }
+
+  sliderPage(text, append=false) {
+    w.sliderPage(text, append, this);
+  }
+
+  hideSliderPage() {
+    w.hideSliderPage();
+  }
+
 }
