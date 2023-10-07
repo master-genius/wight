@@ -149,3 +149,40 @@ this.properties = {
 
 组件解析后的属性可以通过this.attrs获取，attrs属性是一个object。attributes是浏览器自定义组件给出的用于获取组件属性的方式，Component封装利用properties和attributes解析后放在attrs中方便使用。
 
+## 组件编译成模块
+
+当一个组件很大，或者它不是十分频繁的使用，可以考虑编译成模块(module)，在需要时导入。模块就是ES6的标准。
+
+导入的方式就是w.import或_import，浏览器默认的import仍然可用，同样的，w.import是对import的封装，_import是全局可用的，是w.import的别名。
+
+<br>
+
+w.import会自动加入构建时的路径前缀，并作了运行时缓存处理。
+
+若要把组件编译成模块的方式需要使用config.json的配置项：
+
+```json
+
+{
+    "componentModule": [
+        "user-post", "x-plan"
+    ]
+}
+
+```
+
+此配置项支持3个值：true、false、数组。
+
+true表示对所有组件都使用module模式，false表示都编译成module方式。使用数组则只有在数组内的才会编译成模块。
+
+import、w.import、_import 都是返回Promise实例的异步处理，所以需要.then接受结果：
+
+```javascript
+
+_import('/static/module/x-plan.js').then(res => {
+    console.log(res.default)
+})
+
+```
+
+返回值res.default只是一个字符串，是组件的名字。你不需要更多的结果，导入成功后，组件就可以使用了。
