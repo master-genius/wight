@@ -173,7 +173,7 @@ w.import会自动加入构建时的路径前缀，并作了运行时缓存处理
 
 此配置项支持3个值：true、false、数组。
 
-true表示对所有组件都使用module模式，false表示都编译成module方式。使用数组则只有在数组内的才会编译成模块。
+true表示对所有组件都使用module模式，false表示都集成到主应用。使用数组则只有在数组内的才会编译成模块。
 
 import、w.import、_import 都是返回Promise实例的异步处理，所以需要.then接受结果：
 
