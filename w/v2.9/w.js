@@ -2870,8 +2870,8 @@ class Component extends HTMLElement {
    * @param {object} data 
    */
   plate (id = null, data = {}) {
-    if (typeof id === 'object' || !id) {
-      data = id || {};
+    if (typeof id === 'object' && id) {
+      data = id;
       id = null;
     }
 
