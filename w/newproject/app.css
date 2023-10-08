@@ -379,7 +379,8 @@ table {
 }
 
 a:hover,.click:hover,[click]:hover {
-  color: #1372b5;
+  color: #212223;
+  text-shadow: 2px 2px 0.5rem #dcdcdf;
 }
 
 a:active,.click:active,[click]:active {
