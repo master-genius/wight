@@ -396,7 +396,7 @@ a:hover,.click:hover,[click]:hover {
   color: #1372b5;
 }
 
-a:active,.click:active,[click]:active,[data-onclick]:active {
+a:active,.click:active,[click]:active {
   font-size: 96.9%;
   transform: scale(0.86);
 }
