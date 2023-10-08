@@ -243,11 +243,11 @@ input[ok] {
 }
 
 .loadinfo-worker {
-  border: 0.05rem solid #4556d5;
+  border: 1px solid #4556d5;
 }
 
 .loadinfo-master {
-  border: 0.05rem solid #676869;
+  border: 1px solid #676869;
 }
 
 .image,[image] {
@@ -287,7 +287,7 @@ input[ok] {
 }
 
 .block,[block] {
-  border: #e5e8e9 solid 0.05rem;
+  border: #e5e8e9 solid 1px;
   padding: 0.35rem;
 }
 
