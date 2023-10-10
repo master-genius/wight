@@ -791,8 +791,10 @@ const w = new function () {
     this.prompt(info, options);
   };
 
-  this.promptTopDark = function (info, noclose = false) {
-    this.promptTop(info, noclose, 'dark');
+  this.promptTopDark = function (info, options = {}) {
+    options.wh = 'top';
+    options.glass = 'dark';
+    this.prompt(info, options);
   };
 
   //wh = 'bottom', noclose = false, glass = false
@@ -830,8 +832,10 @@ const w = new function () {
         w.promptdom.innerHTML = `<div style="overflow:auto;word-wrap:break-word;">`
           + `<p style="color:${pcolor};">${info}</p></div>`;
       }
-      w.initPageDomEvents(w.curpage, w.promptdom);
+
+      w.initPageDomEvents(options.target || w.curpage, w.promptdom);
     }
+
     return w.promptdom;
   };
 
@@ -3172,4 +3176,38 @@ class Component extends HTMLElement {
     w.hideSliderPage();
   }
 
+  prompt(info, options={}) {
+    if (!options || typeof options !== 'object') {
+      options = {}
+    }
+    options.target = this;
+    w.prompt(info, options);
+  }
+
+  unprompt() {w.unprompt();}
+
+  promptTop(info, options={}) {
+    options.wh = 'top';
+    this.prompt(info, options);
+  }
+
+  promptMiddle(info, options={}) {
+    options.target = this;
+    w.promptMiddle(info, options);
+  }
+
+  promptDark(info, options={}) {
+    options.target = this;
+    w.promptDark(info, options);
+  }
+
+  promptMiddleDark(info, options={}) {
+    options.target = this;
+    w.promptMiddleDark(info, options);
+  }
+
+  promptTopDark(info, options={}) {
+    options.target = this;
+    w.promptTopDark(info, options);
+  }
 }
