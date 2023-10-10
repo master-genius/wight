@@ -906,9 +906,9 @@ const w = new function () {
   this.pageShowType = '';
   this.pageShowTypeLock = false;
   
-  this.listenHash = function (op = '') {
+  this.listenHash = async function (op = '') {
     if (this.listenHashLock === true) {
-      return ;
+      return false;
     }
 
     if (!this.pageShowTypeLock) {
@@ -941,11 +941,13 @@ const w = new function () {
         return w.switchTab(tp || w.tabs.pages[0]);
       }
 
-      this.loadPage(r);
+      await this.loadPage(r);
       this.listenHashLock = false;
     } catch (err) {
       this.listenHashLock = false;
-    }
+    }finally{this.listenHashLock = false;}
+
+    return true;
   };
 
   this.pageNameList=[];
@@ -1305,10 +1307,15 @@ w.handleNotFound = function () {
 
 w.going = null;
 
+w.routeInfo = function() {
+  return w.curpage ? (w.curpage.__ctx__ || null) : null;
+};
+
 w.loadPage = async function (R) {
   if (w.loadPageLock) {
-    return;
+    return false;
   }
+
   w.loadPageLock = true;
 
   let route = R.path;
@@ -1340,13 +1347,6 @@ w.loadPage = async function (R) {
   }
 
   let pg = this.pages[route];
-
-  if (this.initFlag===false) {
-    await new Promise((rv,rj) => {
-      setTimeout(()=>{rv();}, 5);
-    });
-  }
-
   let c = this.context();
   c.path = route;
   c.query = R.query;
@@ -1363,6 +1363,10 @@ w.loadPage = async function (R) {
   c.name = pg.__name__;
   this.going = pg.__name__;
 
+  pg.__ctx__ = c;
+
+  //loadPage是一个异步函数，如果此时在runHook中的函数执行了重定向操作会导致页面显示失败。
+  //因为此时，listenHasLock为true
   if (false === await w.runHooks(c)) {
     w.loadPageLock = false;
     return false;
@@ -1475,8 +1479,16 @@ w.redirect = function (path, args = {}) {
 
   let qrs = w.qs(args.query || {});
 
-  let startRedirect = () => {
+  let startRedirect = async () => {
     history.replaceState({id: path}, '', `${path}${qrs.length > 0 ? '?' : ''}${qrs}`);
+    if (w.listenHashLock) {
+      //有可能某些页面还没准准备好导致页面初始化需要等待，此时listenHash会等待，这里也要等待。
+      for (let i = 0; i < 500; i++) {
+        await new Promise(rv => {setTimeout(rv, 5)});
+        if (!w.listenHashLock) break;
+      }
+    }
+
     w.listenHash();
   };
 

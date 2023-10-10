@@ -326,7 +326,9 @@ let wapp = function (options = {}) {
 
   window.addEventListener('pageshow', async function() {
     await new Promise(rv => {setTimeout(() => {rv();}, 35);});
-    if (w.init && typeof w.init === 'function') await w.init();
+    if (w.init && typeof w.init === 'function') {
+      try{await w.init();}catch(err){alertError(err.message);console.error(err)}
+    }
     if (w.tabs.list.length > 0 && w.tabs.pageIndex[w.homepage] !== undefined && location.hash.length < 2)
     {
       w.switchTab(w.homepage);
