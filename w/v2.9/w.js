@@ -533,7 +533,7 @@ const w = new function () {
 
       let closeText = '<div style="text-align:right;">'
         +'<a href="javascript:w.unalert();" '
-        +'style="color:#696365;font-size:105%;text-decoration:none;cursor:pointer;">'
+        +'style="color:#696365;font-size:105%;text-decoration:none;" click>'
         +'&nbsp;X&nbsp;</a>'
         +'</div>';
 
@@ -722,8 +722,8 @@ const w = new function () {
       } else {
         w.notifydom.innerHTML = `<div style="text-align:right;">`
           +`<a href="javascript:w.unnotify();" `
-          +`style="color:#dfdfdf;font-size:109%;text-decoration:none;">&nbsp;X&nbsp;</a>`
-          +`</div><p style="color:${colorText};">${w.notifylog}</p>`;
+          +`style="color:#dfdfdf;font-size:109%;text-decoration:none;" click>&nbsp;X&nbsp;</a>`
+          +`</div><div style="color:${colorText};">${w.notifylog}</div>`;
       }
       w.initPageDomEvents(w.curpage, w.notifydom);
     }
@@ -1492,7 +1492,7 @@ w.redirect = function (path, args = {}) {
         if (!w.listenHashLock) break;
       }
     }
-    
+
     if (args.noticeInfo) {
       if (args.noticeTimeout && typeof args.noticeTimeout === 'number') {
         setTimeout(()=>{w.unnotify();}, args.noticeTimeout);
