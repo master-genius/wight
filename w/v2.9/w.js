@@ -684,7 +684,7 @@ const w = new function () {
     }
 
     if (ntype.indexOf('error') >= 0) {
-      info = `<span style="color:#f76567;font-size:95%;">${info}</span>`;
+      info = `<span style="color:#f96567;font-size:95%;">${info}</span>`;
     }
 
     let where_is = 'w-notify-bottom';
@@ -1402,7 +1402,6 @@ w.loadPage = async function (R) {
   }
 
   pg.__dom__.scrollTop = pg.scroll;
-
 };
 
 w.reload = function (force = true) {
@@ -1448,6 +1447,20 @@ w.goBack = function () {
     return true;
   }
   return false;
+}
+
+w.redirectBack = function (n=1) {
+  if (w.historyList.length < n) {
+    return false;
+  }
+
+  let last_url = w.historyList[w.historyList.length - n];
+
+  if (!last_url) {
+    return false;
+  }
+
+  w.redirect(last_url);
 }
 
 w.redirect = function (path, args = {}) {
@@ -2745,6 +2758,13 @@ class Component extends HTMLElement {
       writable: true,
       enumerable: false
     });
+
+    /* Object.defineProperty(this, '__cid__', {
+      value: 'c_' + `${Math.random().toString(16).substring(2)}${Date.now().toString(16)}_${this.tagName.toLowerCase()}`,
+      configurable: false,
+      writable: false,
+      enumerable: false
+    }); */
 
     queueMicrotask(this.__queue_task_init__.bind(this));
   }

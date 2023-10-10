@@ -74,7 +74,7 @@
 
 .w-common-slide-right {
   padding:0.6rem;
-  z-index: 100;
+  z-index: 99;
   position:fixed;
   right:0;
   top:0;
@@ -87,7 +87,7 @@
 }
 
 .w-common-slide-right-close {
-  z-index: 100;
+  z-index: 99;
   position:fixed;
   top:0;
   left:0;
@@ -161,7 +161,7 @@
 }
 
 .w-prompt-glass {
-  background: var(--w-prompt-glass-bg-color, rgba(42,43,45, 0.033));
+  background: var(--w-prompt-glass-bg-color, rgba(42,43,45, 0.035));
   color: #4a4a4f;
 }
 
@@ -189,7 +189,7 @@
 .w-prompt-close {
   z-index: 100;
   position: fixed;
-  background: rgba(7, 8, 9, 0.0235);
+  background: rgba(7, 8, 9, 0.0245);
   width:99.999%;
   height:99.999%;
   top:0%;
@@ -197,7 +197,7 @@
 }
 
 .w-prompt-close-glass {
-  background: rgba(2, 3, 5, 0.016);
+  background: rgba(7, 8, 9, 0.02);
 }
 
 .w-prompt-bottom {
