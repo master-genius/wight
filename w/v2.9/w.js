@@ -1481,12 +1481,22 @@ w.redirect = function (path, args = {}) {
 
   let startRedirect = async () => {
     history.replaceState({id: path}, '', `${path}${qrs.length > 0 ? '?' : ''}${qrs}`);
-    if (w.listenHashLock) {
+    if (args.noticeInfo) {
+      w.notify(args.noticeInfo, {ntype: 'top noclose', timeout: 5000});
+    }
+
+    if (w.listenHashLock) {  
       //有可能某些页面还没准准备好导致页面初始化需要等待，此时listenHash会等待，这里也要等待。
       for (let i = 0; i < 500; i++) {
         await new Promise(rv => {setTimeout(rv, 5)});
         if (!w.listenHashLock) break;
       }
+    }
+    
+    if (args.noticeInfo) {
+      if (args.noticeTimeout && typeof args.noticeTimeout === 'number') {
+        setTimeout(()=>{w.unnotify();}, args.noticeTimeout);
+      } else w.unnotify();
     }
 
     w.listenHash();

@@ -21,8 +21,8 @@ exports.storageEvent = new function () {
 
   this._setEventHandle = function (key, type, options) {
     let h = this.eventMap[key][type]
-    if (h.length >= 5) {
-      !options.quiet && w.alertError('每个storage事件最多允许注册5个处理函数。')
+    if (h.length >= 10) {
+      !options.quiet && w.alertError('每个storage事件最多允许注册10个处理函数。')
       return false
     }
 
@@ -171,7 +171,6 @@ exports.storageEvent = new function () {
   this.frequencyRecord = {}
 
   this.handle = async function (evt) {
-
     let self = this
 
     let ur = new URL(evt.url)
@@ -190,8 +189,7 @@ exports.storageEvent = new function () {
     }
 
     if (this.frequency <= 0) {
-      this._run(tr.data.key || '@all', tr.data.type, tr.data)
-      return
+      return this._run(obj.key || '@all', obj.type, obj)
     }
 
     let tm = Date.now()
@@ -218,19 +216,17 @@ exports.storageEvent = new function () {
 
     tr.data = obj
 
-    !tr.timer &&
-      (
-        tr.timer = setTimeout(() => {
-          let obj = tr.data
-          this._run(obj.key || '@all', obj.type, obj)
-          tr.timer = null
-          tr.data = null
-          tr.tm = tm
-        }, this.frequency)
-      )
+    if (!tr.timer) {
+      tr.timer = setTimeout(() => {
+        let obj = tr.data
+        this._run(obj.key || '@all', obj.type, obj)
+        tr.timer = null
+        tr.data = null
+        tr.tm = tm
+      }, this.frequency)
+    }
 
   };
-
 
 };
 
