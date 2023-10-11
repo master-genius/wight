@@ -146,7 +146,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
 
   let tk = token.get();
 
-  if (tk && !options.headers.authorization) options.headers.authorization = tk;
+  if (tk && !options.headers.authorization) options.headers.authorization = tk.token;
 
   let ret = makeResponse();
 
