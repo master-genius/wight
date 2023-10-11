@@ -940,7 +940,7 @@ const w = new function () {
         w.tabs.cur = '';
         return w.switchTab(tp || w.tabs.pages[0]);
       }
-
+    
       await this.loadPage(r);
       this.listenHashLock = false;
     } catch (err) {
@@ -1326,15 +1326,15 @@ w.loadPage = async function (R) {
   if (this.pages[route] === undefined && w.pageNameList.indexOf(route) >= 0) {
     w.acover('正在等待页面初始化···');
   
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 222; i++) {
       await new Promise(rv => {setTimeout(rv, 5)});
       if (this.pages[route] && this.pages[route].state) break;
     }
 
-    w.uncover();
+    setTimeout(()=>{w.uncover();},111);
 
     if (this.pages[route] === undefined) {
-      w.notify('此页面准备时间超时！', {ntype: 'top error noclose'});
+      w.notify('等待页面超时！', {ntype: 'top error noclose'});
       await new Promise(rv => {setTimeout(rv, 1280)});
     }
 
@@ -1392,6 +1392,10 @@ w.loadPage = async function (R) {
     w.initPageDomEvents(pg, pg.__dom__);
   }
 
+  //为了避免在重定向或跳转页面的操作时出现冲突。
+  //这里先解锁hash，允许listenHash执行，避免后续的事件函数执行出现漫长等待。
+  w.listenHashLock = false;
+
   if (pg.onload && typeof pg.onload === 'function' && pg.loaded === false) {
     pg.loaded = true;
     try {
@@ -1435,7 +1439,7 @@ w.qs = function (args) {
   return qrs_list.join('&');
 };
 
-w.go = function (path, args = {}, op = 'forward') {
+w.go = async function (path, args = {}, op = 'forward') {
   if (typeof args === 'string') {
     op = args;
     args = {};
@@ -1445,6 +1449,13 @@ w.go = function (path, args = {}, op = 'forward') {
   w.pageShowType = op;
 
   let qrs = w.qs(args);
+
+  if (w.listenHashLock) {
+    for (let i = 0; i < 500; i++) {
+      await new Promise(rv => {setTimeout(rv, 5)});
+      if (!w.listenHashLock) break;
+    }
+  }
   
   location.hash = `${path}${qrs.length>0?'?':''}${qrs}`;
 };
