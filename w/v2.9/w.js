@@ -1323,7 +1323,9 @@ w.loadPage = async function (R) {
     route = this.homepage;
   }
 
-  if (this.pages[route] === undefined && w.pageNameList.indexOf(route) >= 0) {
+  let pageindex = w.pageNameList.indexOf(route);
+
+  if (this.pages[route] === undefined && pageindex >= 0) {
     w.acover('正在等待页面初始化···');
   
     for (let i = 0; i < 222; i++) {
@@ -1335,9 +1337,10 @@ w.loadPage = async function (R) {
 
     if (this.pages[route] === undefined) {
       w.notify('等待页面超时！', {ntype: 'top error noclose'});
+      //经过这个延迟，页面有可能已经准备好。
       await new Promise(rv => {setTimeout(rv, 1280)});
     }
-
+  
   }
 
   if (this.pages[route] === undefined) {
