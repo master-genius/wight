@@ -6,18 +6,11 @@ exports.checkToken = function (autoRemove = false) {
 
   parseUrl();
 
-  let tk = token.get();
-
-  if (tk === null) {
-    return false;
-  }
-
-  let u = w.storage.jget('userinfo');
-
-  if (parseInt(u.logintime) + parseInt(u.expires) <= Date.now()) {
+  if (!token.verify()) {
     if (autoRemove) {
       token.remove();
     }
+
     return false;
   }
 
