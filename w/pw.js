@@ -286,7 +286,7 @@ let wapp = function (options = {}) {
     window.promptMiddleGlass = w.promptMiddleGlass.bind(w);
     window.promptDark = w.promptDark.bind(w);
     window.promptMiddleDark = w.promptMiddleDark.bind(w);
-    window.acover = w.acover.bind(w);
+    window.cover = w.cover.bind(w);
     window.coverShadow = w.coverShadow.bind(w);
     window.uncover = w.uncover.bind(w);
     window.uncoverShadow = w.uncoverShadow.bind(w);

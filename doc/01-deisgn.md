@@ -56,3 +56,13 @@ pw.js的角色类似于编程语言的编译器，只是这个过程没有编译
 ```html
 <div data-onclick="clickHandle">OK</div>
 ```
+
+## 相关重要改进的记录
+
+- 在2.9的之前版本上，对页面的初始化使用的是pw.js在构建应用时，注入的代码，在这之后全部放在了w.js中，并调整了一些需要在初始化之前就要存在的dom节点，放在了开始的位置。
+
+- 加载页面的过程，如果此时页面还没有准备好，则会提示一个正在初始化的提示，并进行等待，直到准备好或超时。
+
+- w.go和w.redirect在异步处理的代码中，或者是在钩子函数中运行，此时若listenHashLock为true会导致失败，进而导致页面显示白板，2.9以后改为若检测到处于锁定状态则会等待，直到解锁或超时，无论是正常解锁还是超时都会执行listenHash()。
+
+- w.loadPage()函数中在初始化相关处理完成后，准备执行onload和onshow事件函数之前，会把listenHashLock设置为false，此时若因为onload和onshow执行时间过长，导致listenHash等待，再次执行listenHash，不会导致失败。

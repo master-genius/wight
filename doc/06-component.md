@@ -190,3 +190,27 @@ _import('/static/module/x-plan.js').then(res => {
 ## 组件属性的大小写问题
 
 > **html的缺陷是标签名和属性区分大小写，组件的属性在浏览器查看只有小写。所以目前组件属性推荐只使用小写，properties定义的约束条件，以及attrs使用大写的属性名访问会拿不到数据，请知悉。**
+
+## 组件的UI交互
+
+组件内部可以调用以下方法：
+
+- this.cover(text)
+
+- this.uncover()
+
+- this.prompt(text)
+
+- this.unprompt()
+
+- this.promptDark(text)
+
+- this.prompt(text)
+
+- this.promptTop(text)
+
+- this.promptTopDark(text)
+
+- this.promptMiddle(text)
+
+- this.promptMiddleDark(text)

@@ -618,7 +618,7 @@ const w = new function () {
     });
   };
 
-  this.acover = function (info, trans = false) {
+  this.cover = function (info, trans = false) {
     this.alert(info, {
       replace: true,
       notClose: true,

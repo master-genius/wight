@@ -71,6 +71,8 @@ w.redirect('login', {delay:300})
 
 延迟重定向针对不能立即执行的函数中，比如在下面要讲到的钩子函数，检测到未登录要重定向到login页面，但是要先返回false阻止继续加载页面，然后重定向。
 
+> 在之前的版本上，存在w.redirect
+
 ### 重新加载页面：w.reload
 
 此函数不必传参，直接调用：
@@ -140,9 +142,9 @@ w.alert = function (info, options){}
 
 alert会显示几条最近的文本，如果要在显示新的文本时，不显示已有的，请使用replace选项设置为true。
 
-### w.acover
+### w.cover
 
-acover方法是对alert的封装。有对应的w.uncover方法是对unalert的封装。
+cover方法是对alert的封装。有对应的w.uncover方法是对unalert的封装。
 
 ### 消息通知：w.notify和相关封装
 
@@ -291,6 +293,10 @@ w.attachTitle(' - 内容详情')
 ### w.resetTitle()
 
 重置为原始标题。
+
+### w.loadScript(path)
+
+动态加载js脚本文件，内部就是进行了script标签的创建。
 
 ### w.config
 
