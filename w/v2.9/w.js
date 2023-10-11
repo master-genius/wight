@@ -1326,19 +1326,19 @@ w.loadPage = async function (R) {
   let pageindex = w.pageNameList.indexOf(route);
 
   if (this.pages[route] === undefined && pageindex >= 0) {
-    w.acover('正在等待页面初始化···');
+    alert('正在等待页面初始化···', {notClose: true});
   
     for (let i = 0; i < 222; i++) {
       await new Promise(rv => {setTimeout(rv, 5)});
       if (this.pages[route] && this.pages[route].state) break;
     }
 
-    setTimeout(()=>{w.uncover();},111);
+    setTimeout(()=>{w.unalert();},111);
 
     if (this.pages[route] === undefined) {
       w.notify('等待页面超时！', {ntype: 'top error noclose'});
       //经过这个延迟，页面有可能已经准备好。
-      await new Promise(rv => {setTimeout(rv, 1280)});
+      await new Promise(rv => {setTimeout(rv, 1101)});
     }
   
   }
