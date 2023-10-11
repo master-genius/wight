@@ -1,7 +1,7 @@
 module.exports = {
   host : '0.0.0.0',
-  port : 1211,
-  worker : 2,
+  port : 1213,
+  worker : 1,
   maxWorker: 3,
   /*
   proxy: {
