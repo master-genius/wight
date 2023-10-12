@@ -951,7 +951,7 @@ wapp.prototype.loadExt = async function (cdir) {
 
         await this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
 
-        this.extends += `;(async function(exports){${orgdata}})(w.ext);`;
+        this.extends += `;(async function(exports, module){${orgdata}})(w.ext, w.__module__('${names[i].replaceAll('\'', '').replaceAll('"','')}'));`;
 
       } catch (err) {
         console.error(err.message);

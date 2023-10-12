@@ -2777,6 +2777,25 @@ Object.defineProperty(w, '__bindpage__', {
   }
 });
 
+Object.defineProperty(w, '__module__', {
+  enumerable: false,
+  configurable: false,
+  writable: false,
+  value: (name) => {
+    let oo = {}
+    Object.defineProperty(oo, 'exports', {
+      set: (val) => {
+        w.ext[name] = val
+      },
+      get: () => {
+        return name
+      }
+    });
+
+    return oo
+  }
+})
+
 w.__comps_loop__ = {};
 
 class Component extends HTMLElement {
