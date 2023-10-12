@@ -81,7 +81,7 @@ class initapp {
           break
           
         case 'appList':
-          if (options[k] instanceof Array) {
+          if (Array.isArray(options[k]) && options[k].length > 0) {
             this.appList = options[k]
           }
           break

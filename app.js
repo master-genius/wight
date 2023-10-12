@@ -6,6 +6,48 @@ const titbit = require('titbit')
 const cluster = require('cluster')
 const fs = require('fs')
 const {proxy} = require('titbit-toolkit')
+const npargv = require('npargv')
+
+let arg = npargv({
+  '--http2': {
+    name: 'http2',
+    default: false,
+  },
+
+  '--https': {
+    name: 'https',
+    default: false,
+  },
+
+  '--port': {
+    name: 'port',
+    default: 0,
+    type: 'number',
+    min: 1,
+    max: 65535
+  },
+
+  '--local': {
+    name: 'local',
+    default: false,
+  },
+
+  '--debug': {
+    name: 'debug',
+    default: false,
+  },
+
+  '--no-debug': {
+    name: 'nodebug',
+    default: false,
+  },
+
+  '--test': {
+    name: 'test',
+    default: false
+  }
+
+})
 
 if (cluster.isMaster) {
   try {
@@ -18,6 +60,7 @@ if (cluster.isMaster) {
     fs.accessSync('./config/config.js')
   } catch (err) {
     fs.copyFileSync('./config-example.js', './config/config.js')
+    console.log('正在初始化配置文件···\n已经初始化配置文件\n')
     console.log('首次运行，请配置config/config.js后再次启动服务。\n或者您可以再次运行，这会使用默认配置。')
     process.exit(0)
   }
@@ -26,26 +69,15 @@ if (cluster.isMaster) {
 const initapp = require('./initapp')
 const cfg = require('./config/config')
 
-let http2_on = false
+let args = arg.args
 
-let https_on = false
-
-if (process.argv.indexOf('--http2') > 0) {
-  http2_on = true
-  https_on = true
-}
-
-if (process.argv.indexOf('--https') > 0) {
-  https_on = true
-}
-
-var app = new titbit({
+let app = new titbit({
   maxBody: 50,
   debug: true,
   showLoadInfo: false,
   timeout : 10000,
-  http2: http2_on,
-  https: https_on,
+  http2: args.http2,
+  https: args.https,
 })
 
 app.autoWorker(cfg.maxWorker)
@@ -59,50 +91,12 @@ if (cfg.host === undefined) {
 }
 
 if (cfg.worker === undefined) {
-  cfg.worker = 2
+  cfg.worker = 1
 }
 
-var _test_mode = false
-var _debug_mode = false
+if (args.port) cfg.port = args.port
 
-if (process.argv.length > 2) {
-  
-  let pind = process.argv.indexOf('--port')
-  if (pind > 0) {
-    if (pind+1 < process.argv.length && !isNaN(process.argv[pind+1])) {
-      cfg.port =  process.argv[pind+1]
-    }
-  }
-  if (process.argv.indexOf('--local') > 0) {
-    app.config.https = false
-    cfg.host = 'localhost'
-  }
-
-  if (process.argv.indexOf('-d') > 0) {
-    app.config.daemon = true
-  }
-
-  if (process.argv.indexOf('--no-debug') > 0) {
-    app.config.debug = false
-  }
-
-  if (process.argv.indexOf('--debug') > 0) {
-    app.config.debug = true
-    _debug_mode = true
-  }
-
-  if (process.argv.indexOf('--test') > 0 || process.argv.indexOf('--dev') > 0) {
-    _test_mode = true
-    app.config.debug = true
-    app.config.globalLog = true
-    //app.config.https = false
-    app.config.daemon = false
-    cfg.port = 1213
-  }
-
-}
-
-app.service.TEST = _test_mode
+app.service.TEST = args.test
 
 if (app.config.https) {
   app.config.cert = './rsa/localhost.cert'
@@ -142,33 +136,32 @@ if (cluster.isWorker) {
 
   app.get('/favicon.ico', async c => {
     c.setHeader('content-type', 'image/x-icon')
-    c.res.body = await c.helper.readb('./favicon.ico')
+     .helper.pipe('./favicon.ico', c.reply)
   })
-
+  
   let opts = {
-    test : _test_mode,
-    debug : _debug_mode,
+    test : args.test,
+    debug : args.debug,
     prefix : 'apps',
   }
 
-  if (process.argv.length > 2) {
-    
-    let applist = []
-    for (let i = 2; i < process.argv.length; i++) {
-      if ((/^[\_a-z]/i).test(process.argv[i])) {
-        applist.push(process.argv[i])
-      }
-    }
-    if (applist.length > 0) {
-      opts.appList = applist
-    }
+  if (arg.list.length > 0) {
+    let fmtList = arg.list.map(x => {
+      x = x.trim()
+      if (!x) return ''
+      if (x[x.length - 1] === '/') x = x.substring(0, x.length - 1)
+      if (x.indexOf('apps/') === 0) return x.substring(5)
+      return x
+    })
+
+    opts.appList = fmtList.filter(x => x.length > 0)
   }
 
   iapp = new initapp(opts)
 
   iapp.init(app)
 
-  process.on('message', (msg) => {
+  /* process.on('message', (msg) => {
     if (msg.type === 'reload-app') {
       console.log(`---- PID: [${process.pid}] ; RELOAD APP [${msg.appname}] ----`)
       iapp.reloadApp(app, msg.appname)
@@ -176,66 +169,17 @@ if (cluster.isWorker) {
       console.log(`---- PID: [${process.pid}] ; UNLOAD APP [${msg.appname}] ----`)
       iapp.unloadApp(app, msg.appname)
     }
-  })
-
-} else {
-  app.setMsgEvent('reload-app', (w, msg, sock) => {
-    for (let k in cluster.workers) {
-      cluster.workers[k].send(msg)
-    }
-  })
-
-  app.setMsgEvent('unload-app', (w, msg, sock) => {
-    for (let k in cluster.workers) {
-      cluster.workers[k].send(msg)
-    }
-  })
+  }) */
 
 }
-
-app.get('/app/control/:appname/:handle', async c => {
-  let {appname, handle} = c.param
-
-  if (iapp.has(app, appname) === false) {
-    c.send('app not found', 404)
-    return
-  }
-
-  switch (handle) {
-    case 'reload':
-      process.send({
-        type : 'reload-app',
-        appname : appname
-      })
-      break
-    
-    case 'unload':
-      if (appname === '_control') {
-        c.send('deny', 403)
-        return
-      }
-      process.send({
-        type : 'unload-app',
-        appname : appname
-      })
-      break
-    
-    default:
-      c.send('unknow command', 400)
-      return
-  }
-  
-  c.send('done')
-
-})
 
 if (app.isWorker) {
   let pxy;
   let proxy_host;
 
-  if (cfg.proxy && !_test_mode) proxy_host = cfg.proxy;
+  if (cfg.proxy && !args.test) proxy_host = cfg.proxy;
 
-  if (cfg.proxyTest && _test_mode) proxy_host = cfg.proxyTest;
+  if (cfg.proxyTest && args.test) proxy_host = cfg.proxyTest;
 
   if (proxy_host) {
     pxy = new proxy({
@@ -249,4 +193,4 @@ if (app.isWorker) {
 
 }
 
-app.daemon(cfg.port, cfg.host, 1)
+app.daemon(cfg.port, cfg.host, cfg.worker)
