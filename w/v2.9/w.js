@@ -1290,7 +1290,7 @@ w.loadPageLock = false;
 
 w.handleNotFound = function () {
   if (!w.config.notFound || typeof w.config.notFound === 'string') {
-    let notfoundText = `<div>404: 没有此页面</div><p>${location.hash} 页面不存在！！<a href="javascript:unalert();w.redirect('#');">回到首页</a></p>`;
+    let notfoundText = `<div style="font-size:125%;font-weight:bold;">404: 没有此页面</div><p>${location.hash} 页面不存在！！</p><p style="text-align:center;"><a href="javascript:unalert();w.redirect('#');">回到首页</a></p>`;
     this.alert(w.config.notFound || notfoundText);
   } else {
     if (typeof w.config.notFound === 'function') {
