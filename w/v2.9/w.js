@@ -1290,7 +1290,7 @@ w.loadPageLock = false;
 
 w.handleNotFound = function () {
   if (!w.config.notFound || typeof w.config.notFound === 'string') {
-    this.coverShadow(w.config.notFound || '<div>404: 没有此页面</div>');
+    this.alert(w.config.notFound || '<div>404: 没有此页面</div>');
   } else {
     if (typeof w.config.notFound === 'function') {
       w.config.notFound();
@@ -1299,7 +1299,7 @@ w.handleNotFound = function () {
       if (obj.redirect && w.pages[obj.redirect]) {
         w.redirect(obj.redirect);
       } else {
-        this.coverShadow('<div>404: 没有此页面</div>');
+        this.alert('<div>404: 没有此页面</div>');
       }
     }
   }
@@ -2538,15 +2538,14 @@ w.ext = new Proxy(w.__ext__, {
   },
 
   deleteProperty : (obj, k) => {
-    if (obj[k])
-      delete obj[k];
+    if (obj[k]) delete obj[k];
 
     return true;
   }
 });
 
 Object.defineProperty(w, '__require_loop__', {
-  value: 5,
+  value: 111,
   configurable: false,
   writable: false,
   enumerable: false
@@ -2560,7 +2559,7 @@ window.require = async function (name) {
 
     for (let i = 0; i < loop; i++) {
       await new Promise((rv) => {
-        setTimeout(() => { rv(); }, 2);
+        setTimeout(() => { rv(); }, 5);
       });
 
       if (w.__ext__[name]) return w.__ext__[name];
@@ -2785,10 +2784,11 @@ Object.defineProperty(w, '__module__', {
     let oo = {}
     Object.defineProperty(oo, 'exports', {
       set: (val) => {
-        w.ext[name] = val
+        if (w.__ext__[name]) delete w.__ext__[name];
+        w.ext[name] = val;
       },
       get: () => {
-        return name
+        return name;
       }
     });
 
