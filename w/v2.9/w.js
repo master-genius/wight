@@ -2364,17 +2364,23 @@ w.naviHide = function () {
   w.navibtndom.className = '';
 };
 
-w._devents = [
-  'animationcancel', 'animationend', 'animationiteration', 'animationstart',
-  'blur', 'click', 'copy', 'cut', 'compositionend', 'compositionstart', 'compositionupdate',
-  'change', 'contextmenu', 'dblclick', 'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 
-  'dragenter', 'drop', 'error', 'fullscreenchange', 'fullscreenerror', 'focus', 'focusin',
-  'focusout', 'input', 'keyup', 'keydown', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 
-  'mouseout', 'mouseover', 'mouseup', 'pointercancel', 'pointerdown', 'pointerenter', 
-  'pointerleave', 'pointermove', 'pointerout', 'pointerover', 'pointerup', 'paste', 
-  'submit', 'scroll', 'select', 'transitioncancel', 'transitionend', 'transitionrun',
-  'transitionstart', 'touchcancel', 'touchend', 'touchmove', 'touchstart',  'wheel', 
-];
+Object.defineProperty(w, '_devents', {
+  enumerable: false,
+  writable: false,
+  configurable: false,
+  value: [
+    'animationcancel', 'animationend', 'animationiteration', 'animationstart',
+    'blur', 'click', 'copy', 'cut', 'compositionend', 'compositionstart', 'compositionupdate',
+    'change', 'contextmenu', 'dblclick', 'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 
+    'auxclick', 'securitypolicyviolation', 'beforematch',
+    'dragenter', 'drop', 'error', 'fullscreenchange', 'fullscreenerror', 'focus', 'focusin',
+    'focusout', 'input', 'keyup', 'keydown', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 
+    'mouseout', 'mouseover', 'mouseup', 'pointercancel', 'pointerdown', 'pointerenter', 
+    'pointerleave', 'pointermove', 'pointerout', 'pointerover', 'pointerup', 'paste', 
+    'submit', 'scroll', 'scrollend', 'select', 'transitioncancel', 'transitionend', 'transitionrun',
+    'transitionstart', 'touchcancel', 'touchend', 'touchmove', 'touchstart',  'wheel'
+  ]
+});
 
 w.initDomEvent = function (pg, dom, evtname) {
   if (!dom || !dom.querySelectorAll) return false;
