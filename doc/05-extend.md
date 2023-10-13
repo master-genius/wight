@@ -1,3 +1,4 @@
+<!--name:扩展-->
 # 扩展
 
 扩展就是extends目录下的js文件，但是要在config.json的配置项extends中设置要启用哪些扩展。

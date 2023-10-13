@@ -5,8 +5,9 @@ process.chdir(__dirname)
 const titbit = require('titbit')
 const cluster = require('cluster')
 const fs = require('fs')
-const {proxy} = require('titbit-toolkit')
+const {proxy, resource} = require('titbit-toolkit')
 const npargv = require('npargv')
+const loadddoc = require('./lib/loaddoc')
 
 let arg = npargv({
   '--http2': {
@@ -170,6 +171,43 @@ if (cluster.isWorker) {
       iapp.unloadApp(app, msg.appname)
     }
   }) */
+
+}
+
+if (app.isWorker) {
+  let mdoc = new loadddoc('doc')
+  mdoc.init()
+  console.log(mdoc)
+
+  app.get('/wight-doc', async ctx => {
+    ctx.send(mdoc.search('.*'))
+  })
+
+  app.get('/wight-doc/*', async ctx => {
+    try {
+      let fname = ctx.param.starPath
+      if (fname.substring(fname.length-3) === '.md') {
+        
+      }
+
+      return await ctx.helper.pipe('./doc/' + fname, ctx.reply)
+    } catch (err) {
+      return c.status(404).send(err.message)
+    }
+  })
+
+  let rse = new resource({
+    staticPath: './wight-app/static',
+    routePath : '/wight-app/static/*',
+    routeGroup: '_static_wight',
+    decodePath: true,
+    //最大缓存文件大小，超过此大小则不会缓存
+    maxFileSize: 12_000_000,
+    //设置消息头cache-control的值，默认为null表示不发送消息头cache-control
+    cacheControl: 'max-age=30'
+  })
+
+  rse.init(app)
 
 }
 
