@@ -219,11 +219,11 @@ _import('/static/module/x-plan.js').then(res => {
 
 - findMethod(name)
 
-- findMethod(name, wh, lowercase)
+- findMethod(name, wh)
 
-- findMethod(name, lowercase)
+通过调用this.findMethod(name)可以查找指定name的方法，注意区分大小写。
 
-通过调用this.findMethod(name)可以查找指定name的方法，注意默认区分大小写，但是你可以传递第二个参数为false表示不区分大小写。
+<br>
 
 findMethod将默认从w.config和w.ext上查找方法，你可以通过第二个参数来设置查找的顺序：
 

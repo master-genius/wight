@@ -3264,12 +3264,7 @@ class Component extends HTMLElement {
     w.promptTopDark(info, options);
   }
 
-  findMethod(name, wh=['config', 'ext'], lowercase=true) {
-    if (typeof wh === 'boolean') {
-      lowercase = wh;
-      wh = ['config', 'ext'];
-    }
-
+  findMethod(name, wh=['config', 'ext']) {
     if (typeof wh === 'string') wh = [wh];
 
     if (!wh || !Array.isArray(wh) || wh.length === 0) {
