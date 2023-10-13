@@ -214,3 +214,165 @@ _import('/static/module/x-plan.js').then(res => {
 - this.promptMiddle(text)
 
 - this.promptMiddleDark(text)
+
+## 查找并返回方法：findMethod
+
+- findMethod(name)
+
+- findMethod(name, wh, lowercase)
+
+- findMethod(name, lowercase)
+
+通过调用this.findMethod(name)可以查找指定name的方法，注意默认区分大小写，但是你可以传递第二个参数为false表示不区分大小写。
+
+findMethod将默认从w.config和w.ext上查找方法，你可以通过第二个参数来设置查找的顺序：
+
+```javascript
+//将会从w.ext查找login并确定如果是方法则返回。
+this.findMethod('login', 'ext');
+
+//更改顺序，默认的是['config', 'ext]
+this.findMethod('login', ['ext', 'config']);
+
+```
+
+## 组件的解耦合以及通用性
+
+通用型的组件编写起来更加复杂，但是好处是一次编写，可以在很多场景下进行直接复用，可以用在很多项目上。不必每次都要修改。
+
+<br>
+
+要编写通用型组件，需要利用框架提供的各种机制来实现逻辑的解耦合。比如要编写一个user-login组件，用户输入后，执行的login操作并不在组件中，而是在w.config中设置的。
+
+### user-login组件示例
+
+**user-login.js**
+
+```javascript
+'use strict';
+
+class UserLogin extends Component {
+
+  constructor() {
+    super();
+    
+    this.properties = {
+      func: {
+        type: 'string'
+      },
+
+      hideforgetusername: {
+        type: 'boolean',
+        default: false,
+      },
+
+      hideforgetpasswd: {
+        type: 'boolean',
+        default: false,
+      }
+    };
+
+    this.loginFunc = null
+
+    this.forgetUsernameFunc = null
+
+    this.forgetPasswdFunc = null
+  }
+
+  //在render之前执行，此时已经创建好shadow DOM。
+  init() {
+    let fname = this.attrs.func || 'login'
+
+    if (w.config[fname] && typeof w.config[fname] === 'function') {
+      this.loginFunc = w.config[fname]
+    }
+  }
+
+  login(fm) {
+    if (!this.loginFunc) {
+      return notifyTopError('没有配置login方法用于登录，请通过属性func配置对应的方法名字，或者直接在app.js中设置w.config.login作为登录的处理函数。', 15000)
+    }
+
+    let {username,passwd} = fm.value
+    if (!username || !passwd) {
+      notifyTopError('用户名和密码不能为空')
+    }
+
+    this.loginFunc(fm.value)
+    
+  }
+
+  //返回字符串或DOM节点。
+  render() {
+    // 也可以返回字符串 return 'user-login组件';
+    return this.plate();
+  }
+
+  //渲染完成后执行
+  afterRender() {
+
+    if (this.attrs.hideforgetpasswd) {
+      this.view({
+        forgetPasswd: ''
+      })
+    }
+
+    if (this.attrs.hideforgetusername) {
+      this.view({
+        forgetUsername: ''
+      })
+    }
+  }
+
+  forgetUsername() {
+    let ff = w.config.forgetUsername
+    if (!ff || typeof ff !== 'function') {
+      return w.notifyTopError('未定义w.config.forgetUsername函数。')
+    }
+
+    w.config.forgetUsername()
+  }
+
+  forgetPasswd() {
+    let ff = w.config.forgetPasswd
+    if (!ff || typeof ff !== 'function') {
+      return w.notifyTopError('未定义w.config.forgetPasswd函数。')
+    }
+
+    w.config.forgetPasswd()
+  }
+
+  onload() {
+
+  }
+
+}
+```
+
+**template.html**
+
+```html
+<template>
+<style>
+</style>
+
+<div row c-12 padding inset-shadow>
+  <form data-onsubmit="login" style="width: 100%;" autocomplete="off">
+    <input type="text" name="username" long-input placeholder="用户名" required><br>
+    <input type="password" name="passwd" mtop-0-5 long-input placeholder="密码" required><br>
+    <div align-center mtop>
+      <input type="submit" value="登录">
+    </div>
+  </form>
+  <div c-12 row mtop-2 text-shadow>
+    <div c-6 data-name="forgetUsername">
+      <span middle click click-middle data-onclick="forgetUsername">忘记用户名</span>
+    </div>
+    <div c-6 align-right data-name="forgetPasswd">
+      <span middle click click-middle data-onclick="forgetPasswd">找回密码</span>
+    </div>
+  </div>
+</div>
+</template>
+
+```

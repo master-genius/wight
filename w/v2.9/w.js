@@ -3224,18 +3224,15 @@ class Component extends HTMLElement {
     return w.loadScript(src, this.tagName.toLowerCase());
   }
 
-  sliderPage(text, append=false) {
-    w.sliderPage(text, append, this);
-  }
+  sliderPage(text, append=false) { w.sliderPage(text, append, this); }
 
-  hideSliderPage() {
-    w.hideSliderPage();
-  }
+  hideSliderPage() { w.hideSliderPage(); }
 
   prompt(info, options={}) {
     if (!options || typeof options !== 'object') {
-      options = {}
+      options = {};
     }
+
     options.target = this;
     w.prompt(info, options);
   }
@@ -3265,5 +3262,26 @@ class Component extends HTMLElement {
   promptTopDark(info, options={}) {
     options.target = this;
     w.promptTopDark(info, options);
+  }
+
+  findMethod(name, wh=['config', 'ext'], lowercase=true) {
+    if (typeof wh === 'boolean') {
+      lowercase = wh;
+      wh = ['config', 'ext'];
+    }
+
+    if (typeof wh === 'string') wh = [wh];
+
+    if (!wh || !Array.isArray(wh) || wh.length === 0) {
+      wh = ['config', 'ext'];
+    }
+
+    for (let k of wh) {
+      if (w[k] && w[k][name] && typeof w[k][name] === 'function') {
+        return w[k][name];
+      }
+    }
+
+    return null;
   }
 }
