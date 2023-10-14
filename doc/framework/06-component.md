@@ -148,7 +148,7 @@ this.properties = {
 
 ## attrs和attributes
 
-组件解析后的属性可以通过this.attrs获取，attrs属性是一个object。attributes是浏览器自定义组件给出的用于获取组件属性的方式，Component封装利用properties和attributes解析后放在attrs中方便使用。
+组件解析后的属性可以通过this.attrs获取，attrs属性是一个Proxy实例对象，内部包装处理的是__attrs__属性，此属性是记录属性的对象。attributes是浏览器自定义组件给出的用于获取组件属性的方式，Component封装利用properties和attributes解析后放在attrs中方便使用。
 
 ## 组件编译成模块
 
@@ -377,3 +377,33 @@ class UserLogin extends Component {
 </template>
 
 ```
+
+## 组件的属性和状态变化
+
+this.attributes是组件原始的属性，它是一个NamedNodeMap实例对象。但是使用起来十分复杂并且还需要自己去处理得到的数据，比如转换成数字或数组等。
+
+this.attributes仍然存在另一个问题，那就是如果不是节点的默认具备的属性，就要是明确写在html代码中的属性才会出现在这里，也才可以具备监听的机制。
+
+组件内必须存在以下方法才可以具备监听属性变化和处理变化回调函数的能力：
+
+```javascript
+
+  onattrchange (name, oldValue, newValue) {
+    console.log(name, oldValue, newValue)
+  }
+
+  static get observedAttributes() {
+    //如果你要监控某些属性的变化，你需要在onattrchange中处理。
+    //要在属性变化时触发onattrchange函数，你需要在此函数中返回对应的属性。
+    return ['class', 'name', 'id'];
+  }
+
+```
+
+以上代码是说只有class、name、id三个属性发生变化，才会触发onattrchange函数。
+
+还有一个问题是，如果你在程序里设置this.attributes是不会触发事件函数的。你需要在一个使用组件的外部，通过获取到的DOM节点，设置属性，会触发onattrchange事件函数。
+
+----
+
+组件提供了this.attrs用于获取和设置属性，this.attrs是对this.__attrs__的代理对象，当给this.attrs设置属性或删除属性，同样会触发onattrchange事件，不过需要注意的是，这个是每个属性都会触发。

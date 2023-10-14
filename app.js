@@ -177,9 +177,13 @@ if (cluster.isWorker) {
 if (app.isWorker) {
   let mdoc = new loadddoc('doc')
   mdoc.init()
-  console.log(mdoc)
 
   app.get('/wight-doc', async ctx => {
+    if (ctx.query.group) {
+      let clist = mdoc.search('.*', 0, 0, ctx.query.group)
+      return ctx.send(clist)
+    }
+
     ctx.send(mdoc.search('.*'))
   })
 
@@ -187,7 +191,10 @@ if (app.isWorker) {
     try {
       let fname = ctx.param.starPath
       if (fname.substring(fname.length-3) === '.md') {
-        
+        let doc = mdoc.getById(fname)
+        if (!doc) return ctx.status(404).send('没有找到文档，该文档可能丢失。')
+
+        return ctx.send(doc)
       }
 
       return await ctx.helper.pipe('./doc/' + fname, ctx.reply)
@@ -196,9 +203,10 @@ if (app.isWorker) {
     }
   })
 
+  let magic_str = 'wy-wxm-ww-ok'
   let rse = new resource({
     staticPath: './wight-app/static',
-    routePath : '/wight-app/static/*',
+    routePath : `/${magic_str}/wight-app/static/*`,
     routeGroup: '_static_wight',
     decodePath: true,
     //最大缓存文件大小，超过此大小则不会缓存
@@ -209,6 +217,9 @@ if (app.isWorker) {
 
   rse.init(app)
 
+  app.get('/', async ctx => {
+    await ctx.helper.pipe('./wight-app/app.html', ctx.reply)
+  })
 }
 
 if (app.isWorker) {

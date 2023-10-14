@@ -384,7 +384,7 @@ a:hover,.click:hover,[click]:hover {
 }
 
 a:active,.click:active,[click]:active {
-  font-size: 96.9%;
+  font-size: 98.9%;
   transform: scale(0.86);
 }
 
