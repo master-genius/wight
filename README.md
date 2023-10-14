@@ -257,7 +257,7 @@ this.setAttr({
 
     "components" : "*",
 
-    "version": "1.3",
+    "version": "2.9",
 
     "radius" : true,
 
@@ -422,7 +422,7 @@ node newcomps.js [应用目录名称] [组件名称]
 
 ### w常用API
 
-- acover 弹出层显示内容，带有cover页面不允许点击其他部分。
+- cover 弹出层显示内容，带有cover页面不允许点击其他部分。
 
 - uncover 取消acover弹出层。
 
