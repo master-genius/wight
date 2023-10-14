@@ -2003,7 +2003,7 @@ w._page_style_bind = function (pname) {
       if (obj[k]) {
         delete obj[k];
       }
-      
+
       return true;
     }
   });
@@ -2860,10 +2860,19 @@ class Component extends HTMLElement {
       },
 
       deleteProperty: (obj, k) => {
-        delete obj[k];
-        //声明了properties的会默认设置到this上，也会删除。
-        if (this.properties[k] && (!this.notDelete || this.notDelete.indexOf(k) < 0)) {
-          delete this[k];
+        if (obj[k] !== undefined) {
+          let oldval = obj[k];
+          delete obj[k];
+          //声明了properties的会默认设置到this上，也会删除。
+          if (this.properties[k] && (!this.notDelete || this.notDelete.indexOf(k) < 0)) {
+            delete this[k];
+          }
+
+          try {
+            ;(typeof this.onattrchange === 'function') && this.onattrchange(k, oldval, null);
+          } catch (err) {
+            w.debug && console.error(err);
+          }
         }
 
         return true;
