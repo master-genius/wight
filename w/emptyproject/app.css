@@ -276,13 +276,23 @@ input[ok] {
   margin: 0.38rem auto;
 }
 
-.icon, [icon] {
+.icon-small, [icon-small] {
   width: 1.1rem;
   height: auto;
 }
 
+.icon, [icon] {
+  width: 1.68rem;
+  height: auto;
+}
+
 .icon-large,[icon-large] {
-  width: 1.6rem;
+  width: 2.5rem;
+  height: auto;
+}
+
+.icon-huge,[icon-huge] {
+  width: 4.2rem;
   height: auto;
 }
 
@@ -385,7 +395,7 @@ a:hover,.click:hover,[click]:hover {
 
 a:active,.click:active,[click]:active {
   font-size: 98.9%;
-  transform: scale(0.86);
+  transform: scale(0.9);
 }
 
 .select-none,[select-none] {
