@@ -116,6 +116,43 @@ w.removeHook('login-check')
 ```
 
 > ----
+> ## 共享数据和消息通知
+> ----
+
+框架层面提供了w.share用于共享数据，你可以在页面、组件、扩展等任何js文件里使用。通过w.share可以共享各种数据。
+
+w.share是一个Proxy实例，因此，基于此机制，实现了数据状态变化的通知函数：
+
+- w.registerShareNotice(object) {String}id
+
+- w.removeShareNotice(id)
+
+
+示例：
+
+```javascript
+//返回值为唯一标识id
+let id = w.registerShareNotice({
+    //mode支持always或once
+    mode: 'always',
+    //要监听的key，如果w.share.datalist变化则会执行回调函数
+    key: 'datalist',
+    //操作类型，type支持 get、set、delete、all，默认为set。
+    type: 'set',
+    callback: (ctx) => {
+        //ctx中包括data、type、key
+        console.log(ctx)
+    }
+})
+
+setTimeout(() => {
+    w.removeShareNotice(id)
+}, 5000)
+
+```
+
+
+> ----
 > ## 界面交互
 > ----
 

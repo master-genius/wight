@@ -1214,6 +1214,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
       try {
         orgdata = fs.readFileSync(`${cdir}/${names[i]}/${names[i]}.js`, 'utf8') + '\n';
         
+        orgdata = this.replaceRequire(orgdata);
         await this.checkCode(`${cdir}/${names[i]}.js`, orgdata);
 
         opts = '';
@@ -1223,7 +1224,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
 
         orgdata = this.replaceSrc(orgdata, true, names[i]);
 
-        let comps_jscode = `;(()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
+        let comps_jscode = `;(async()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
 
         if (checkIfToModule(names[i])) {
           let mod_dir = `${appdir}/static/module`;

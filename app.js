@@ -190,16 +190,14 @@ if (app.isWorker) {
   app.get('/wight-doc/*', async ctx => {
     try {
       let fname = ctx.param.starPath
-      if (fname.substring(fname.length-3) === '.md') {
-        let doc = mdoc.getById(fname)
-        if (!doc) return ctx.status(404).send('没有找到文档，该文档可能丢失。')
+      let doc = mdoc.getById(fname)
+      if (!doc) return ctx.status(404).send('没有找到文档，该文档可能丢失。')
 
-        return ctx.send(doc)
-      }
+      return ctx.send(doc)
 
-      return await ctx.helper.pipe('./doc/' + fname, ctx.reply)
+      //return await ctx.helper.pipe('./doc/' + fname, ctx.reply)
     } catch (err) {
-      return c.status(404).send(err.message)
+      return ctx.status(404).send(err.message)
     }
   })
 

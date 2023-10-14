@@ -2603,8 +2603,8 @@ Object.defineProperties(w, {
  */
 w.registerShareNotice = function (options) {
 
-  if (w.shareNoticeList.length >= 111) {
-    w.notifyError('注册通知函数已达上限，不能超过111个。');
+  if (w.shareNoticeList.length >= 10101) {
+    w.notifyError('注册通知函数已达上限，不能超过10101个。');
     return false;
   }
 
@@ -2629,8 +2629,8 @@ w.registerShareNotice = function (options) {
   } else {
     if (options.only) return false;
     let kn = w.shareNoticeList.funcmap[ options.key ];
-    if (kn.length >= 10) {
-      w.notifyError('同一个key注册通知函数不能超过10个。');
+    if (kn.length >= 111) {
+      w.notifyError('同一个key注册通知函数不能超过111个。');
       return false;
     }
     kn.push(options);
@@ -2724,8 +2724,10 @@ Object.defineProperty(w, 'share', {
     },
   
     deleteProperty : (obj, k) => {
-      w.runShareNotice('delete', obj, k);
-      delete obj[k];
+      if (obj[k] !== undefined) {
+        w.runShareNotice('delete', obj, k);
+        delete obj[k];
+      }
       return true;
     }
   })
