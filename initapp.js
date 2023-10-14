@@ -357,7 +357,7 @@ class initapp {
       }
     });
 
-    app.get('/:name/component/:comp/:src', async c => {
+    app.get('/:name/components/:comp/:src', async c => {
       let srcname = `${c.service.appPath}/${c.service.prefix}/${c.param.name}/`
           + `components/${c.param.comp}/static/${c.param.src}`;
         

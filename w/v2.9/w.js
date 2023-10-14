@@ -1697,15 +1697,11 @@ w.view = function (pagename, data) {
   for (let k in data) {
     qcss = `[data-name=${k}]`;
     
-    if (k[0] === '#') {
+    if (k[0] === '&') {
+      qcss = k.substring(1);
+    } else if ([':', '.', '#'].indexOf(k[0]) >= 0) {
       qcss = k;
-    } else if (k[0] === '@') {
-      qcss = `[name=${k.substring(1)}]`;
-    } else if (k[0] === '.') {
-      qcss = `[class=${k.substring(1)}]`;
-    } else if (k[0] === ':') {
-      qcss = `[data-bind=${k.substring(1)}]`;
-    } else if (k[0] === '[') {
+    } else if (k.indexOf('[') >= 0) {
       qcss = k;
     }
 
@@ -2015,7 +2011,7 @@ w._page_style_bind = function (pname) {
 };
 
 w.parseform = function (fd) {
-  var m = {
+  let m = {
     node : fd,
     childs : {},
     buttons : {},
@@ -2024,9 +2020,9 @@ w.parseform = function (fd) {
     values : {}
   };
 
-  var inds = fd.querySelectorAll('input');
-  var secnds = fd.querySelectorAll('select');
-  var textnds = fd.querySelectorAll('textarea');
+  let inds = fd.querySelectorAll('input');
+  let secnds = fd.querySelectorAll('select');
+  let textnds = fd.querySelectorAll('textarea');
 
   for (let i=0; i<inds.length; i++) {
     if (inds[i].name === undefined || inds[i].name === '') {
@@ -3138,16 +3134,14 @@ class Component extends HTMLElement {
 
   _fmtquery (k) {
     let qcss = `[data-name=${k}]`;
-
-    if (k[0] === '#') {
+    if (k[0] === '&') {
+      qcss = k.substring(1);
+    } else if (['.', ':', '#'].indexOf(k[0]) >= 0) {
       qcss = k;
-    } else if (k[0] === '@') {
-      qcss = `[name=${k.substring(1)}]`;
-    } else if (k[0] === '.') {
-      qcss = `[class=${k.substring(1)}]`;
-    } else if (k[0] === '[') {
-      qcss = k;
+    } else if (k.indexOf('[') >= 0) {
+      return k;
     }
+
     return qcss;
   }
 

@@ -136,8 +136,8 @@ let iapp
 if (cluster.isWorker) {
 
   app.get('/favicon.ico', async c => {
-    c.setHeader('content-type', 'image/x-icon')
-     .helper.pipe('./favicon.ico', c.reply)
+    await c.setHeader('content-type', 'image/x-icon')
+            .helper.pipe('./wight-app/favicon.ico', c.reply)
   })
   
   let opts = {
@@ -176,10 +176,10 @@ if (cluster.isWorker) {
 
 if (app.isWorker) {
   let mdoc = new loadddoc('doc')
-  mdoc.routepath = '/wight-doc'
+  mdoc.routepath = '/self/wight-doc'
   mdoc.init()
 
-  app.get('/wight-doc', async ctx => {
+  app.get('/self/wight-doc', async ctx => {
     if (ctx.query.group) {
       let clist = mdoc.search('.*', 0, 0, ctx.query.group)
       return ctx.send(clist)
@@ -188,7 +188,7 @@ if (app.isWorker) {
     ctx.send(mdoc.search('.*'))
   })
 
-  app.get('/wight-doc/*', async ctx => {
+  app.get('/self/wight-doc/*', async ctx => {
     try {
       let fname = ctx.param.starPath
       let doc = mdoc.getById(fname)
@@ -221,7 +221,7 @@ if (app.isWorker) {
   rse.init(app)
 
   app.get('/', async ctx => {
-    await ctx.helper.pipe('./wight-app/app.html', ctx.reply)
+    await ctx.helper.pipe('./wight-app/index.html', ctx.reply)
   })
 }
 
