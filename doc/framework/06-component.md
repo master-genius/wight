@@ -407,3 +407,14 @@ this.attributes仍然存在另一个问题，那就是如果不是节点的默�
 ----
 
 组件提供了this.attrs用于获取和设置属性，this.attrs是对this.__attrs__的代理对象，当给this.attrs设置属性或删除属性，同样会触发onattrchange事件，不过需要注意的是，这个是每个属性都会触发。
+
+## 相关属性和函数
+
+### this.__init__
+
+用于标记是否已经执行过初始化，若为true则表示已经进行过shadow节点的模板内容加载。并且在此之前已经执行了init函数。
+
+### this.allAttrs()
+
+获取所有的属性，返回值是一个object，其实就是把this.__attrs__属性返回了。
+
