@@ -378,7 +378,7 @@ let wapp = function (options = {}) {
       }
     }
 
-    await new Promise((rv, rj) => { setTimeout(rv, 15); });
+    await new Promise((rv, rj) => { setTimeout(rv, 9); });
 
     let parsehash = (h) => {
       let ind = h.indexOf('#');

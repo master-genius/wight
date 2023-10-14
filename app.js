@@ -176,6 +176,7 @@ if (cluster.isWorker) {
 
 if (app.isWorker) {
   let mdoc = new loadddoc('doc')
+  mdoc.routepath = '/wight-doc'
   mdoc.init()
 
   app.get('/wight-doc', async ctx => {
@@ -191,11 +192,15 @@ if (app.isWorker) {
     try {
       let fname = ctx.param.starPath
       let doc = mdoc.getById(fname)
-      if (!doc) return ctx.status(404).send('没有找到文档，该文档可能丢失。')
+      if (!doc) {
+        try {
+          return await ctx.helper.pipe('./doc/' + fname, ctx.reply)
+        } catch (err) {
+          return ctx.status(404).send('没有找到文档，该文档可能丢失。')
+        }
+      }
 
       return ctx.send(doc)
-
-      //return await ctx.helper.pipe('./doc/' + fname, ctx.reply)
     } catch (err) {
       return ctx.status(404).send(err.message)
     }

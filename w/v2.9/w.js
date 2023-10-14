@@ -2884,7 +2884,7 @@ class Component extends HTMLElement {
     queueMicrotask(this.__queue_task_init__.bind(this));
   }
 
-  __queue_task_init__() {
+  async __queue_task_init__() {
     if (!this.properties || typeof this.properties !== 'object') this.properties = {};
     if (this.notDelete && !Array.isArray(this.notDelete)) {
       this.notDelete = [this.notDelete];
@@ -2913,7 +2913,16 @@ class Component extends HTMLElement {
     }
 
     if (this.init && typeof this.init === 'function') {
-      this.init();
+      try {
+        if (this.init.constructor.name === 'AsyncFunction') {
+          await this.init();
+        } else {
+          this.init();
+        }
+      } catch (err) {
+        w.debug && console.error(err);
+        w.debug && w.notifyTopError(err.message);
+      }
     }
 
     if (this.render && typeof this.render === 'function') {
