@@ -398,6 +398,18 @@ a:active,.click:active,[click]:active {
   transform: scale(0.9);
 }
 
+.click-middle:active,[click-middle]:active {
+  font-size: 90%;
+  text-decoration: none;
+  transform: scale(0.88);
+}
+
+.click-small:active,[click-small]:active {
+  font-size: 83.5%;
+  text-decoration: none;
+  transform: scale(0.92);
+}
+
 .select-none,[select-none] {
   user-select: none;
 }
