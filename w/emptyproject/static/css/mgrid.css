@@ -118,6 +118,11 @@
     display: none;
   }
 
+  .sm-0-5, [sm-0-5] {
+    width: 4.15%;
+    box-sizing: border-box;
+  }
+
   .sm-1, [sm-1] {
     width: 8.333333%;
     box-sizing: border-box;
@@ -196,6 +201,11 @@
     display: none;
   }
 
+  .md-0-5, [md-0-5] {
+    width: 4.15%;
+    box-sizing: border-box;
+  }
+
   .md-1, [md-1] {
     width: 8.333333%;
     box-sizing: border-box;
@@ -267,6 +277,11 @@
   .hide-for-large, [hide-for-large] {
     visibility: hidden;
     display: none;
+  }
+
+  .lg-0-5, [lg-0-5] {
+    width: 4.15%;
+    box-sizing: border-box;
   }
 
   .lg-1, [lg-1] {
