@@ -1685,7 +1685,7 @@ const w = new function () {
 
       let closeText = '<div style="text-align:right;">'
         +'<a href="javascript:w.unalert();" '
-        +'style="color:#696365;font-size:105%;text-decoration:none;cursor:pointer;">'
+        +'style="color:#696365;font-size:105%;text-decoration:none;" click>'
         +'&nbsp;X&nbsp;</a>'
         +'</div>';
 
@@ -1770,7 +1770,7 @@ const w = new function () {
     });
   };
 
-  this.acover = function (info, trans = false) {
+  this.cover = function (info, trans = false) {
     this.alert(info, {
       replace: true,
       notClose: true,
@@ -1836,7 +1836,7 @@ const w = new function () {
     }
 
     if (ntype.indexOf('error') >= 0) {
-      info = `<span style="color:#f76567;font-size:95%;">${info}</span>`;
+      info = `<span style="color:#f96567;font-size:95%;">${info}</span>`;
     }
 
     let where_is = 'w-notify-bottom';
@@ -1874,8 +1874,8 @@ const w = new function () {
       } else {
         w.notifydom.innerHTML = `<div style="text-align:right;">`
           +`<a href="javascript:w.unnotify();" `
-          +`style="color:#dfdfdf;font-size:109%;text-decoration:none;">&nbsp;X&nbsp;</a>`
-          +`</div><p style="color:${colorText};">${w.notifylog}</p>`;
+          +`style="color:#dfdfdf;font-size:109%;text-decoration:none;" click>&nbsp;X&nbsp;</a>`
+          +`</div><div style="color:${colorText};">${w.notifylog}</div>`;
       }
       w.initPageDomEvents(w.curpage, w.notifydom);
     }
@@ -1943,8 +1943,10 @@ const w = new function () {
     this.prompt(info, options);
   };
 
-  this.promptTopDark = function (info, noclose = false) {
-    this.promptTop(info, noclose, 'dark');
+  this.promptTopDark = function (info, options = {}) {
+    options.wh = 'top';
+    options.glass = 'dark';
+    this.prompt(info, options);
   };
 
   //wh = 'bottom', noclose = false, glass = false
@@ -1982,8 +1984,10 @@ const w = new function () {
         w.promptdom.innerHTML = `<div style="overflow:auto;word-wrap:break-word;">`
           + `<p style="color:${pcolor};">${info}</p></div>`;
       }
-      w.initPageDomEvents(w.curpage, w.promptdom);
+
+      w.initPageDomEvents(options.target || w.curpage, w.promptdom);
     }
+
     return w.promptdom;
   };
 
@@ -2054,9 +2058,9 @@ const w = new function () {
   this.pageShowType = '';
   this.pageShowTypeLock = false;
   
-  this.listenHash = function (op = '') {
+  this.listenHash = async function (op = '') {
     if (this.listenHashLock === true) {
-      return ;
+      return false;
     }
 
     if (!this.pageShowTypeLock) {
@@ -2088,15 +2092,24 @@ const w = new function () {
         w.tabs.cur = '';
         return w.switchTab(tp || w.tabs.pages[0]);
       }
-
-      this.loadPage(r);
+    
+      await this.loadPage(r);
       this.listenHashLock = false;
     } catch (err) {
       this.listenHashLock = false;
-    }
+    }finally{this.listenHashLock = false;}
+
+    return true;
   };
 
-  this.pages = {};
+  this.pageNameList=[];
+  Object.defineProperty(this, 'pages', {
+    value: Object.create(null),
+    enumerable: true,
+    configurable: false,
+    writable: false
+  });
+
   this.curpage = null;
   this.curpagename = null;
 
@@ -2199,32 +2212,58 @@ const w = new function () {
 
   this.initFlag = false;
 
+  this.initOnePage = function (name, obj=null) {
+    let pg = this.pages[name];
+    if (!pg) {
+      pg = this.pages[name] = obj || {};
+    }
+
+    if (pg.state) {
+      return false;
+    }
+
+    pg.__dom__ = this.pgcdom.insertBefore(document.createElement('div'),
+                                          this.pgcdom.firstChild);
+    pg.initCount = 0;
+    pg.loaded = false;
+    pg.scroll = 0;
+    pg.bottomTime = 0;
+    pg.pageKey = name;
+    pg.__name__ = name;
+    pg.init = false;
+    pg.__dom__.onscroll = w.events.scroll;
+    pg.state = true;
+    pg.tabsPlace = '';
+
+    if (w.tabs.list.length > 0) {
+        pg.tabsPlace = '<div style="height:3.8rem;">&nbsp;</div>';
+
+        if (w.tabs.pages.indexOf(name) >= 0) {
+          pg.__dom__.style.cssText = 'z-index:1;';
+        }
+    }
+
+    pg.view = function (data) {return w.view(name, data);};
+    pg.resetView = function (data) {return w.resetView(name, data);};
+    pg.render = function (htext) {return w.fmtHTML(name, htext);};
+    pg.setScroll = function(scr) {
+        if (scr < 0) { w.pages[name].__dom__.scrollTop += scr; }
+        else { w.pages[name].__dom__.scrollTop = scr; }
+    };
+    pg.destroy = function () {w.destroyPage(w.pages[name]);};
+    pg.query = function(qstr) {return w.pages[name].__dom__.querySelector(qstr);};
+    pg.queryAll = function(qstr) {return w.pages[name].__dom__.querySelectorAll(qstr);};
+    pg.setAttr = function (data) {w.setAttr(name, data);};
+    if (!w.pages[name].data || typeof w.pages[name].data !== 'object') {
+        w.pages[name].data = {};
+    }
+    w._make_page_bind(name);
+    w._page_style_bind(name);
+  }
+
   this.initPage = function () {
     for (let k in this.pages) {
-      this.pages[k].__dom__ = this.pgcdom.insertBefore(
-                  document.createElement('div'),
-                  this.pgcdom.firstChild
-                );
-      this.pages[k].initCount = 0;
-      this.pages[k].loaded = false;
-      this.pages[k].scroll = 0;
-      this.pages[k].bottomTime = 0;
-      this.pages[k].pageKey = k;
-      this.pages[k].__name__ = k;
-      this.pages[k].init = false;
-      this.pages[k].__dom__.onscroll = w.events.scroll;
-      
-      this.pages[k].tabsPlace = '';
-
-      if (w.tabs.list.length > 0) {
-
-        this.pages[k].tabsPlace = '<div style="height:3.8rem;">&nbsp;</div>';
-
-        if (w.tabs.pages.indexOf(k) >= 0) {
-          this.pages[k].__dom__.style.cssText = 'z-index:1;';
-        }
-      }
-
+      this.initOnePage(k);
     }
     this.initFlag = true;
   };
@@ -2403,7 +2442,8 @@ w.loadPageLock = false;
 
 w.handleNotFound = function () {
   if (!w.config.notFound || typeof w.config.notFound === 'string') {
-    this.coverShadow(w.config.notFound || '<div>404: 没有此页面</div>');
+    let notfoundText = `<div style="font-size:125%;font-weight:bold;">404: 没有此页面</div><p>${location.hash} 页面不存在！！</p><p style="text-align:center;"><a href="javascript:unalert();w.redirect('#');">回到首页</a></p>`;
+    this.alert(w.config.notFound || notfoundText);
   } else {
     if (typeof w.config.notFound === 'function') {
       w.config.notFound();
@@ -2412,7 +2452,7 @@ w.handleNotFound = function () {
       if (obj.redirect && w.pages[obj.redirect]) {
         w.redirect(obj.redirect);
       } else {
-        this.coverShadow('<div>404: 没有此页面</div>');
+        this.alert('<div>404: 没有此页面</div>');
       }
     }
   }
@@ -2420,10 +2460,15 @@ w.handleNotFound = function () {
 
 w.going = null;
 
+w.routeInfo = function() {
+  return w.curpage ? (w.curpage.__ctx__ || null) : null;
+};
+
 w.loadPage = async function (R) {
   if (w.loadPageLock) {
-    return;
+    return false;
   }
+
   w.loadPageLock = true;
 
   let route = R.path;
@@ -2431,21 +2476,33 @@ w.loadPage = async function (R) {
     route = this.homepage;
   }
 
+  let pageindex = w.pageNameList.indexOf(route);
+
+  if (this.pages[route] === undefined && pageindex >= 0) {
+    alert('正在等待页面初始化···', {notClose: true});
+  
+    for (let i = 0; i < 222; i++) {
+      await new Promise(rv => {setTimeout(rv, 5)});
+      if (this.pages[route] && this.pages[route].state) break;
+    }
+
+    setTimeout(()=>{w.unalert();},111);
+
+    if (this.pages[route] === undefined) {
+      w.notify('等待页面超时！', {ntype: 'top error noclose'});
+      //经过这个延迟，页面有可能已经准备好。
+      await new Promise(rv => {setTimeout(rv, 1101)});
+    }
+  
+  }
+
   if (this.pages[route] === undefined) {
-    w.loadPageLock = false;
-    this.handleNotFound();
-    return ;
+      w.loadPageLock = false;
+      this.handleNotFound();
+      return false;
   }
 
   let pg = this.pages[route];
-
-  //临时的解决方案，如果没有准备好，则等待一会。
-  if (this.initFlag===false) {
-    await new Promise((rv,rj) => {
-      setTimeout(()=>{rv();}, 52);
-    });
-  }
-
   let c = this.context();
   c.path = route;
   c.query = R.query;
@@ -2462,6 +2519,10 @@ w.loadPage = async function (R) {
   c.name = pg.__name__;
   this.going = pg.__name__;
 
+  pg.__ctx__ = c;
+
+  //loadPage是一个异步函数，如果此时在runHook中的函数执行了重定向操作会导致页面显示失败。
+  //因为此时，listenHasLock为true
   if (false === await w.runHooks(c)) {
     w.loadPageLock = false;
     return false;
@@ -2487,6 +2548,10 @@ w.loadPage = async function (R) {
     w.initPageDomEvents(pg, pg.__dom__);
   }
 
+  //为了避免在重定向或跳转页面的操作时出现冲突。
+  //这里先解锁hash，允许listenHash执行，避免后续的事件函数执行出现漫长等待。
+  w.listenHashLock = false;
+
   if (pg.onload && typeof pg.onload === 'function' && pg.loaded === false) {
     pg.loaded = true;
     try {
@@ -2505,7 +2570,6 @@ w.loadPage = async function (R) {
   }
 
   pg.__dom__.scrollTop = pg.scroll;
-
 };
 
 w.reload = function (force = true) {
@@ -2531,7 +2595,7 @@ w.qs = function (args) {
   return qrs_list.join('&');
 };
 
-w.go = function (path, args = {}, op = 'forward') {
+w.go = async function (path, args = {}, op = 'forward') {
   if (typeof args === 'string') {
     op = args;
     args = {};
@@ -2541,6 +2605,13 @@ w.go = function (path, args = {}, op = 'forward') {
   w.pageShowType = op;
 
   let qrs = w.qs(args);
+
+  if (w.listenHashLock) {
+    for (let i = 0; i < 500; i++) {
+      await new Promise(rv => {setTimeout(rv, 5)});
+      if (!w.listenHashLock) break;
+    }
+  }
   
   location.hash = `${path}${qrs.length>0?'?':''}${qrs}`;
 };
@@ -2553,6 +2624,20 @@ w.goBack = function () {
   return false;
 }
 
+w.redirectBack = function (n=1) {
+  if (w.historyList.length < n) {
+    return false;
+  }
+
+  let last_url = w.historyList[w.historyList.length - n];
+
+  if (!last_url) {
+    return false;
+  }
+
+  w.redirect(last_url);
+}
+
 w.redirect = function (path, args = {}) {
   this.pageShowTypeLock = true;
   w.pageShowType = 'forward';
@@ -2561,8 +2646,26 @@ w.redirect = function (path, args = {}) {
 
   let qrs = w.qs(args.query || {});
 
-  let startRedirect = () => {
+  let startRedirect = async () => {
     history.replaceState({id: path}, '', `${path}${qrs.length > 0 ? '?' : ''}${qrs}`);
+    if (args.noticeInfo) {
+      w.notify(args.noticeInfo, {ntype: 'top noclose', timeout: 5000});
+    }
+
+    if (w.listenHashLock) {  
+      //有可能某些页面还没准准备好导致页面初始化需要等待，此时listenHash会等待，这里也要等待。
+      for (let i = 0; i < 500; i++) {
+        await new Promise(rv => {setTimeout(rv, 5)});
+        if (!w.listenHashLock) break;
+      }
+    }
+
+    if (args.noticeInfo) {
+      if (args.noticeTimeout && typeof args.noticeTimeout === 'number') {
+        setTimeout(()=>{w.unnotify();}, args.noticeTimeout);
+      } else w.unnotify();
+    }
+
     w.listenHash();
   };
 
@@ -2746,15 +2849,11 @@ w.view = function (pagename, data) {
   for (let k in data) {
     qcss = `[data-name=${k}]`;
     
-    if (k[0] === '#') {
+    if (k[0] === '&') {
+      qcss = k.substring(1);
+    } else if ([':', '.', '#'].indexOf(k[0]) >= 0) {
       qcss = k;
-    } else if (k[0] === '@') {
-      qcss = `[name=${k.substring(1)}]`;
-    } else if (k[0] === '.') {
-      qcss = `[class=${k.substring(1)}]`;
-    } else if (k[0] === ':') {
-      qcss = `[data-bind=${k.substring(1)}]`;
-    } else if (k[0] === '[') {
+    } else if (k.indexOf('[') >= 0) {
       qcss = k;
     }
 
@@ -2854,7 +2953,14 @@ w._setData = function (pagename, pg, nds, data) {
         dtemp = pg[nds[i].dataset.list]({data: data, target: nds[i], type: 'list', dataType}) || '';
       }
     } else {
-      if (typeof data === 'object') {
+      if (pg.display && typeof pg.display === 'object' 
+        && pg.display[nds[i].dataset.name]
+        && typeof pg.display[nds[i].dataset.name] === 'function')
+      {
+        dtemp = pg.display[nds[i].dataset.name]({
+          data: data, target: nds[i], type: 'display', dataType
+        }) || (typeof data === 'object' ? JSON.stringify(data) : data);
+      } else if (typeof data === 'object') {
         dtemp = JSON.stringify(data);
       } else {
         dtemp = data;
@@ -3042,7 +3148,11 @@ w._page_style_bind = function (pname) {
     },
 
     deleteProperty: (obj, k) => {
-      delete obj[k];
+      if (obj[k]) {
+        delete obj[k];
+      }
+
+      return true;
     }
   });
 
@@ -3053,7 +3163,7 @@ w._page_style_bind = function (pname) {
 };
 
 w.parseform = function (fd) {
-  var m = {
+  let m = {
     node : fd,
     childs : {},
     buttons : {},
@@ -3062,9 +3172,9 @@ w.parseform = function (fd) {
     values : {}
   };
 
-  var inds = fd.querySelectorAll('input');
-  var secnds = fd.querySelectorAll('select');
-  var textnds = fd.querySelectorAll('textarea');
+  let inds = fd.querySelectorAll('input');
+  let secnds = fd.querySelectorAll('select');
+  let textnds = fd.querySelectorAll('textarea');
 
   for (let i=0; i<inds.length; i++) {
     if (inds[i].name === undefined || inds[i].name === '') {
@@ -3406,17 +3516,23 @@ w.naviHide = function () {
   w.navibtndom.className = '';
 };
 
-w._devents = [
-  'animationcancel', 'animationend', 'animationiteration', 'animationstart',
-  'blur', 'click', 'copy', 'cut', 'compositionend', 'compositionstart', 'compositionupdate',
-  'change', 'contextmenu', 'dblclick', 'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 
-  'dragenter', 'drop', 'error', 'fullscreenchange', 'fullscreenerror', 'focus', 'focusin',
-  'focusout', 'input', 'keyup', 'keydown', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 
-  'mouseout', 'mouseover', 'mouseup', 'pointercancel', 'pointerdown', 'pointerenter', 
-  'pointerleave', 'pointermove', 'pointerout', 'pointerover', 'pointerup', 'paste', 
-  'submit', 'scroll', 'select', 'transitioncancel', 'transitionend', 'transitionrun',
-  'transitionstart', 'touchcancel', 'touchend', 'touchmove', 'touchstart',  'wheel', 
-];
+Object.defineProperty(w, '_devents', {
+  enumerable: false,
+  writable: false,
+  configurable: false,
+  value: [
+    'animationcancel', 'animationend', 'animationiteration', 'animationstart',
+    'blur', 'click', 'copy', 'cut', 'compositionend', 'compositionstart', 'compositionupdate',
+    'change', 'contextmenu', 'dblclick', 'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 
+    'auxclick', 'securitypolicyviolation', 'beforematch',
+    'dragenter', 'drop', 'error', 'fullscreenchange', 'fullscreenerror', 'focus', 'focusin',
+    'focusout', 'input', 'keyup', 'keydown', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 
+    'mouseout', 'mouseover', 'mouseup', 'pointercancel', 'pointerdown', 'pointerenter', 
+    'pointerleave', 'pointermove', 'pointerout', 'pointerover', 'pointerup', 'paste', 
+    'submit', 'scroll', 'scrollend', 'select', 'transitioncancel', 'transitionend', 'transitionrun',
+    'transitionstart', 'touchcancel', 'touchend', 'touchmove', 'touchstart',  'wheel'
+  ]
+});
 
 w.initDomEvent = function (pg, dom, evtname) {
   if (!dom || !dom.querySelectorAll) return false;
@@ -3581,15 +3697,14 @@ w.ext = new Proxy(w.__ext__, {
   },
 
   deleteProperty : (obj, k) => {
-    if (obj[k])
-      delete obj[k];
+    if (obj[k]) delete obj[k];
 
     return true;
   }
 });
 
 Object.defineProperty(w, '__require_loop__', {
-  value: 5,
+  value: 111,
   configurable: false,
   writable: false,
   enumerable: false
@@ -3603,7 +3718,7 @@ window.require = async function (name) {
 
     for (let i = 0; i < loop; i++) {
       await new Promise((rv) => {
-        setTimeout(() => { rv(); }, 2);
+        setTimeout(() => { rv(); }, 5);
       });
 
       if (w.__ext__[name]) return w.__ext__[name];
@@ -3636,8 +3751,8 @@ Object.defineProperties(w, {
  */
 w.registerShareNotice = function (options) {
 
-  if (w.shareNoticeList.length >= 500) {
-    w.notifyError('注册通知函数已达上限，不能超过500。');
+  if (w.shareNoticeList.length >= 10101) {
+    w.notifyError('注册通知函数已达上限，不能超过10101个。');
     return false;
   }
 
@@ -3662,8 +3777,8 @@ w.registerShareNotice = function (options) {
   } else {
     if (options.only) return false;
     let kn = w.shareNoticeList.funcmap[ options.key ];
-    if (kn.length >= 10) {
-      w.notifyError('同一个key注册通知函数不能超过10个。');
+    if (kn.length >= 111) {
+      w.notifyError('同一个key注册通知函数不能超过111个。');
       return false;
     }
     kn.push(options);
@@ -3757,8 +3872,10 @@ Object.defineProperty(w, 'share', {
     },
   
     deleteProperty : (obj, k) => {
-      w.runShareNotice('delete', obj, k);
-      delete obj[k];
+      if (obj[k] !== undefined) {
+        w.runShareNotice('delete', obj, k);
+        delete obj[k];
+      }
       return true;
     }
   })
@@ -3814,9 +3931,31 @@ Object.defineProperty(w, '__bindpage__', {
           w.alertError(`${pname} 页面初始化有误，不是合法的object也不是函数。`);
         }, 1500);
       }
+
+      w.initOnePage(pname);
     }
   }
 });
+
+Object.defineProperty(w, '__module__', {
+  enumerable: false,
+  configurable: false,
+  writable: false,
+  value: (name) => {
+    let oo = {}
+    Object.defineProperty(oo, 'exports', {
+      set: (val) => {
+        if (w.__ext__[name]) delete w.__ext__[name];
+        w.ext[name] = val;
+      },
+      get: () => {
+        return name;
+      }
+    });
+
+    return oo
+  }
+})
 
 w.__comps_loop__ = {};
 
@@ -3824,20 +3963,80 @@ class Component extends HTMLElement {
   constructor () {
     super();
 
+    //this就是节点。
     this.shadow = this.attachShadow({mode: 'closed'});
-
-    Object.defineProperty(this, 'attrs', {
+    
+    Object.defineProperty(this, '__attrs__', {
       value: Object.create(null),
       configurable: false,
       writable: false,
       enumerable: true
     });
 
+    Object.defineProperty(this, '__init__', {
+      value: false,
+      configurable: false,
+      writable: true,
+      enumerable: false
+    });
+
+    this.allAttrs = () => {return this.__attrs__;};
+
+    this.attrs = new Proxy(this.__attrs__, {
+      set: (obj, k, data) => {
+        let oldval = (obj[k] === undefined) ? null : obj[k];
+        if (this.properties[k]) {
+          obj[k] = this._propValue(this.properties[k], data);
+          this[k] = data;
+        } else {
+          obj[k] = data;
+        }
+        
+        try {
+          ;(typeof this.onattrchange === 'function') && this.onattrchange(k, oldval, obj[k]);
+        } catch (err) {
+          w.debug && console.error(err);
+        }
+        return true;
+      },
+
+      get: (obj, k) => {
+        if (this.attributes[k] !== undefined && obj[k] === undefined) {
+          obj[k] = this._propValue(this.properties[k]||{}, this.attributes[k].value);
+        }
+
+        if (obj[k] === undefined) return null;
+        return obj[k];
+      },
+
+      deleteProperty: (obj, k) => {
+        if (obj[k] !== undefined) {
+          let oldval = obj[k];
+          delete obj[k];
+          //声明了properties的会默认设置到this上，也会删除。
+          if (this.properties[k] && (!this.notDelete || this.notDelete.indexOf(k) < 0)) {
+            delete this[k];
+          }
+
+          try {
+            ;(typeof this.onattrchange === 'function') && this.onattrchange(k, oldval, null);
+          } catch (err) {
+            w.debug && console.error(err);
+          }
+        }
+
+        return true;
+      }
+    });
+
     queueMicrotask(this.__queue_task_init__.bind(this));
   }
 
-  __queue_task_init__() {
+  async __queue_task_init__() {
     if (!this.properties || typeof this.properties !== 'object') this.properties = {};
+    if (this.notDelete && !Array.isArray(this.notDelete)) {
+      this.notDelete = [this.notDelete];
+    }
 
     let typ;
     for (let k in this.properties) {
@@ -3847,37 +4046,37 @@ class Component extends HTMLElement {
           type: this.properties[k]
         };
       } else if (typ !== 'object') { continue; }
-      if (this.properties[k].default !== undefined) this.attrs[k] = this.properties[k].default;
+      
+      if (this.properties[k].default !== undefined) {
+        this.__attrs__[k] = this.properties[k].default;
+      }
     }
     
     for (let a of this.attributes) {
       if (this.properties[a.name]) {
-        this.attrs[a.name] = this._propValue(this.properties[a.name], a.value);
+        this.__attrs__[a.name] = this._propValue(this.properties[a.name], a.value);
         continue;
       }
-      this.attrs[a.name] = a.value;
+      this.__attrs__[a.name] = a.value;
     }
 
     if (this.init && typeof this.init === 'function') {
-      this.init();
-    }
-
-    if (this.render && typeof this.render === 'function') {
-
-      let d = this.render() || '';
-      if (typeof d === 'object') {
-        this.shadow.appendChild(d);
-      } else if (typeof d === 'string' && d.length > 0) {
-        let st = this.checkLoopRef(d);
-        if ( st.ok === false ) {
-          return this.notifyLoopRefError(st);
+      try {
+        if (this.init.constructor.name === 'AsyncFunction') {
+          await this.init();
+        } else {
+          this.init();
         }
-
-        w._htmlcheck(d) && (this.shadow.innerHTML = d);
+      } catch (err) {
+        w.debug && console.error(err);
+        w.debug && w.notifyTopError(err.message);
       }
     }
 
-    w.initPageDomEvents(this, this.shadow);
+    if (this.render && typeof this.render === 'function') {
+      let d = this.render() || '';
+      this.initPlateTemplate(null, d);
+    }
 
     if (this.afterRender && typeof this.afterRender === 'function') {
       this.afterRender();
@@ -3899,11 +4098,13 @@ class Component extends HTMLElement {
         break;
 
       case 'json':
-        try {
-          val = JSON.parse(val);
-        } catch (err) {
-          val = {};
-        }
+        if (typeof val === 'string') {
+          try {
+            val = JSON.parse(val);
+          } catch (err) {
+            val = {};
+          }
+        } else {val = {}}
         break;
     }
 
@@ -3987,31 +4188,61 @@ class Component extends HTMLElement {
     w.notifyError(`${this.tagName} [${outerText}]存在循环引用${st.ref ? ' &lt;--&gt; ' : ''}${st.ref || ''}`, 20000);
     return '';
   }
+  
+  //不会重复初始化基础结构。
+  initPlateTemplate(id=null, d=null) {
+    if (this.__init__) {
+      return true;
+    }
+
+    if (!d) d = this.plate(id);
+  
+    if (typeof d === 'object' && d) {
+      this.shadow.appendChild(d);
+    } else if (typeof d === 'string' && d.length > 0) {
+      let st = this.checkLoopRef(d);
+      if ( st.ok === false ) {
+        return this.notifyLoopRefError(st);
+      }
+
+      w._htmlcheck(d) && (this.shadow.innerHTML = d);
+    }
+
+    this.__init__ = true;
+
+    w.initPageDomEvents(this, this.shadow);
+
+    return true;
+  }
 
   /**
+   * 一个组件对应于一个template，plate可以有选择的使用不同的template。
    * @param {string} id 
    * @param {object} data 
    */
   plate (id = null, data = {}) {
-    if (typeof id === 'object' || !id) {
-      data = id || {};
-      id = this.tagName.toLowerCase();
+    if (typeof id === 'object' && id) {
+      data = id;
+      id = null;
     }
+
+    let tempid = this.tagName.toLowerCase();
     
-    if (id[0] === '#') id = id.substring(1);
+    if (id && id[0] === '#') id = id.substring(1);
 
-    let nd = document.querySelector(`template[id=${id}]`);
-
-    if (!nd) {
-      nd = document.querySelector(`div[data-id=${id}]`);
-      if (nd) nd = nd.querySelector('template');
+    let nd = w.__templatedom__.querySelector(`div[data-templateid=${tempid}]`);
+    if (!nd) return false;
+    if (id) {
+      nd = nd.querySelector(`template[id=${id}]`);
+    } else {
+      nd = nd.querySelector('template');
     }
 
     if (!nd) return false;
 
     let init_style = true;
-    if (w.__components_css__ && w.__components_css__[id]) {
-      let csslist = w.__components_css__[id];
+    if (w.__components_css__ && w.__components_css__[tempid]) {
+      let csslist = w.__components_css__[tempid];
       if (csslist && Array.isArray(csslist) && csslist.length > 0) {
         let sty = '';
         let ctext= '';
@@ -4055,20 +4286,22 @@ class Component extends HTMLElement {
 
   _fmtquery (k) {
     let qcss = `[data-name=${k}]`;
-
-    if (k[0] === '#') {
+    if (k[0] === '&') {
+      qcss = k.substring(1);
+    } else if (['.', ':', '#'].indexOf(k[0]) >= 0) {
       qcss = k;
-    } else if (k[0] === '@') {
-      qcss = `[name=${k.substring(1)}]`;
-    } else if (k[0] === '.') {
-      qcss = `[class=${k.substring(1)}]`;
-    } else if (k[0] === '[') {
-      qcss = k;
+    } else if (k.indexOf('[') >= 0) {
+      return k;
     }
+
     return qcss;
   }
 
   view (data) {
+    if (!this.__init__) {
+      this.initPlateTemplate(null, null);
+    }
+
     let qcss = '';
     let nds;
     
@@ -4207,6 +4440,62 @@ class Component extends HTMLElement {
 
   loadScript (src) {
     return w.loadScript(src, this.tagName.toLowerCase());
+  }
+
+  sliderPage(text, append=false) { w.sliderPage(text, append, this); }
+
+  hideSliderPage() { w.hideSliderPage(); }
+
+  prompt(info, options={}) {
+    if (!options || typeof options !== 'object') {
+      options = {};
+    }
+
+    options.target = this;
+    w.prompt(info, options);
+  }
+
+  unprompt() {w.unprompt();}
+
+  promptTop(info, options={}) {
+    options.wh = 'top';
+    this.prompt(info, options);
+  }
+
+  promptMiddle(info, options={}) {
+    options.target = this;
+    w.promptMiddle(info, options);
+  }
+
+  promptDark(info, options={}) {
+    options.target = this;
+    w.promptDark(info, options);
+  }
+
+  promptMiddleDark(info, options={}) {
+    options.target = this;
+    w.promptMiddleDark(info, options);
+  }
+
+  promptTopDark(info, options={}) {
+    options.target = this;
+    w.promptTopDark(info, options);
+  }
+
+  findMethod(name, wh=['config', 'ext']) {
+    if (typeof wh === 'string') wh = [wh];
+
+    if (!wh || !Array.isArray(wh) || wh.length === 0) {
+      wh = ['config', 'ext'];
+    }
+
+    for (let k of wh) {
+      if (w[k] && w[k][name] && typeof w[k][name] === 'function') {
+        return w[k][name];
+      }
+    }
+
+    return null;
   }
 }
 
