@@ -2000,7 +2000,11 @@ w._page_style_bind = function (pname) {
     },
 
     deleteProperty: (obj, k) => {
-      delete obj[k];
+      if (obj[k]) {
+        delete obj[k];
+      }
+      
+      return true;
     }
   });
 
@@ -2809,34 +2813,71 @@ class Component extends HTMLElement {
   constructor () {
     super();
 
+    //this就是节点。
     this.shadow = this.attachShadow({mode: 'closed'});
-
-    Object.defineProperty(this, 'attrs', {
+    
+    Object.defineProperty(this, '__attrs__', {
       value: Object.create(null),
       configurable: false,
       writable: false,
       enumerable: true
     });
 
-    Object.defineProperty(this, '__init_flag__', {
+    Object.defineProperty(this, '__init__', {
       value: false,
       configurable: false,
       writable: true,
       enumerable: false
     });
 
-    /* Object.defineProperty(this, '__cid__', {
-      value: 'c_' + `${Math.random().toString(16).substring(2)}${Date.now().toString(16)}_${this.tagName.toLowerCase()}`,
-      configurable: false,
-      writable: false,
-      enumerable: false
-    }); */
+    this.allAttrs = () => {return this.__attrs__;};
+
+    this.attrs = new Proxy(this.__attrs__, {
+      set: (obj, k, data) => {
+        let oldval = (obj[k] === undefined) ? null : obj[k];
+        if (this.properties[k]) {
+          obj[k] = this._propValue(this.properties[k], data);
+          this[k] = data;
+        } else {
+          obj[k] = data;
+        }
+        
+        try {
+          ;(typeof this.onattrchange === 'function') && this.onattrchange(k, oldval, obj[k]);
+        } catch (err) {
+          w.debug && console.error(err);
+        }
+        return true;
+      },
+
+      get: (obj, k) => {
+        if (this.attributes[k] !== undefined && obj[k] === undefined) {
+          obj[k] = this._propValue(this.properties[k]||{}, this.attributes[k].value);
+        }
+
+        if (obj[k] === undefined) return null;
+        return obj[k];
+      },
+
+      deleteProperty: (obj, k) => {
+        delete obj[k];
+        //声明了properties的会默认设置到this上，也会删除。
+        if (this.properties[k] && (!this.notDelete || this.notDelete.indexOf(k) < 0)) {
+          delete this[k];
+        }
+
+        return true;
+      }
+    });
 
     queueMicrotask(this.__queue_task_init__.bind(this));
   }
 
   __queue_task_init__() {
     if (!this.properties || typeof this.properties !== 'object') this.properties = {};
+    if (this.notDelete && !Array.isArray(this.notDelete)) {
+      this.notDelete = [this.notDelete];
+    }
 
     let typ;
     for (let k in this.properties) {
@@ -2846,15 +2887,18 @@ class Component extends HTMLElement {
           type: this.properties[k]
         };
       } else if (typ !== 'object') { continue; }
-      if (this.properties[k].default !== undefined) this.attrs[k] = this.properties[k].default;
+      
+      if (this.properties[k].default !== undefined) {
+        this.__attrs__[k] = this.properties[k].default;
+      }
     }
     
     for (let a of this.attributes) {
       if (this.properties[a.name]) {
-        this.attrs[a.name] = this._propValue(this.properties[a.name], a.value);
+        this.__attrs__[a.name] = this._propValue(this.properties[a.name], a.value);
         continue;
       }
-      this.attrs[a.name] = a.value;
+      this.__attrs__[a.name] = a.value;
     }
 
     if (this.init && typeof this.init === 'function') {
@@ -2886,11 +2930,13 @@ class Component extends HTMLElement {
         break;
 
       case 'json':
-        try {
-          val = JSON.parse(val);
-        } catch (err) {
-          val = {};
-        }
+        if (typeof val === 'string') {
+          try {
+            val = JSON.parse(val);
+          } catch (err) {
+            val = {};
+          }
+        } else {val = {}}
         break;
     }
 
@@ -2977,7 +3023,7 @@ class Component extends HTMLElement {
   
   //不会重复初始化基础结构。
   initPlateTemplate(id=null, d=null) {
-    if (this.__init_flag__) {
+    if (this.__init__) {
       return true;
     }
 
@@ -2994,7 +3040,7 @@ class Component extends HTMLElement {
       w._htmlcheck(d) && (this.shadow.innerHTML = d);
     }
 
-    this.__init_flag__ = true;
+    this.__init__ = true;
 
     w.initPageDomEvents(this, this.shadow);
 
@@ -3086,7 +3132,7 @@ class Component extends HTMLElement {
   }
 
   view (data) {
-    if (!this.__init_flag__) {
+    if (!this.__init__) {
       this.initPlateTemplate(null, null);
     }
 

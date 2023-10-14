@@ -1628,7 +1628,9 @@ class ${className} extends Component {
     //this.attrs是为了方便而做的映射。
 
     //this.shadow可以访问shadow DOM，注意这是shadowRoot。
+    //直接通过this访问组件自己的节点。
     
+    //以下是属性声明的示例。
     //用于声明支持的属性和类型限制，若不需要请去掉properties的定义。
     this.properties = {
       tag: {
@@ -1671,7 +1673,7 @@ class ${className} extends Component {
   }
 
   onattrchange (name, oldValue, newValue) {
-
+    //当改变this上的属性时，会触发此函数。
   }
 
   //被移动到新文档时触发。
