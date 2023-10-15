@@ -1083,7 +1083,7 @@ const w = new function () {
       writable: false,
       value: name
     });
-    pg.getName = ()=>{return pg.__name__};
+    pg.name = name;
     pg.init = false;
     pg.__dom__.onscroll = w.events.scroll;
     pg.__state__ = true;
@@ -2782,7 +2782,7 @@ Object.defineProperty(w, '__bindpage__', {
       } else {
         w.pages[pname] = {};
         setTimeout(() => {
-          w.alertError(`${pname} 页面初始化有误，不是合法的object也不是函数。`);
+          w.alertError(`${pname} 页面初始化失败。`);
         }, 1500);
       }
 
