@@ -29,11 +29,14 @@
     },
 
     "buildPrePath" : "",
+    
+    "buildCss": [
+        "/static/css/mgrid.css"
+    ],
 
     "cssurl" : [
         "/static/css/concise.min.css",
-        "/static/css/concise-ui.min.css",
-        "/static/css/mgrid.css"
+        "/static/css/concise-ui.min.css"
     ],
 
     "jsurl" : [],

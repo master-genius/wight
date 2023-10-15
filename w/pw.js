@@ -196,6 +196,8 @@ let wapp = function (options = {}) {
   this.sseCode = '';
   this.appInitCode = '';
   this.compsCssCode = '';
+  //构建时，打包到应用内部的css代码。
+  this.buildCssCode = '';
 
   this.oid = Math.random().toString(16).substring(2);
 
@@ -229,6 +231,7 @@ let wapp = function (options = {}) {
   ${this.manifest}
   ${this.csstext}
   <style>
+    ${csso.minify(this.buildCssCode+'\n').css}
     ${csso.minify(this.jch.css+'\n').css}
     ${csso.minify(this.cssCode+'\n').css}
   </style>
@@ -1318,6 +1321,27 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
     let lend = this.config.prepath.length - 1;
     if (this.config.prepath[lend] === '/')
       this.config.prepath = this.config.prepath.substring(0, lend);
+  }
+
+  if (this.config.buildCss && Array.isArray(this.config.buildCss)) {
+    let real_cssfile = ''
+    for (let cssfile of this.config.buildCss) {
+      if (!cssfile) continue;
+      if (cssfile.indexOf('./') == 0) {
+        real_cssfile = pdir + cssfile.substring(1)
+      } else if (cssfile[0] === '/') {
+        real_cssfile = pdir + cssfile
+      } else {
+        real_cssfile = pdir + '/' + cssfile
+      }
+
+      try {
+        fs.accessSync(real_cssfile)
+        this.buildCssCode += fs.readFileSync(real_cssfile, {encoding: 'utf8'}) + '\n';
+      } catch (err) {
+        console.error(err)
+      }
+    }
   }
 
   try {
