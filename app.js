@@ -194,6 +194,7 @@ if (app.isWorker) {
       let doc = mdoc.getById(fname)
       if (!doc) {
         try {
+          ctx.setHeader('cache-control', 'public,max-age=600')
           return await ctx.helper.pipe('./doc/' + fname, ctx.reply)
         } catch (err) {
           return ctx.status(404).send('没有找到文档，该文档可能丢失。')
@@ -215,13 +216,20 @@ if (app.isWorker) {
     //最大缓存文件大小，超过此大小则不会缓存
     maxFileSize: 12_000_000,
     //设置消息头cache-control的值，默认为null表示不发送消息头cache-control
-    cacheControl: 'max-age=30'
+    cacheControl: 'max-age=35'
   })
 
   rse.init(app)
 
   app.get('/', async ctx => {
-    await ctx.helper.pipe('./wight-app/index.html', ctx.reply)
+    try {
+      ctx.setHeader('content-encoding', 'gzip').setHeader('content-type', 'text/html;charset=utf-8')
+      await ctx.helper.pipe('./wight-app/index.html.gz', ctx.reply)
+    } catch (err) {
+      ctx.setHeader('content-encoding', 'identity')
+      await ctx.helper.pipe('./wight-app/index.html', ctx.reply)
+    }
+    
   })
 }
 
