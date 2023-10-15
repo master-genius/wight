@@ -19,3 +19,5 @@ require其实是一个async function声明的函数，所以返回值是promise�
 
 扩展不需要考虑依赖顺序，一个扩展内部导入其他扩展，如果此时扩展还没有导入，会进行循环等待，等待机制利用的是Promise，所以reuqire被设计为async function声明的函数。
 
+> 实际上，它使用了类似于睡眠排序的逻辑。
+
