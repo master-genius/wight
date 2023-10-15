@@ -67,3 +67,5 @@ pw.js的角色类似于编程语言的编译器，只是这个过程没有编译
 - w.go和w.redirect在异步处理的代码中，或者是在钩子函数中运行，此时若listenHashLock为true会导致失败，进而导致页面显示白板，2.9以后改为若检测到处于锁定状态则会等待，直到解锁或超时，无论是正常解锁还是超时都会执行listenHash()。
 
 - w.loadPage()函数中在初始化相关处理完成后，准备执行onload和onshow事件函数之前，会把listenHashLock设置为false，此时若因为onload和onshow执行时间过长，导致listenHash等待，再次执行listenHash，不会导致失败。
+
+- 组件层面使用this.attrs代理内部的this.\_\_attrs\_\_，利用代理机制，在使用this.attrs更改属性时也会触发onattrchange事件函数，组件的init可以是async function声明的函数，并在初始化时会等待其执行完毕再继续执行后续操作。
