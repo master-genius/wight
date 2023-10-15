@@ -162,6 +162,10 @@ if (cluster.isWorker) {
 
   iapp.init(app)
 
+  app.get('/self/control/applist', async ctx => {
+    ctx.send(iapp.appList)
+  })
+
   /* process.on('message', (msg) => {
     if (msg.type === 'reload-app') {
       console.log(`---- PID: [${process.pid}] ; RELOAD APP [${msg.appname}] ----`)
@@ -230,6 +234,16 @@ if (app.isWorker) {
       await ctx.helper.pipe('./wight-app/index.html', ctx.reply)
     }
     
+  })
+
+  /**
+   * {
+   *    action: "create",
+   *    type: "component|extend"
+   * }
+   */
+  app.put('/control/:name', async ctx => {
+
   })
 }
 

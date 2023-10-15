@@ -839,14 +839,14 @@ const w = new function () {
     return w.promptdom;
   };
 
-  this.promptBlock = function (info) {
+  this.promptBlock = function (info, options = {}) {
     if (w.promptdom) {
       w.promptdom.className = 'w-prompt-box w-prompt-block';
       w.promptdom.innerHTML = `<div style="color:#4a4a4f;padding:0.8rem;margin-top:5%;">`
           + `${w.fmtHTML(w.curpagename, info)}`
           + `</div>`;
     }
-    w.initPageDomEvents(w.curpage, w.promptdom);
+    w.initPageDomEvents(options.target || w.curpage, w.promptdom);
     return w.promptdom;
   };
 
