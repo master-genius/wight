@@ -5,11 +5,9 @@
 
 框架的扩展统一放在w.ext上。并且提供了require机制，require其实就是一个函数，用于从w.ext上获取扩展。
 
-<br>
 
 使用require而不是直接使用w.ext的好处一方面是可以降低代码耦合性，另一方面就是require在扩展找不到的时候会进行等待，直到找到或超时报错。
 
-<br>
 
 require其实是一个async function声明的函数，所以返回值是promise，但是你可以直接使用require，框架层面会自动替换成await require。
 

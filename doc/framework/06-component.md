@@ -15,7 +15,6 @@
 
 浏览器的自定义组件不会解决此问题，循环引用会导致死循环直到超出浏览器限制，控制台会报错，此封装类解决了循环引用问题并在检测到循环引用时使用消息通知给出提示。
 
-<br>
 
 **创建组件：**
 
@@ -36,11 +35,9 @@ node newcomps.js x-user x-login
 
 template.html是初始的html布局代码。
 
-<br>
 
 js文件是组件的具体逻辑。这里面已经给出了基本的结果，包括生命周期函数、注释说明等。
 
-<br>
 
 explain.json是组件的说明文件。
 
@@ -63,31 +60,26 @@ explain.json是组件的说明文件。
 
 就是对querySelector的封装，但是查询的节点仅限于组件内。
 
-<br>
 
 - sliderPage和hideSliderPage
 
 对w.sliderPage和w.hideSlidePage的封装。
 
-<br>
 
 - render()
 
 用于渲染的逻辑操作，组件初始化后会自动执行render，如果返回值为Node或文本，同时还没有进行template初始化，则会进行初始化。
 
-<br>
 
 - view(data)
 
 用于渲染数据，如果你在render中调用view，此时还没有进行初始化操作，这个时候view内部会自动进行初始化。
 
-<br>
 
 - plate(id, data)
 
 此方法最主要的作用是获取要初始化的template节点，id可以不传，直接传递data，默认会选择第一个template。如果传递了id，则表示要使用指定id的template。这意味着你可以在template.html中编写多个template，并使用id属性进行标记。
 
-<br>
 
 
 ## properies
@@ -128,13 +120,11 @@ this.properties = {
 
 同时可以指定min、max、limit
 
-<br>
 
 - float
 
 同时可以指定min、max、limit
 
-<br>
 
 - string
 
@@ -144,7 +134,6 @@ this.properties = {
 
 目前没有更多辅助属性
 
-<br>
 
 ## attrs和attributes
 
@@ -156,7 +145,6 @@ this.properties = {
 
 导入的方式就是w.import或_import，浏览器默认的import仍然可用，同样的，w.import是对import的封装，_import是全局可用的，是w.import的别名。
 
-<br>
 
 w.import会自动加入构建时的路径前缀，并作了运行时缓存处理。
 
@@ -224,7 +212,6 @@ _import('/static/module/x-plan.js').then(res => {
 
 通过调用this.findMethod(name)可以查找指定name的方法，注意区分大小写。
 
-<br>
 
 findMethod将默认从w.config和w.ext上查找方法，你可以通过第二个参数来设置查找的顺序：
 
@@ -241,7 +228,6 @@ this.findMethod('login', ['ext', 'config']);
 
 通用型的组件编写起来更加复杂，但是好处是一次编写，可以在很多场景下进行直接复用，可以用在很多项目上。不必每次都要修改。
 
-<br>
 
 要编写通用型组件，需要利用框架提供的各种机制来实现逻辑的解耦合。比如要编写一个user-login组件，用户输入后，执行的login操作并不在组件中，而是在w.config中设置的。
 
