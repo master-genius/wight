@@ -1066,7 +1066,7 @@ const w = new function () {
       pg = this.pages[name] = obj || {};
     }
 
-    if (pg.state) {
+    if (pg.__state__) {
       return false;
     }
 
@@ -1077,10 +1077,16 @@ const w = new function () {
     pg.scroll = 0;
     pg.bottomTime = 0;
     pg.pageKey = name;
-    pg.__name__ = name;
+    Object.defineProperty(pg, '__name__', {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: name
+    });
+    pg.getName = ()=>{return pg.__name__};
     pg.init = false;
     pg.__dom__.onscroll = w.events.scroll;
-    pg.state = true;
+    pg.__state__ = true;
     pg.tabsPlace = '';
 
     if (w.tabs.list.length > 0) {
@@ -1331,7 +1337,7 @@ w.loadPage = async function (R) {
   
     for (let i = 0; i < 222; i++) {
       await new Promise(rv => {setTimeout(rv, 5)});
-      if (this.pages[route] && this.pages[route].state) break;
+      if (this.pages[route] && this.pages[route].__state__) break;
     }
 
     setTimeout(()=>{w.unalert();},111);
@@ -2803,8 +2809,58 @@ Object.defineProperty(w, '__module__', {
 
     return oo
   }
-})
+});
 
+w.getFunc = function(str, supportTrue=false) {
+  let arr;
+  if (Array.isArray(str)) {
+    arr = str;
+  } else {
+    arr = str.split('.').filter(p => p.length > 0);
+  }
+
+  if (arr[0] === 'w') arr = arr.slice(1);
+  
+  if (arr.length <= 0) return null;
+
+  let oo = null;
+  let ftemp = w;
+  for (let a of arr) {
+    oo = ftemp;
+    ftemp = ftemp[a];
+    if (!ftemp) return null;
+  }
+
+  let typ = typeof ftemp;
+  if (typ === 'function') {
+    return {
+      type: typ,
+      value: ftemp,
+      object: oo,
+      func: ftemp.bind(oo)
+    };
+  }
+
+  if (ftemp && ftemp !== w && supportTrue) {
+    return {
+      type: typ,
+      value: ftemp,
+      object: oo
+    };
+  }
+}
+
+w.runFunc = function (str, ...args) {
+  let f = w.getFunc(str)
+  if (!f) {
+    w.debug && console.error(str, '没有此方法')
+    return false;
+  }
+
+  return f.func(...args)
+}
+
+//--------Component---------------
 w.__comps_loop__ = {};
 
 class Component extends HTMLElement {
@@ -2941,8 +2997,16 @@ class Component extends HTMLElement {
       case 'int':
         val = parseInt(val);
         break;
+
       case 'float':
         val = parseFloat(val);
+        break;
+
+      case 'boolean':
+        if (typeof val !== 'boolean') {
+          if (val === 'false' || val === '0' || val === undefined || val === null) val = false;
+          else val = true;
+        }
         break;
 
       case 'json':
