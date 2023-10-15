@@ -14,26 +14,59 @@ if (wkthread.isMainThread) {
 
 let sseNotice = new sse({
   timeout: 0,
-  retry: 200,
-  timeSlice: 1000
+  retry: 500,
+  timeSlice: 1000,
+  mode: 'generator'
 })
 
-sseNotice.appState = {}
+let appState = {}
+sseNotice.connectCount = 0
+
+let presse = async (ctx, next) => {
+  ctx.box.connid = ctx.helper.uuid()
+
+  let name = ctx.param.name
+  
+  sseNotice.connectCount += 1
+
+  if (appState[name] === undefined) {
+    appState[name] = {
+      state: 'none',
+      idmap: {}
+    }
+  }
+
+  appState[name].idmap[ctx.box.connid] = 'none'
+
+  await next(ctx)
+  //有可能无法在close事件触发handleClose
+  if (appState[name].idmap[ctx.box.connid]) {
+    delete appState[name].idmap[ctx.box.connid]
+  }
+}
 
 sseNotice.handle = async function (ctx) {
   let name = ctx.param.name
 
-  if (ctx.sse.appState[name] == undefined) {
-    ctx.sse.appState[name] = 'none'
-  }
-
-  if (ctx.sse.appState[name] === 'update') {
+  if (appState[name].idmap[ctx.box.connid] === 'update') {
     ctx.sendmsg({event: 'update', data: 'update'})
-    ctx.sse.appState[name] = 'none'
+    appState[name].idmap[ctx.box.connid] = 'none'
   }
 
   ctx.sendmsg(':ok')
 }
+
+sseNotice.handleClose = async function (ctx) {
+  let name = ctx.param.name
+  
+  sseNotice.connectCount -= 1
+
+  if (appState[name] && ctx.box.connid) {
+    delete appState[name].idmap[ctx.box.connid]
+  }
+}
+
+sseNotice.handleError = sseNotice.handleClose
 
 class initapp {
 
@@ -147,10 +180,16 @@ class initapp {
   }
 
   async reloadApp (app, appname) {
-    this.unloadApp(app, appname)
-    return this.makeApp(app, appname).then(r => {
-      if (r) sseNotice.appState[appname] = 'update';
-    })
+    this.unloadApp(app, appname);
+    return this.makeApp(app, appname)
+              .then(r => {
+                  if (r) {
+                    appState[appname].state = 'update';
+                    for (let k in appState[appname].idmap) {
+                      appState[appname].idmap[k] = 'update';
+                    }
+                  }
+              });
   }
 
   delayReload (app, appname) {
@@ -376,7 +415,7 @@ class initapp {
 
     app.get('/:name/sse', async c => {}, {group: '__sse__'})
 
-    app.use(sseNotice.mid(), {group: '__sse__'})
+    app.use(presse).use(sseNotice.mid(), {group: '__sse__'})
 
   }
   
