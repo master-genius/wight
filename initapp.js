@@ -184,6 +184,12 @@ class initapp {
     return this.makeApp(app, appname)
               .then(r => {
                   if (r) {
+                    if (appState[appname] === undefined) {
+                      appState[appname] = {
+                        state: 'none', idmap: {}
+                      }
+                    }
+
                     appState[appname].state = 'update';
                     for (let k in appState[appname].idmap) {
                       appState[appname].idmap[k] = 'update';
