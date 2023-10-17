@@ -1753,6 +1753,12 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
     let turl = url.trim();
 
     //只会对 /static开头的数据做替换处理
+    if ((w.prepath !== '/static' && turl.indexOf(w.prepath) === 0) 
+      || w.prepath === '/static' && turl.indexOf('/static/static') === 0)
+    {
+        return turl;
+    }
+    
     if (w.prepath && turl.indexOf('/static') === 0) {
       return `${w.prepath}/${turl}`.replace(/\/{2,}/ig, '/');
     }
