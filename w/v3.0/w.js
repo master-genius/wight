@@ -519,6 +519,12 @@ const w = new function () {
       return w[domname];
     }
 
+    if (options.context && options.context.tagName) {
+      info = w.replaceSrc(info, true, options.context.tagName.toLowerCase());
+    } else {
+      info = w.replaceSrc(info);
+    }
+
     if (w[domname]) {
       ;(logs.length > 3) && (logs.pop());
 
@@ -679,6 +685,8 @@ const w = new function () {
       return w.notifydom;
     }
 
+    info = w.replaceSrc(info);
+
     if (ntype.indexOf('error') >= 0) {
       info = `<span style="color:#f96567;font-size:95%;">${info}</span>`;
     }
@@ -825,6 +833,12 @@ const w = new function () {
 
         w.promptdom.innerHTML = `<div style="overflow:auto;word-wrap:break-word;">`
           + `<p style="color:${pcolor};">${info}</p></div>`;
+      }
+
+      if (options.target && options.target.tagName) {
+        info = w.replaceSrc(info, true, options.target.tagName.toLowerCase());
+      } else {
+        info = w.replaceSrc(info);
       }
 
       w.initPageDomEvents(options.target || w.curpage, w.promptdom);
@@ -1721,6 +1735,79 @@ w._resetData = function (pagename, pg, nds) {
   }
 };
 
+//w.replaceRegex = /\{\:[A-Za-z0-9\-\_]{1,100}\:\}/;
+
+/**
+ *
+ * @param {string} codetext 
+ * @param {boolean} is_comps 
+ * @param {string} comp_name 
+ * @returns {string}
+ */
+w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
+  let replace_src = (url, plist, offset, text) => {
+    if ((/^http[s]?:\/\//).test(url)) {
+      return url;
+    }
+
+    let turl = url.trim();
+
+    //只会对 /static开头的数据做替换处理
+    if (w.prepath && turl.indexOf('/static') === 0) {
+      return `${w.prepath}/${turl}`.replace(/\/{2,}/ig, '/');
+    }
+
+    return turl;
+  };
+
+  let match_replace = m => {
+    let arr = m.split(' src=');
+    
+    let q = arr[1][0];
+    let startind = 1;
+    let endind = arr[1].indexOf(q, 1);
+
+    if (q !== '"' && q !== "'") {
+      q = '';
+      startind = 0;
+      endind = arr[1].indexOf(' ', 1);
+      if (endind < 0) endind = arr[1].length - 1;
+    }
+
+    let orgsrc = arr[1].substring(startind, endind);
+    //针对组件
+    if (is_comps) {
+      orgsrc = orgsrc.replace('./static', '/static/components/' + comp_name);
+    }
+
+    let final_src = `${arr[0]} src=${q}${replace_src(orgsrc)}${arr[1].substring(endind)}`;
+    return final_src;
+  };
+
+  let fix_src_space = (m) => {
+    return m.replace(/ src\s+=\s+/g, ' src=');
+  }
+
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+"[^"]+"[^>]*>/ig, 
+    fix_src_space);
+
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+'[^']+'[^>]*>/ig, 
+    fix_src_space);
+
+  //audio embed iframe img input source track video
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src="[^"]+"[^>]*>/ig, 
+    match_replace);
+
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src='[^']+'[^>]*>/ig, 
+    match_replace);
+
+  return codetext;
+};
+
 w._setData = function (pagename, pg, nds, data) {
   let dtemp = '';
   let dataType = typeof data;
@@ -1817,6 +1904,12 @@ w._setData = function (pagename, pg, nds, data) {
         if (!w._htmlcheck(dtemp)) {
           return false;
         }
+      }
+
+      if (pagename) {
+        dtemp = w.replaceSrc(dtemp);
+      } else {
+        dtemp = w.replaceSrc(dtemp, true, pg.tagName.toLowerCase());
       }
 
       switch (nds[i].dataset.insert) {

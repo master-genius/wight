@@ -801,7 +801,9 @@ wapp.prototype.replaceCssUrl = function (codetext) {
   return codetext;
 };
 
-wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
+wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = '', is_jscode=false) {
+
+  if (is_jscode) return codetext;
 
   let replace_src = (url, plist, offset, text) => {
     if ((/^http[s]?:\/\//).test(url)) {
@@ -815,14 +817,18 @@ wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = ''
 
     //不做替换处理。
     if (turl[0] === '!') {
-      return turl.substring(1);
+      return turl.substring(1).trim();
     }
 
     if (this.isbuild) {
-      return `${this.buildPrePath}/${url}`.replace(/\/{2,}/ig, '/');
+      if (this.buildPrePath && turl.indexOf(this.buildPrePath) === 0) return turl;
+
+      return `${this.buildPrePath}/${turl}`.replace(/\/{2,}/ig, '/');
     }
 
-    return `${this.pageUrlPath}/${url}`.replace(/\/{2,}/ig, '/');
+    if (turl.indexOf(this.pageUrlPath) === 0) return turl;
+
+    return `${this.pageUrlPath}/${turl}`.replace(/\/{2,}/ig, '/');
 
   };
 
@@ -831,37 +837,49 @@ wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = ''
     
     let q = arr[1][0];
     let startind = 1;
-    let endind = arr[1].length - 1;
+    let endind = arr[1].indexOf(q, 1);
 
-    /* if (q !== '"' && q !== "'") {
+    if (q !== '"' && q !== "'") {
       q = '';
       startind = 0;
-      endind++;
-    } */
+      endind = arr[1].indexOf(' ', 1);
+      if (endind < 0) endind = arr[1].length - 1;
+    }
 
     let orgsrc = arr[1].substring(startind, endind);
-
     //针对组件
     if (is_comps) {
       orgsrc = orgsrc.replace('./static', '/static/components/' + comp_name);
     }
 
-    let final_src = `${arr[0]} src=${q}${replace_src(orgsrc)}${q}`;
-
+    let final_src = `${arr[0]} src=${q}${replace_src(orgsrc)}${arr[1].substring(endind)}`;
     return final_src;
   };
 
+  let fix_src_space = (m) => {
+    return m.replace(/ src\s+=\s+/g, ' src=');
+    //return match_replace(m.replace(/ src\s+=\s+/g, ' src='));
+  }
+
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+"[^"]+"[^>]*>/ig, 
+    fix_src_space);
+
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+'[^']+'[^>]*>/ig, 
+    fix_src_space);
+
   //audio embed iframe img input source track video
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src="[^"]+"/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src="[^"]+"[^>]*>/ig, 
     match_replace);
 
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src='[^']+'/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src='[^']+'[^>]*>/ig, 
     match_replace);
 
   /* codetext = codetext.replace(
-      /<(audio|embed|iframe|img|input|source|track|video)[^>]* src=[^\s]+ /g, 
+      /<(audio|embed|iframe|img|input|source|track|video)[^>]* src=[^\s]+ [^>]*>/g, 
       match_replace); */
 
   return codetext;
@@ -876,6 +894,7 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
     htext = fs.readFileSync(htmlfile, {encoding: 'utf8'});
     htext = simpleComporessHTML(htext);
     htext = this.fmtPageHTML(htext, pagename);
+    htext = this.replaceSrc(htext, false, '', false);
   } catch (err) {
     delayOutError(err, '--LOAD-PAGE--');
     this.errorCount += 1;
@@ -890,6 +909,8 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
     }
 
     await this.checkCode(pagefile, ctext, {async: this.config.asyncPage});
+
+    this.replaceSrc(ctext, false, '', true);
 
     this.pagesCode += `;(${this.config.asyncPage ? 'async ' : ''}`
       + `function(definePage,exports){${ctext};exports['${pagename}'].orgHTML=\`${htext}\`;})`
@@ -963,7 +984,7 @@ wapp.prototype.loadExt = async function (cdir) {
     }
 
     //进行src替换处理
-    this.extends = this.replaceSrc(this.extends);
+    this.extends = this.replaceSrc(this.extends, false, '', true);
 
     if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)){
       data = await terser.minify(this.extends);
@@ -1225,7 +1246,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           opts = `,{extends: '${cex.options.extends}'}`;
         }
 
-        orgdata = this.replaceSrc(orgdata, true, names[i]);
+        orgdata = this.replaceSrc(orgdata, true, names[i], true);
 
         let comps_jscode = `;(async()=>{${orgdata};customElements.define('${cex.name}', ${cex.className}${opts});})();`;
 
@@ -1482,9 +1503,6 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
       page
     );
   }
-
-  //进行src替换处理
-  this.pagesCode = this.replaceSrc(this.pagesCode);
 
   //压缩页面
   if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)) {
