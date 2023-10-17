@@ -2361,7 +2361,6 @@ w.initPageDomEvents = function (pg, dom) {
 };
 
 w.eventProxy = function (evt, pg, funcname) {
-
   let wind = funcname.trim().indexOf('w.');
   let wfunc = null;
 
