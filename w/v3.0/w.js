@@ -2362,16 +2362,18 @@ w.initPageDomEvents = function (pg, dom) {
 
 w.eventProxy = function (evt, pg, funcname) {
 
-  let wind = funcname.trim().indexOf('w.ext.');
+  let wind = funcname.trim().indexOf('w.');
   let wfunc = null;
 
   if (wind === 0) {
-    wfunc = w.ext[funcname.substring(8)];
-    if (typeof wfunc !== 'function') {
+    let wf = w.getFunc(funcname.trim());
+    if (!wf) {
       if (evt.target && evt.target.dataset.noterror) return false;
       w.notifyError(`${funcname} is not a function.`);
       return false;
     }
+
+    wfunc = wf.func;
   }
   else if (!pg || !pg[funcname] || !(typeof pg[funcname] === 'function')) {
     if (evt.target && evt.target.dataset.noterror) return false;
@@ -2780,6 +2782,7 @@ w.getFunc = function(str, supportTrue=false) {
       type: typ,
       value: ftemp,
       object: oo,
+      key: arr[arr.length - 1],
       func: ftemp.bind(oo)
     };
   }
@@ -2788,7 +2791,8 @@ w.getFunc = function(str, supportTrue=false) {
     return {
       type: typ,
       value: ftemp,
-      object: oo
+      object: oo,
+      key: arr[arr.length - 1]
     };
   }
 }
