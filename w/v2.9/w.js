@@ -1535,7 +1535,8 @@ w.fmtHTML = function (pagename, ht) {
   if (!ht || !ht.replace || typeof ht.replace !== 'function') {
     return ht || '';
   }
-
+  
+  /*
   ht = ht.replace(/ on[^(=|"|'|;)]+="[^"]+"/g, m => {
     let sp = m.split('=');
     let fstr = sp[1].substring(1, sp[1].length-1);
@@ -1552,7 +1553,8 @@ w.fmtHTML = function (pagename, ht) {
     return m;
   });
 
-  ht = ht.replace(/ on[^=]+=[^(\s|>|"|')]+/g, m => {
+  ht = ht.replace(/ on[^(=|\s)]+=[^(\s|>|"|')]+/g, m => {
+    console.log(m)
     let sp = m.split('=');
     let fstr = sp[1];
 
@@ -1565,7 +1567,7 @@ w.fmtHTML = function (pagename, ht) {
     }
 
     return m;
-  });
+  });*/
 
   return ht;
 };
@@ -1826,9 +1828,10 @@ w._setData = function (pagename, pg, nds, data) {
       continue;
     }
 
-    if (pagename)
-      dtemp_fmtval = w.fmtHTML(pagename, dtemp);
-    else dtemp_fmtval = dtemp;
+    if (pagename) {
+      //dtemp_fmtval = w.fmtHTML(pagename, dtemp);
+      dtemp_fmtval = dtemp;
+    } else dtemp_fmtval = dtemp;
 
     if (nds[i].dataset.insert === undefined) {
       nds[i].dataset.insert = 'replace';

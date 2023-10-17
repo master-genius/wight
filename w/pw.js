@@ -1564,6 +1564,12 @@ wapp.prototype.newPage = function (name, pagedir) {
   } catch (err) {
     fs.mkdirSync(`${pagedir}/pages`)
   }
+  let name_preg = /^[a-z0-9\-\_][a-z0-9\-\_]{0,100}$/i
+
+  if (!name_preg.test(name)) {
+    delayOutError(`${name} 不是合法的页面名称，允许字母数字减号下划线，不能出现其他非法字符`);
+    return false;
+  }
 
   let pdir = `${pagedir}/pages/${name}/`;
   let pagefile = `${pagedir}/pages/${name}/${name}.js`;
