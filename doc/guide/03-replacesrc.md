@@ -47,7 +47,7 @@ node build.js xtest
 
 - **src引入的资源路径是/static开头但是w.prepath为真。**
 
-如果src已经是w.prepath开头或者是完整的url，是https://xxx.cn/xxx这种形式则不会替换。
+如果src已经是w.prepath开头或者是完整的url，是 `https://xxx.cn/xxx` 这种形式则不会替换。
 
 <br>
 
