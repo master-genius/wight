@@ -1009,6 +1009,18 @@ wapp.prototype.buildCompsStatic = async function (cdir, names, stdir) {
   for (let a of names) {
     d = `${stdir}/${a}`;
 
+    await fsp.access(d).then(async state => {
+      let flist = await fsp.readdir(d);
+      if (flist.length > 0) {
+        //此目录存在文件则删除
+        return fsp.rm(d, {recursive: true, force:true})
+                  .catch(err => {
+                    delayOutError(err, '删除旧的组件静态文件失败')
+                  })
+      }
+    })
+    .catch(err => {})
+
     await fsp.access(d).catch(err => {
       return fsp.mkdir(d);
     });
@@ -1021,7 +1033,23 @@ wapp.prototype.buildCompsStatic = async function (cdir, names, stdir) {
       continue;
     }
 
+    let sublist;
     for (let f of flist) {
+      if (f.isDirectory()) {
+        sublist = await fsp.readdir(src + '/' + f.name, {withFileTypes:true});
+        for (let a of sublist) {
+          if (!a.isFile())continue;
+          try {
+            await fsp.mkdir(d + '/' + f.name);
+          } catch (err) {}
+          await fsp.copyFile(src + '/' + f.name + '/' + a.name, d + '/' + f.name + '/' + a.name)
+                    .catch(err => {
+                      delayOutError(err, '复制组件静态文件出错：')
+                    });
+                      
+        }
+        continue;
+      }
       if (!f.isFile()) continue;
 
       await fsp.copyFile(`${src}/${f.name}`, `${d}/${f.name}`)
