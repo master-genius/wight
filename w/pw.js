@@ -729,7 +729,7 @@ wapp.prototype.fmtPageHTML = function (ht, pagename) {
   //匹配onclick ondblclick 等事件属性，前面必须有空格，否则会引起错误，比如button class=""
   //因为onsubmit="return false;"等类似的形式，会导致处理错误，这需要引入语法分析，所以暂时注释了。
   //页面中，需要明确带上self.表示是页面对应的操作函数。
-  ht = ht.replace(/ on[^(=|"|'|;)]+="[^"]+"/g, m => {
+  /* ht = ht.replace(/ on[^(=|"|'|;)]+="[^"]+"/g, m => {
     let sp = m.split('=');
     let fstr = sp[1].substring(1, sp[1].length-1);
     let retFalse = '';
@@ -772,7 +772,7 @@ wapp.prototype.fmtPageHTML = function (ht, pagename) {
 
   replaceSelf('="self.');
   replaceSelf("='self.", "'");
-  replaceSelf('=self.', '');
+  replaceSelf('=self.', ''); */
 
   return ht;
 };
