@@ -1149,7 +1149,6 @@ for (let k in window) !global[k] && (global[k] = window[k]);
 for (let k in window.globalThis) !global[k] && (global[k] = window.globalThis[k]);
 
 /** -------------  */
-
 'use strict';
 
 class HtmlState_ {
@@ -1664,13 +1663,17 @@ const w = new function () {
       return false;
     }
 
-    info = w.fmtHTML(w.curpagename, info);
-
     let check_stat = true;
     w.checkhtml && (check_stat = w._htmlcheck(info));
 
     if (!check_stat) {
       return w[domname];
+    }
+
+    if (options.context && options.context.tagName) {
+      info = w.replaceSrc(info, true, options.context.tagName.toLowerCase());
+    } else {
+      info = w.replaceSrc(info);
     }
 
     if (w[domname]) {
@@ -1825,8 +1828,6 @@ const w = new function () {
       w.unnotify();
     }
 
-    info = w.fmtHTML(w.curpagename, info);
-
     let check_stat = true;
 
     w.checkhtml && (check_stat = w._htmlcheck(info));
@@ -1834,6 +1835,8 @@ const w = new function () {
     if (!check_stat) {
       return w.notifydom;
     }
+
+    info = w.replaceSrc(info);
 
     if (ntype.indexOf('error') >= 0) {
       info = `<span style="color:#f96567;font-size:95%;">${info}</span>`;
@@ -1952,8 +1955,6 @@ const w = new function () {
   //wh = 'bottom', noclose = false, glass = false
   this.prompt = function (info, options = {}) {
 
-    info = w.fmtHTML(w.curpagename, info);
-
     let wh = options.wh || 'bottom';
     let noclose = options.noclose || false;
     let glass = options.glass || false;
@@ -1985,20 +1986,26 @@ const w = new function () {
           + `<p style="color:${pcolor};">${info}</p></div>`;
       }
 
+      if (options.target && options.target.tagName) {
+        info = w.replaceSrc(info, true, options.target.tagName.toLowerCase());
+      } else {
+        info = w.replaceSrc(info);
+      }
+
       w.initPageDomEvents(options.target || w.curpage, w.promptdom);
     }
 
     return w.promptdom;
   };
 
-  this.promptBlock = function (info) {
+  this.promptBlock = function (info, options = {}) {
     if (w.promptdom) {
       w.promptdom.className = 'w-prompt-box w-prompt-block';
       w.promptdom.innerHTML = `<div style="color:#4a4a4f;padding:0.8rem;margin-top:5%;">`
-          + `${w.fmtHTML(w.curpagename, info)}`
+          + `${info}`
           + `</div>`;
     }
-    w.initPageDomEvents(w.curpage, w.promptdom);
+    w.initPageDomEvents(options.target || w.curpage, w.promptdom);
     return w.promptdom;
   };
 
@@ -2218,7 +2225,7 @@ const w = new function () {
       pg = this.pages[name] = obj || {};
     }
 
-    if (pg.state) {
+    if (pg.__state__) {
       return false;
     }
 
@@ -2229,10 +2236,16 @@ const w = new function () {
     pg.scroll = 0;
     pg.bottomTime = 0;
     pg.pageKey = name;
-    pg.__name__ = name;
+    Object.defineProperty(pg, '__name__', {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: name
+    });
+    pg.name = name;
     pg.init = false;
     pg.__dom__.onscroll = w.events.scroll;
-    pg.state = true;
+    pg.__state__ = true;
     pg.tabsPlace = '';
 
     if (w.tabs.list.length > 0) {
@@ -2245,7 +2258,6 @@ const w = new function () {
 
     pg.view = function (data) {return w.view(name, data);};
     pg.resetView = function (data) {return w.resetView(name, data);};
-    pg.render = function (htext) {return w.fmtHTML(name, htext);};
     pg.setScroll = function(scr) {
         if (scr < 0) { w.pages[name].__dom__.scrollTop += scr; }
         else { w.pages[name].__dom__.scrollTop = scr; }
@@ -2394,18 +2406,15 @@ w.sliderPage = function(html = null, append = true, obj=null) {
 
     if (html !== null) {
       if (typeof html === 'string') {
-        let fmthtml = w.fmtHTML(w.curpagename, html);
         let check_stat = true;
-
-        w.checkhtml && (check_stat = w._htmlcheck(fmthtml));
-        check_stat && (w.slidedom.innerHTML = fmthtml);
-
+        w.checkhtml && (check_stat = w._htmlcheck(html));
+        check_stat && (w.slidedom.innerHTML = html);
       } else {
         if (append) {
           w.slidedom.innerHTML = '';
           w.slidedom.appendChild(html);
         } else {
-          w.slidedom.innerHTML = w.fmtHTML(w.curpagename, html.innerHTML);;
+          w.slidedom.innerHTML = html.innerHTML;
         }
       }
       w.initPageDomEvents(obj || w.curpage, w.slidedom);
@@ -2483,7 +2492,7 @@ w.loadPage = async function (R) {
   
     for (let i = 0; i < 222; i++) {
       await new Promise(rv => {setTimeout(rv, 5)});
-      if (this.pages[route] && this.pages[route].state) break;
+      if (this.pages[route] && this.pages[route].__state__) break;
     }
 
     setTimeout(()=>{w.unalert();},111);
@@ -2674,46 +2683,6 @@ w.redirect = function (path, args = {}) {
   }
 
   startRedirect();
-};
-
-w.fmtHTML = function (pagename, ht) {
-
-  if (!ht || !ht.replace || typeof ht.replace !== 'function') {
-    return ht || '';
-  }
-
-  ht = ht.replace(/ on[^(=|"|'|;)]+="[^"]+"/g, m => {
-    let sp = m.split('=');
-    let fstr = sp[1].substring(1, sp[1].length-1);
-    let retFalse = '';
-
-    if (fstr.indexOf('w.') != 0) {
-      fstr = `w.pages.${pagename}.${fstr}(this);`;
-      if (sp[0] === ' onsubmit') {
-        retFalse = 'return false;';
-      }
-      return `${sp[0]}="${fstr}${retFalse}"`;
-    }
-
-    return m;
-  });
-
-  ht = ht.replace(/ on[^=]+=[^(\s|>|"|')]+/g, m => {
-    let sp = m.split('=');
-    let fstr = sp[1];
-
-    if (fstr.indexOf('w.') != 0) {
-      fstr = `w.pages.${pagename}.${fstr}(this);`;
-      if (sp[0] === ' onsubmit') {
-        return `${sp[0]}="${fstr}return false;"`;
-      }
-      return `${sp[0]}=${fstr}`;
-    }
-
-    return m;
-  });
-
-  return ht;
 };
 
 w.setAttr = function (pagename, data) {
@@ -2917,10 +2886,72 @@ w._resetData = function (pagename, pg, nds) {
   }
 };
 
-w._setData = function (pagename, pg, nds, data) {
+w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
+  let replace_src = (url, plist, offset, text) => {
+    if ((/^http[s]?:\/\//).test(url)) {
+      return url;
+    }
 
+    let turl = url.trim();
+
+    //只会对 /static开头的数据做替换处理
+    if (w.prepath && turl.indexOf('/static') === 0) {
+      return `${w.prepath}/${turl}`.replace(/\/{2,}/ig, '/');
+    }
+
+    return turl;
+  };
+
+  let match_replace = m => {
+    let arr = m.split(' src=');
+    
+    let q = arr[1][0];
+    let startind = 1;
+    let endind = arr[1].indexOf(q, 1);
+
+    if (q !== '"' && q !== "'") {
+      q = '';
+      startind = 0;
+      endind = arr[1].indexOf(' ', 1);
+      if (endind < 0) endind = arr[1].length - 1;
+    }
+
+    let orgsrc = arr[1].substring(startind, endind);
+    //针对组件
+    if (is_comps) {
+      orgsrc = orgsrc.replace('./static', '/static/components/' + comp_name);
+    }
+
+    let final_src = `${arr[0]} src=${q}${replace_src(orgsrc)}${arr[1].substring(endind)}`;
+    return final_src;
+  };
+
+  let fix_src_space = (m) => {
+    return m.replace(/ src\s+=\s+/g, ' src=');
+  }
+
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+"[^"]+"[^>]*>/ig, 
+    fix_src_space);
+
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+'[^']+'[^>]*>/ig, 
+    fix_src_space);
+
+  //audio embed iframe img input source track video
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src="[^"]+"[^>]*>/ig, 
+    match_replace);
+
+  codetext = codetext.replace(
+    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src='[^']+'[^>]*>/ig, 
+    match_replace);
+
+  return codetext;
+};
+
+w._setData = function (pagename, pg, nds, data) {
   let dtemp = '';
-  let dtemp_fmtval = '';
   let dataType = typeof data;
 
   for (let i = 0; i < nds.length; i++) {
@@ -2972,17 +3003,13 @@ w._setData = function (pagename, pg, nds, data) {
       continue;
     }
 
-    if (pagename)
-      dtemp_fmtval = w.fmtHTML(pagename, dtemp);
-    else dtemp_fmtval = dtemp;
-
     if (nds[i].dataset.insert === undefined) {
       nds[i].dataset.insert = 'replace';
     }
 
     if (nds[i].tagName === 'SELECT') {
 
-      if (!((/<option .*option>/i).test(dtemp_fmtval)) ) {
+      if (!((/<option .*option>/i).test(dtemp)) ) {
 
         for (let o of nds[i].options) {
           if (o.value == dtemp) {
@@ -3016,20 +3043,26 @@ w._setData = function (pagename, pg, nds, data) {
     } else {
       //开启后，则检测html文本是否存在语法错误。
       if (w.checkhtml) {
-        if (!w._htmlcheck(dtemp_fmtval)) {
+        if (!w._htmlcheck(dtemp)) {
           return false;
         }
       }
 
+      if (pagename) {
+        dtemp = w.replaceSrc(dtemp);
+      } else {
+        dtemp = w.replaceSrc(dtemp, true, pg.tagName.toLowerCase());
+      }
+
       switch (nds[i].dataset.insert) {
         case 'before':
-          nds[i].insertAdjacentHTML('afterbegin', dtemp_fmtval);
+          nds[i].insertAdjacentHTML('afterbegin', dtemp);
           break;
         case 'end':
-          nds[i].insertAdjacentHTML('beforeend', dtemp_fmtval);
+          nds[i].insertAdjacentHTML('beforeend', dtemp);
           break;
         default:
-          nds[i].innerHTML = dtemp_fmtval;
+          nds[i].innerHTML = dtemp;
       }
       if (pagename)
         w.initPageDomEvents(pg, nds[i]);
@@ -3040,7 +3073,6 @@ w._setData = function (pagename, pg, nds, data) {
     }
 
     dtemp = '';
-    dtemp_fmtval = '';
   }
 
 };
@@ -3501,7 +3533,7 @@ w.navi = function (htext, opts = {}) {
 
   setTimeout(() => {
     w.navibtndom.className = classtext;
-    w.navibtndom.innerHTML = w.fmtHTML(w.curpagename, htext);
+    w.navibtndom.innerHTML = htext;
     w.initPageDomEvents(opts.context || w.curpage, w.navibtndom);
   }, 5);
   
@@ -3564,17 +3596,18 @@ w.initPageDomEvents = function (pg, dom) {
 };
 
 w.eventProxy = function (evt, pg, funcname) {
-
-  let wind = funcname.trim().indexOf('w.ext.');
+  let wind = funcname.trim().indexOf('w.');
   let wfunc = null;
 
   if (wind === 0) {
-    wfunc = w.ext[funcname.substring(8)];
-    if (typeof wfunc !== 'function') {
+    let wf = w.getFunc(funcname.trim());
+    if (!wf) {
       if (evt.target && evt.target.dataset.noterror) return false;
       w.notifyError(`${funcname} is not a function.`);
       return false;
     }
+
+    wfunc = wf.func;
   }
   else if (!pg || !pg[funcname] || !(typeof pg[funcname] === 'function')) {
     if (evt.target && evt.target.dataset.noterror) return false;
@@ -3928,7 +3961,7 @@ Object.defineProperty(w, '__bindpage__', {
       } else {
         w.pages[pname] = {};
         setTimeout(() => {
-          w.alertError(`${pname} 页面初始化有误，不是合法的object也不是函数。`);
+          w.alertError(`${pname} 页面初始化失败。`);
         }, 1500);
       }
 
@@ -3955,8 +3988,60 @@ Object.defineProperty(w, '__module__', {
 
     return oo
   }
-})
+});
 
+w.getFunc = function(str, supportTrue=false) {
+  let arr;
+  if (Array.isArray(str)) {
+    arr = str;
+  } else {
+    arr = str.split('.').filter(p => p.length > 0);
+  }
+
+  if (arr[0] === 'w') arr = arr.slice(1);
+  
+  if (arr.length <= 0) return null;
+
+  let oo = null;
+  let ftemp = w;
+  for (let a of arr) {
+    oo = ftemp;
+    ftemp = ftemp[a];
+    if (!ftemp) return null;
+  }
+
+  let typ = typeof ftemp;
+  if (typ === 'function') {
+    return {
+      type: typ,
+      value: ftemp,
+      object: oo,
+      key: arr[arr.length - 1],
+      func: ftemp.bind(oo)
+    };
+  }
+
+  if (ftemp && ftemp !== w && supportTrue) {
+    return {
+      type: typ,
+      value: ftemp,
+      object: oo,
+      key: arr[arr.length - 1]
+    };
+  }
+}
+
+w.runFunc = function (str, ...args) {
+  let f = w.getFunc(str)
+  if (!f) {
+    w.debug && console.error(str, '没有此方法')
+    return false;
+  }
+
+  return f.func(...args)
+}
+
+//--------Component---------------
 w.__comps_loop__ = {};
 
 class Component extends HTMLElement {
@@ -4093,8 +4178,16 @@ class Component extends HTMLElement {
       case 'int':
         val = parseInt(val);
         break;
+
       case 'float':
         val = parseFloat(val);
+        break;
+
+      case 'boolean':
+        if (typeof val !== 'boolean') {
+          if (val === 'false' || val === '0' || val === undefined || val === null) val = false;
+          else val = true;
+        }
         break;
 
       case 'json':
