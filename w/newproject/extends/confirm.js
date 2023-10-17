@@ -3,9 +3,11 @@ let cexp = {};
 
 exports.confirmExp = cexp;
 
-exports.confirmExec = function (id) {
+exports.confirmExec = function (ctx) {
 
   unalert('shadow');
+
+  let id = ctx.target.dataset.id;
 
   if (cexp[id] === undefined) {
     return false;
@@ -23,9 +25,10 @@ exports.confirmExec = function (id) {
 
 };
 
-exports.confirmCancel = function (id) {
-  
+exports.confirmCancel = function (ctx) {
   unalert('shadow');
+
+  let id = ctx.target.dataset.id;  
 
   if (cexp[id] === undefined) {
     return;
@@ -60,9 +63,23 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
 
   let atext = `<div style="text-align:center;font-size:89%;color:#4a4a4f;">
     <p>${opts.text || ''}</p>
-    <button class="small" style="font-weight:bold;background:#00b2ee;" onclick="w.ext.confirmExec('${id}');">确定</button>
-    &nbsp;&nbsp;&nbsp;
-    <button class="small inverse" style="background:#777879;" onclick="w.ext.confirmCancel('${id}');">取消</button>
+    <div style="box-sizing: border-box;display: flex;flex-flow: row wrap;">
+      <div style="padding-left: 0.5rem;padding-right: 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
+      <button class="small" 
+        style="font-weight:bold;background:#00b2ee;" 
+        data-onclick="w.ext.confirmExec" 
+        data-id="${id}">
+          确定</button>
+      </div>
+
+      <div style="padding-left: 0.5rem;padding-right: 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
+        <button class="small inverse" 
+          style="background:#777879;" 
+          data-onclick="w.ext.confirmCancel" 
+          data-id="${id}">
+            取消</button>
+      </div>
+    </div>
   </div>`;
 
   unalert('all');
