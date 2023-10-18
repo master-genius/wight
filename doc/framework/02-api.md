@@ -156,11 +156,11 @@ setTimeout(() => {
 > ## 界面交互
 > ----
 
-### w.alert w.unalert
+### w.alert w.cancelAlert w.unalert
 
 w.alert用于替换window.alert，并且你可以直接写alert，因为已经挂在到window.alert，替换掉了浏览器默认的。
 
-w.unalert用于取消alert显示。
+w.cancelAlert用于取消alert显示，w.unalert是w.cancelAlert的别名。
 
 w.alert可以用于显示任何复杂的内容，除了信息提示，还可以是表单，info就是开发者拼接好的html文本。
 
@@ -168,21 +168,36 @@ w.alert可以用于显示任何复杂的内容，除了信息提示，还可以�
 //函数定义
 w.alert = function (info, options){}
 ```
+
 **options选项**
 
 - notClose 不显示关闭按钮。
 
-- transparent 是否显示透明背景。
+- transparent 是否显示透明背景，如果选项设置了background，则此选项无效。
 
-- replace 是否使用替换操作，默认是追加到已有信息的后面。
+- background 背景色，编写css的样式代码值。示例：#d01223
 
 - withCover 是否显示一个遮罩层，遮罩层的目的是阻止其他操作。
 
-alert会显示几条最近的文本，如果要在显示新的文本时，不显示已有的，请使用replace选项设置为true。
+- color 字体颜色。
 
-### w.cover
+- withShadow 是否显示一个阴影，默认不显示。
 
-cover方法是对alert的封装。有对应的w.uncover方法是对unalert的封装。
+**返回值**
+
+alert返回值是一个表示当前显示框id的字符串，注意这个值很重要，你需要调用w.cancelAlert(id)取消某一个弹框。
+
+alert可以多次调用，每次显示都是在样式上覆盖已有的框，但是原来的不会撤销，直到关闭最近的。
+
+### w.cover(info, options)
+
+cover方法是对alert的封装，withCover和notClose为true。有对应的w.uncover方法是对unalert的封装。
+**返回值**：和alert同样的返回值。
+
+使用w.uncover(id)撤销。对于w.uncover，如果你不传递参数，则默认会把最近的弹框取消。
+
+如果使用cancelAlert不断地取消弹框，直到为空，那么已经启用的遮罩层也会自动取消。
+
 
 ### 消息通知：w.notify和相关封装
 
