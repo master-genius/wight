@@ -211,13 +211,21 @@ let wapp = function (options = {}) {
    */
 
   this.compile = function () {
-    //window.onunload = function () {return '退出？';};
-    let closePromptText = `window.onbeforeunload = function (e) {return e.returnValue = '退出应用？';};`
-      +`window.onpagehide = evt => {if (evt.persisted) {} return '退出?';};`
-      +`window.onunload = function () {w.destroyAllPage();};`;
+    let closePromptText = `
+      window.addEventListener('beforeunload', (e) => {
+        for (let k in w.pages) {
+          if (w.pages[k].onbeforeunload && typeof w.pages[k].onbeforeunload === 'function') {
+            w.pages[k].onbeforeunload();
+          }
+        }
+      }, {capture:true});
+      window.addEventListener('beforeunload', (e) => { return e.returnValue = '退出应用？';});
+      window.addEventListener('pagehide', (evt) => {if (evt.persisted) {} return '退出?';});
+      window.addEventListener('unload', (evt) => { w.destroyAllPage(); });
+    `;
 
     if (this.config.closePrompt === false) {
-      closePromptText = 'window.onunload = function () {w.destroyAllPage();};';
+      closePromptText = `window.addEventListener('unload', (evt) => { w.destroyAllPage(); });`;
     }
 
     return `<!DOCTYPE html><html${this.config.lang}>
@@ -290,10 +298,7 @@ let wapp = function (options = {}) {
     window.promptDark = w.promptDark.bind(w);
     window.promptMiddleDark = w.promptMiddleDark.bind(w);
     window.cover = w.cover.bind(w);
-    window.coverShadow = w.coverShadow.bind(w);
     window.uncover = w.uncover.bind(w);
-    window.uncoverShadow = w.uncoverShadow.bind(w);
-    window.setCoverText = w.setCoverText.bind(w);
   </script>
   <script>'use strict';${this.extends}</script>
   <script>'use strict';${this.components}</script>
@@ -305,8 +310,8 @@ let wapp = function (options = {}) {
 
   window.addEventListener('load', async function () {
     let dms = [
-      'coverdom','notifydom','alertdom','alertdom1', 'slidedom', 'alertcoverdom',
-      'alertcoverdom1', 'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
+      'coverdom','notifydom','alertdom', 'slidedom', 'alertcoverdom',
+      'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
     ];
 
     for (let i=0; i<dms.length; i++) {
