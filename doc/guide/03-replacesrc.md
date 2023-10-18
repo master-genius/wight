@@ -55,7 +55,7 @@ node build.js xtest
 
 注意构建过程仅支持static下的一级子目录，也就是说你可以把组件的静态资源组织成以下形式：
 
-```plain
+```shell
 static/:
     x.js
     icon/:
