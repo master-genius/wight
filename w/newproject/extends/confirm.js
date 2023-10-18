@@ -5,20 +5,20 @@ exports.confirmExp = cexp;
 
 exports.confirmExec = function (ctx) {
 
-  unalert('shadow');
-
   let id = ctx.target.dataset.id;
 
   if (cexp[id] === undefined) {
     return false;
   }
 
-  let {callback, args} = cexp[id];
+  let {callback, args, aid} = cexp[id];
 
   delete cexp[id];
 
+  cancelAlert(aid);
+
   if (typeof callback !== 'function') {
-    return;
+    return false;
   }
 
   return callback(args);
@@ -26,13 +26,14 @@ exports.confirmExec = function (ctx) {
 };
 
 exports.confirmCancel = function (ctx) {
-  unalert('shadow');
-
-  let id = ctx.target.dataset.id;  
+  
+  let id = ctx.target.dataset.id;
 
   if (cexp[id] === undefined) {
-    return;
+    return false;
   }
+
+  cancelAlert(cexp[id].aid);
 
   try {
     if (cexp[id].cancel) {
@@ -82,9 +83,15 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
     </div>
   </div>`;
 
-  unalert('all');
+  let func = w.cover.bind(w);
+  if (opts.dark) func = w.coverDark.bind(w);
+  let options = {
+    transparent: !!opts.transparent
+  };
 
-  coverShadow(atext, !!opts.transparent);
+  let aid = func(atext, options);
+
+  cexp[id].aid = aid;
   
 };
 

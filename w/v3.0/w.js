@@ -537,12 +537,26 @@ const w = new function () {
     dom.className = 'w-global-alert-info';
     if (options.transparent) dom.className += ' w-global-alert-trans';
     dom.style.zIndex = astack.curZIndex;
-    dom.style.top = `9.${Object.keys(astack.dmap).length % 10}%`;
+    if (options.top) {
+      dom.style.top = options.top;
+    } else {
+      let realTop = 9 + 0.07 * Object.keys(astack.dmap).length;
+      dom.style.top = `${realTop}%`;
+    }
+
+    if (options.color) {
+      dom.style.color = options.color;
+    }
+
     if (options.background) {
       dom.style.background = options.background;
     }
 
-    //dom.style.boxShadow = ``;
+    if (options.withShadow) {
+      let shadowPx = Object.keys(astack.dmap).length % 7;
+      dom.style.boxShadow = `${shadowPx}px -${shadowPx}px 2.3px #e3e3e3`;
+    }
+
     astack.curZIndex <= astack.maxZIndex && astack.curZIndex++;
 
     let aid = `a_${Date.now().toString(16)}${Math.random().toString(16).substring(2)}`;
@@ -551,8 +565,8 @@ const w = new function () {
     astack.count++;
 
     let closeText = '<div style="text-align:right;">'
-        +`<a data-onclick="w.cancelAlert" data-id="${aid}" `
-        +'style="color:#696365;font-size:105%;text-decoration:none;" click>'
+        +`<a data-onclick="w.cancelAlert" data-aid="${aid}" `
+        +'style="color:#959595;font-size:105%;text-decoration:none;" click>'
         +'&nbsp;X&nbsp;</a>'
         +'</div>';
 
@@ -579,7 +593,7 @@ const w = new function () {
   this.cancelAlert = function (ctx) {
     if (!ctx) return false;
 
-    let aid = typeof ctx === 'string' ? ctx : ctx.target.dataset.id;
+    let aid = typeof ctx === 'string' ? ctx : ctx.target.dataset.aid;
     let domname = 'alertdom';
     let dom = this.alertStack.dmap[aid];
     if (!dom) return false;
@@ -596,10 +610,29 @@ const w = new function () {
     if (Object.keys(this.alertStack.dmap).length === 0) {
       w['alertcoverdom'].className = '';
       w['alertcoverdom'].innerHTML = '';
+      this.alertStack.coverCount = 0;
       this.alertStack.curZIndex = this.alertStack.zindex;
     }
 
     return true;
+  };
+
+  this.alertDark = function (info, options=null) {
+    if (!options) options = {};
+    if (!options.background) {
+      options.background = '#4a4a4a';
+    }
+
+    if (!options.color) options.color = '#f0f0f1';
+
+    return this.alert(info, options);
+  };
+
+  this.coverDark = function (info, options=null) {
+    if (!options) options = {};
+    options.withCover = true;
+    options.notClose = true;
+    return this.alertDark(info, options);
   };
 
   this.unalert = this.cancelAlert;
@@ -616,6 +649,7 @@ const w = new function () {
     if (this.alertStack.coverCount > 0) {
       this.alertStack.coverCount--;
     } else {
+      this.alertStack.coverCount = 0;
       w['alertcoverdom'].className = '';
       w['alertcoverdom'].innerHTML = '';
     }
@@ -633,11 +667,9 @@ const w = new function () {
 
   this.alertError = function (info, tmout = 0) {
     info = `<span style="color:#e73949;">${info}</span>`;
-    w.alert(info);
+    let aid = w.alert(info);
     if (tmout > 0) {
-      setTimeout(() => {
-        w.unalert();
-      }, tmout);
+      setTimeout(() => { w.cancelAlert(aid); }, tmout);
     }
   };
 

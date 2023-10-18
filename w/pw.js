@@ -299,6 +299,8 @@ let wapp = function (options = {}) {
     window.promptMiddleDark = w.promptMiddleDark.bind(w);
     window.cover = w.cover.bind(w);
     window.uncover = w.uncover.bind(w);
+    window.alertDark = w.alertDark.bind(w);
+    window.coverDark = w.coverDark.bind(w);
   </script>
   <script>'use strict';${this.extends}</script>
   <script>'use strict';${this.components}</script>
