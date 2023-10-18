@@ -749,7 +749,7 @@ const w = new function () {
         w.notifylogcount = 1;
       }
       
-      w.notifylog = `${info}<br>${w.notifylog}`;
+      w.notifylog = `${info}<div style="padding:0.55rem;"></div>${w.notifylog}`;
 
       w.notifydom.className = `w-global-notify-box ${where_is} w-global-notify-info`;
 
@@ -2491,12 +2491,20 @@ w.initPageDomEvents = function (pg, dom) {
 w.eventProxy = function (evt, pg, funcname) {
   let wind = funcname.trim().indexOf('w.');
   let wfunc = null;
+  
+  let wheretext = '';
+  if (pg.tagName) {
+    wheretext = `<div style="line-height:1.1;">${pg.tagName.toLowerCase()}:</div>`;
+  } else {
+    wheretext = `<div style="line-height:1.1;">${pg.name}:</div>`
+  }
 
   if (wind === 0) {
     let wf = w.getFunc(funcname.trim());
     if (!wf) {
       if (evt.target && evt.target.dataset.noterror) return false;
-      w.notifyError(`${funcname} is not a function.`);
+      
+      w.notifyError(`${wheretext}<div>${funcname} is not a function.</div>`);
       return false;
     }
 
@@ -2504,7 +2512,7 @@ w.eventProxy = function (evt, pg, funcname) {
   }
   else if (!pg || !pg[funcname] || !(typeof pg[funcname] === 'function')) {
     if (evt.target && evt.target.dataset.noterror) return false;
-    w.notifyError(`${funcname} is not a function.`);
+    w.notifyError(`${wheretext}<div>${funcname} is not a function.</div>`);
     return false;
   }
 
