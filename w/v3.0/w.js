@@ -637,6 +637,14 @@ const w = new function () {
 
   this.unalert = this.cancelAlert;
 
+  this.cover = function (info, options=null) {
+    if (!options) options = {};
+    options.withCover = true;
+    options.notClose = true;
+
+    return this.alert(info, options);
+  };
+
   this.uncover = function (aid='last') {
     if (!aid) return false;
     if (aid === 'last') {
@@ -655,14 +663,6 @@ const w = new function () {
     }
 
     return true;
-  };
-
-  this.cover = function (info, trans = false) {
-    return this.alert(info, {
-      notClose: true,
-      withCover: true,
-      transparent: trans
-    });
   };
 
   this.alertError = function (info, tmout = 0) {

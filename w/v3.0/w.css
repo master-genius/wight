@@ -297,7 +297,7 @@
   line-height:2rem;
   color:var(--w-alert-color, #4a4a4a);
   min-height: 4rem;
-  max-height: 86%;
+  max-height: 86.5%;
   overflow-y: auto;
   background: var(--w-alert-bg-color, #f7f8fa);
   padding:0.5rem;
@@ -309,7 +309,7 @@
 
 @media only screen and (max-width: 750px){
   .w-global-alert-info {
-    width:78%;
+    width:81%;
   }
 
   .w-prompt-display {
@@ -324,7 +324,7 @@
 
 @media only screen and (min-width:751px) and (max-width: 1000px){
   .w-global-alert-info {
-    width:69%;
+    width:69.6%;
   }
 
   .w-prompt-display {
@@ -339,7 +339,7 @@
 
 @media only screen and (min-width:1001px) and (max-width:1200px){
   .w-global-alert-info {
-    width:58%;
+    width:58.5%;
   }
 
   .w-global-notify-info {
@@ -353,7 +353,7 @@
 
 @media only screen and (min-width:1201px) and (max-width:1440px){
   .w-global-alert-info {
-    width:48%;
+    width:48.9%;
   }
 
   .w-global-notify-info {
@@ -367,7 +367,7 @@
 
 @media only screen and (min-width: 1441px){
   .w-global-alert-info {
-    width:39%;
+    width:39.5%;
   }
 
   .w-global-notify-info {

@@ -301,6 +301,7 @@ let wapp = function (options = {}) {
     window.uncover = w.uncover.bind(w);
     window.alertDark = w.alertDark.bind(w);
     window.coverDark = w.coverDark.bind(w);
+    window.cancelAlert = w.cancelAlert.bind(w);
   </script>
   <script>'use strict';${this.extends}</script>
   <script>'use strict';${this.components}</script>

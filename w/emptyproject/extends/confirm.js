@@ -15,7 +15,7 @@ exports.confirmExec = function (ctx) {
 
   delete cexp[id];
 
-  cancelAlert(aid);
+  w.cancelAlert(aid);
 
   if (typeof callback !== 'function') {
     return false;
@@ -33,7 +33,7 @@ exports.confirmCancel = function (ctx) {
     return false;
   }
 
-  cancelAlert(cexp[id].aid);
+  w.cancelAlert(cexp[id].aid);
 
   try {
     if (cexp[id].cancel) {
@@ -62,7 +62,10 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
     cexp[id].cancel = opts.cancel;
   }
 
-  let atext = `<div style="text-align:center;font-size:89%;color:#4a4a4f;">
+  let color = '#4a4a4a';
+  if (opts.dark) color = '#f1f2f3';
+
+  let atext = `<div style="text-align:center;font-size:89%;color:${color};">
     <p>${opts.text || ''}</p>
     <div style="box-sizing: border-box;display: flex;flex-flow: row wrap;">
       <div style="padding-left: 0.5rem;padding-right: 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
