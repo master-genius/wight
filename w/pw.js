@@ -656,10 +656,10 @@ wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
 
   let globalBind = () => {
     return `for (let k in window) {
-      global[k] = window[k];
+      globalThis[k] = window[k];
     }
     
-    for (let k in window.globalThis) global[k] = window(k);
+    for (let k in window.globalThis) globalThis[k] = window(k);
     `;
   };
 

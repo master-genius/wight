@@ -1149,6 +1149,7 @@ for (let k in window) !global[k] && (global[k] = window[k]);
 for (let k in window.globalThis) !global[k] && (global[k] = window.globalThis[k]);
 
 /** -------------  */
+
 'use strict';
 
 class HtmlState_ {
@@ -1646,28 +1647,35 @@ const w = new function () {
     this.isFirefox = true;
   }
 
-  this.alertLock = false;
+  this.alertStack = {
+    max: 10,
+    zindex: 105,
+    dmap: {},
+    count: 0,
+    coverCount:0,
+    maxZIndex: 9999,
+    curZIndex: 105
+  };
 
   //replace=false, notClose=false, withCover = false
   this.alert = function (info, options = {}) {
     let domname = 'alertdom';
     let coverdomname = 'alertcoverdom';
-    let logs = w.alertlog.a;
-    if (options.shadow) {
-      domname = 'alertdom1';
-      coverdomname = 'alertcoverdom1';
-      logs = w.alertlog.s;
-    }
+    let astack = this.alertStack;
 
-    if (w.alertLock && !options.shadow) {
-      return false;
-    }
+    if (w.alertLock) return false;
 
     let check_stat = true;
     w.checkhtml && (check_stat = w._htmlcheck(info));
 
     if (!check_stat) {
-      return w[domname];
+      w.notifyTopError(w._htmlcheck.lastErrorMsg);
+      return false;
+    }
+
+    if (Object.keys(astack.dmap).length >= astack.max) {
+      console.error('alert弹框超出最大限制')
+      return false;
     }
 
     if (options.context && options.context.tagName) {
@@ -1676,119 +1684,144 @@ const w = new function () {
       info = w.replaceSrc(info);
     }
 
-    if (w[domname]) {
-      ;(logs.length > 3) && (logs.pop());
+    let dom = document.createElement('div');
+    
+    dom.className = 'w-global-alert-info';
+    if (options.transparent) dom.className += ' w-global-alert-trans';
+    dom.style.zIndex = astack.curZIndex;
+    if (options.top) {
+      dom.style.top = options.top;
+    } else {
+      let realTop = 9 + 0.07 * Object.keys(astack.dmap).length;
+      dom.style.top = `${realTop}%`;
+    }
 
-      if (options.replace) {
-        while (logs.pop()){}
-        ;(typeof info === 'string') && info && logs.push(info);
-      } else {
-        ;(typeof info === 'string') && info && logs.unshift(info);
-      }
+    if (options.color) {
+      dom.style.color = options.color;
+    }
 
-      let closeText = '<div style="text-align:right;">'
-        +'<a href="javascript:w.unalert();" '
-        +'style="color:#696365;font-size:105%;text-decoration:none;" click>'
+    if (options.background) {
+      dom.style.background = options.background;
+    }
+
+    if (options.withShadow) {
+      let shadowPx = Object.keys(astack.dmap).length % 7;
+      dom.style.boxShadow = `${shadowPx}px -${shadowPx}px 2.3px #e3e3e3`;
+    }
+
+    astack.curZIndex <= astack.maxZIndex && astack.curZIndex++;
+
+    let aid = `a_${Date.now().toString(16)}${Math.random().toString(16).substring(2)}`;
+
+    astack.dmap[aid] = dom;
+    astack.count++;
+
+    let closeText = '<div style="text-align:right;">'
+        +`<a data-onclick="w.cancelAlert" data-aid="${aid}" `
+        +'style="color:#959595;font-size:105%;text-decoration:none;" click>'
         +'&nbsp;X&nbsp;</a>'
         +'</div>';
 
-      if (options.notClose) {
-        closeText = '';
-      }
+    if (options.notClose) closeText = '';
 
-      w[domname].className = 'w-global-alert-info';
-
-      if (options.transparent) w[domname].className += ' w-global-alert-trans';
-
-      if (typeof info === 'object') {
-        w[domname].innerHTML = `${closeText}${info.innerHTML}`;
-      } else {
-        w[domname].innerHTML = `${closeText}${logs.join('<br>')}`;
-      }
-      w.initPageDomEvents(options.context || w.curpage, w[domname]);
+    if (typeof info === 'object') {
+      dom.innerHTML = `${closeText}${info.innerHTML}`;
+    } else {
+      dom.innerHTML = `${closeText}${info}`;
     }
 
+    w.initPageDomEvents(options.context || w.curpage, dom);
+
+    w[domname].appendChild(dom);
+
     if (options.withCover && w[coverdomname]) {
-      !options.shadow && (w.alertLock = true);
+      astack.coverCount++;
       w[coverdomname].className = 'w-alert-cover-page';
     }
 
-    return w[domname];
+    return aid;
   };
 
-  this.unalert = function (mode = 'self') {
+  this.cancelAlert = function (ctx) {
+    if (!ctx) return false;
 
-    let domlist = [ 'alertdom' ];
-    let cdomlist = [ 'alertcoverdom' ];
+    let aid = typeof ctx === 'string' ? ctx : ctx.target.dataset.aid;
+    let domname = 'alertdom';
+    let dom = this.alertStack.dmap[aid];
+    if (!dom) return false;
 
-    if (mode === 'shadow') {
-      domlist = ['alertdom1'];
-      cdomlist = ['alertcoverdom1'];
-    } else if (mode === 'all') {
-      domlist = ['alertdom', 'alertdom1'];
-      cdomlist = ['alertcoverdom', 'alertcoverdom1'];
+    let d_zindex = dom.style.zIndex;
+    if (this.alertStack.curZIndex - 1 === d_zindex) {
+      this.alertStack.curZIndex--;
     }
 
-    ;(mode !== 'shadow') && (this.alertLock = false);
+    dom.remove();
+    delete this.alertStack.dmap[aid];
+    this.alertStack.count--;
 
-    if (mode === 'all' || mode === 'shadow') {
-      while(w.alertlog.s.pop()){}
+    if (Object.keys(this.alertStack.dmap).length === 0) {
+      w['alertcoverdom'].className = '';
+      w['alertcoverdom'].innerHTML = '';
+      this.alertStack.coverCount = 0;
+      this.alertStack.curZIndex = this.alertStack.zindex;
     }
 
-    if (mode === 'all' || mode === 'self') {
-      while(w.alertlog.a.pop()){}
-    }
-
-    for (let a of domlist) {
-      if (w[a]) {
-        w[a].innerHTML = '';
-        w[a].className = '';
-      }
-    }
-
-    for (let a of cdomlist) {
-      if (w[a]) {
-        w[a].className = '';
-        w[a].innerHTML = '';
-        w[a].style.cssText = '';
-      }
-    }
+    return true;
   };
 
-  this.uncover = function () {
-    this.unalert();
+  this.alertDark = function (info, options=null) {
+    if (!options) options = {};
+    if (!options.background) {
+      options.background = '#4a4a4a';
+    }
+
+    if (!options.color) options.color = '#f0f0f1';
+
+    return this.alert(info, options);
   };
 
-  this.uncoverShadow = function () {
-    this.unalert('shadow');
+  this.coverDark = function (info, options=null) {
+    if (!options) options = {};
+    options.withCover = true;
+    options.notClose = true;
+    return this.alertDark(info, options);
   };
 
-  this.coverShadow = function (info, trans = false) {
-    this.alert(info, {
-      replace: true,
-      notClose: true,
-      withCover: true,
-      shadow: true,
-      transparent: trans
-    });
+  this.unalert = this.cancelAlert;
+
+  this.cover = function (info, options=null) {
+    if (!options) options = {};
+    options.withCover = true;
+    options.notClose = true;
+
+    return this.alert(info, options);
   };
 
-  this.cover = function (info, trans = false) {
-    this.alert(info, {
-      replace: true,
-      notClose: true,
-      withCover: true,
-      transparent: trans
-    });
+  this.uncover = function (aid='last') {
+    if (!aid) return false;
+    if (aid === 'last') {
+      let idlist = Object.keys(this.alertStack.dmap);
+      if (idlist.length === 0) return false;
+      aid = idlist.pop();
+    }
+
+    this.cancelAlert(aid);
+    if (this.alertStack.coverCount > 0) {
+      this.alertStack.coverCount--;
+    } else {
+      this.alertStack.coverCount = 0;
+      w['alertcoverdom'].className = '';
+      w['alertcoverdom'].innerHTML = '';
+    }
+
+    return true;
   };
 
   this.alertError = function (info, tmout = 0) {
     info = `<span style="color:#e73949;">${info}</span>`;
-    w.alert(info);
+    let aid = w.alert(info);
     if (tmout > 0) {
-      setTimeout(() => {
-        w.unalert();
-      }, tmout);
+      setTimeout(() => { w.cancelAlert(aid); }, tmout);
     }
   };
 
@@ -2393,11 +2426,6 @@ w.setCoverText = (text = '', style = '') => {
   w.alertcoverdom.style.cssText = style;
 };
 
-w.setCoverShadowText = (text = '', style = '') => {
-  w.alertcoverdom1.innerHTML = text;
-  w.alertcoverdom1.style.cssText = style;
-};
-
 w.sliderPage = function(html = null, append = true, obj=null) {
   if (w.slidedom) {
     w.slidedom.className = 'w-common-slide-right';
@@ -2886,7 +2914,18 @@ w._resetData = function (pagename, pg, nds) {
   }
 };
 
+//w.replaceRegex = /\{\:[A-Za-z0-9\-\_]{1,100}\:\}/;
+
+/**
+ *
+ * @param {string} codetext 
+ * @param {boolean} is_comps 
+ * @param {string} comp_name 
+ * @returns {string}
+ */
 w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
+  if (!codetext || typeof codetext !== 'string') return codetext;
+
   let replace_src = (url, plist, offset, text) => {
     if ((/^http[s]?:\/\//).test(url)) {
       return url;
@@ -2895,6 +2934,12 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
     let turl = url.trim();
 
     //只会对 /static开头的数据做替换处理
+    if ((w.prepath !== '/static' && turl.indexOf(w.prepath) === 0) 
+      || w.prepath === '/static' && turl.indexOf('/static/static') === 0)
+    {
+        return turl;
+    }
+    
     if (w.prepath && turl.indexOf('/static') === 0) {
       return `${w.prepath}/${turl}`.replace(/\/{2,}/ig, '/');
     }
@@ -4519,17 +4564,15 @@ class Component extends HTMLElement {
             + `</div>${info}`;
     }
 
-    w.alert(info, {
+    return w.alert(info, {
       context: this,
-      replace: true,
       notClose: true,
       withCover: true,
-      shadow: true,
       transparent: !!options.transparent
     });
   };
 
-  uncover () { w.unalert('shadow'); }
+  uncover (aid='last') { return w.uncover(aid); }
 
   loadScript (src) {
     return w.loadScript(src, this.tagName.toLowerCase());
@@ -4590,6 +4633,17 @@ class Component extends HTMLElement {
 
     return null;
   }
+}
+
+let attrbind = [
+  'prompt', 'promptTop', 'alertError', 'cancelAlert', 'unalert',
+  'alertDark', 'cover', 'uncover',
+  'notify', 'notifyTop', 'notifyDark', 'notifyMiddle', 'notifyMiddleDark',
+  'promptMiddle'
+]
+
+for (let a of attrbind) {
+  w[a] && (window[a] = w[a]);
 }
 
 exports.window = window;
