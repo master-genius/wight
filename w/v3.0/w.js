@@ -499,15 +499,21 @@ const w = new function () {
     max: 10,
     zindex: 105,
     dmap: {},
+    closemap: {},
     count: 0,
     coverCount:0,
     maxZIndex: 9999,
     curZIndex: 105
   };
 
+  this.alertStyles = ['left', 'right', 'top', 'bottom', 'transform', 'color', 'background', 'boxShadow', 'border-radius', 'border-top-left-radius', 'border-top-right-radius', 'border-bottom-left-radius', 'border-bottom-right-radius'];
+
   //replace=false, notClose=false, withCover = false
   this.alert = function (info, options = {}) {
+    if (!this.alertStack.max || typeof this.alertStack.max !== 'number' || this.alertStack.max > 49 || this.alertStack.max < 1) this.alertStack.max = 10;
+
     if (!options || typeof options !== 'object') options = {};
+
     let domname = 'alertdom';
     let coverdomname = 'alertcoverdom';
     let astack = this.alertStack;
@@ -533,30 +539,40 @@ const w = new function () {
       info = w.replaceSrc(info);
     }
 
+    let total = Object.keys(astack.dmap).length;
     let dom = document.createElement('div');
     
     dom.className = 'w-global-alert-info';
     if (options.transparent) dom.className += ' w-global-alert-trans';
     dom.style.zIndex = astack.curZIndex;
+
     if (options.top) {
       dom.style.top = options.top;
     } else {
-      let realTop = 9 + 0.07 * Object.keys(astack.dmap).length;
+      let realTop = parseInt(10 + 0.07 * total);
       dom.style.top = `${realTop}%`;
     }
 
-    if (options.color) {
-      dom.style.color = options.color;
+    if (options.autoOffset && total > 1) {
+      let p_num = parseInt((this.alertStack.max-1) / 2 * Math.random() + 3);
+      let factor = 1.25;
+      let ox = parseInt(49 + (total % p_num) * factor);
+      if (total >= p_num) {
+        ox = parseInt(49 + total*factor - total);
+      }
+
+      let atop = parseInt(10 + (total % p_num) * factor);
+      if (total >= p_num) {
+        atop = parseInt(10 + total*factor - total);
+      }
+      dom.style.transform = `translateX(-${ox}%)`;
+      dom.style.top = `${atop}%`;
+      dom.style.boxShadow = `2px 2px 2px #e0e0e0`;
     }
 
-    if (options.background) {
-      dom.style.background = options.background;
-    }
-
-    if (options.withShadow) {
-      let shadowPx = Object.keys(astack.dmap).length % 7;
-      dom.style.boxShadow = `${shadowPx}px -${shadowPx}px 2.3px #e3e3e3`;
-    }
+    w.alertStyles.forEach(x => {
+      options[x] && (dom.style[x] = options[x]);
+    });
 
     astack.curZIndex <= astack.maxZIndex && astack.curZIndex++;
 
@@ -565,18 +581,37 @@ const w = new function () {
     astack.dmap[aid] = dom;
     astack.count++;
 
-    let closeText = '<div style="text-align:right;">'
+    if (!options.notClose) {
+      let closedom = document.createElement('div');
+      astack.closemap[aid] = closedom;
+      closedom.className = 'w-global-alert-info-close';
+      closedom.style.position = 'fixed';
+      closedom.style.transform = 'translateX(-50%)';
+      closedom.style.left = '50%';
+      if (dom.style.transform) closedom.style.transform = dom.style.transform;
+      if (dom.style.left) closedom.style.left = dom.style.left;
+    
+      closedom.style.boxShadow = dom.style.boxShadow;
+      closedom.style.bottom = `${100 - parseInt(dom.style.top) - 0.09}%`;
+      closedom.style.zIndex = dom.style.zIndex;
+      closedom.style.background = options.closeBackground 
+                                  || options.background
+                                  || 'var(--w-alert-close-bg-color, #f5f6f7)';
+      if (options.closeBorderBottom) closedom.style.borderBottom = options.closeBorderBottom;
+      closedom.innerHTML = `<div style="text-align:right;padding:0.085%;">`
         +`<a data-onclick="w.cancelAlert" data-aid="${aid}" `
-        +'style="color:#959595;font-size:105%;text-decoration:none;" click>'
+        +'style="color:#989595;font-size:105%;text-decoration:none;user-select:none;" click>'
         +'&nbsp;X&nbsp;</a>'
         +'</div>';
 
-    if (options.notClose) closeText = '';
+      w[domname].appendChild(closedom);
+      w.initPageDomEvents(options.context || w.curpage, closedom);
+    }
 
-    if (typeof info === 'object') {
-      dom.innerHTML = `${closeText}${info.innerHTML}`;
+    if (typeof info === 'object' && info.innerHTML) {
+      dom.innerHTML = info.innerHTML;
     } else {
-      dom.innerHTML = `${closeText}${info}`;
+      dom.innerHTML = info;
     }
 
     w.initPageDomEvents(options.context || w.curpage, dom);
@@ -592,9 +627,14 @@ const w = new function () {
   };
 
   this.cancelAlert = function (ctx) {
-    if (!ctx) return false;
+    if (!ctx) {
+      ctx = this.getLastAlert();
+      if (!ctx) return false;
+    }
 
-    let aid = typeof ctx === 'string' ? ctx : ctx.target.dataset.aid;
+    let aid = typeof ctx === 'string' ? ctx : (ctx.target.dataset.aid || this.getLastAlert());
+    if (!aid) return false;
+
     let domname = 'alertdom';
     let dom = this.alertStack.dmap[aid];
     if (!dom) return false;
@@ -604,8 +644,12 @@ const w = new function () {
       this.alertStack.curZIndex--;
     }
 
+    let closedom = this.alertStack.closemap[aid];
+    if (closedom) closedom.remove();
     dom.remove();
+
     delete this.alertStack.dmap[aid];
+    delete this.alertStack.closemap[aid];
     this.alertStack.count--;
 
     if (Object.keys(this.alertStack.dmap).length === 0) {
@@ -620,12 +664,9 @@ const w = new function () {
 
   this.alertDark = function (info, options=null) {
     if (!options || typeof options !== 'object') options = {};
-    if (!options.background) {
-      options.background = '#4a4a4a';
-    }
-
+    if (!options.background) options.background = '#4f4f4f';
+    if (!options.closeBackground) options.closeBackground = '#4a4a4a';
     if (!options.color) options.color = '#f0f0f1';
-
     return this.alert(info, options);
   };
 
@@ -646,13 +687,18 @@ const w = new function () {
     return this.alert(info, options);
   };
 
+  this.getLastAlert = function() {
+    let idlist = Object.keys(this.alertStack.dmap);
+    if (idlist.length === 0) return false;
+    return idlist.pop();
+  };
+
   this.uncover = function (aid='last') {
-    if (!aid) return false;
-    if (aid === 'last') {
-      let idlist = Object.keys(this.alertStack.dmap);
-      if (idlist.length === 0) return false;
-      aid = idlist.pop();
+    if (aid === 'last' || !aid) {
+      aid = this.getLastAlert();
     }
+
+    if (!aid) return false;
 
     this.cancelAlert(aid);
     if (this.alertStack.coverCount > 0) {
@@ -3412,21 +3458,25 @@ class Component extends HTMLElement {
 
   naviHide () { w.naviHide(); }
 
-  cover (info, options = {notClose: false, transparent: false}) {
-    let notclose = !!options.notClose;
+  alert(info, options=null) {
+    if (!options || typeof options !== 'object') options = {};
+    options.context = this;
+    return w.alert(info, options);
+  }
 
-    if (!notclose) {
-      info = `<div style="text-align:right;">`
-            + `<span style="user-select:none;padding:0.15rem;text-decoration:none;cursor:pointer;" data-onclick=uncover>X</span>`
-            + `</div>${info}`;
-    }
+  alertDark(info, options={}) {
+    options.context = this;
+    return w.alertDark(info, options);
+  }
 
-    return w.alert(info, {
-      context: this,
-      notClose: true,
-      withCover: true,
-      transparent: !!options.transparent
-    });
+  cancelAlert(aid='') {return w.cancelAlert(aid);}
+
+  cover (info, options = null) {
+    if (!options || typeof options !== 'object') options = {};
+    
+    options.notClose = true;
+    options.withCover = true;
+    return this.alert(info, options);
   };
 
   uncover (aid='last') { return w.uncover(aid); }
