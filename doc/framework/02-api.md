@@ -175,13 +175,11 @@ w.alert = function (info, options){}
 
 - transparent 是否显示透明背景，如果选项设置了background，则此选项无效。
 
-- background 背景色，编写css的样式代码值。示例：#d01223
-
 - withCover 是否显示一个遮罩层，遮罩层的目的是阻止其他操作。
 
-- color 字体颜色。
+- closeBackground 关闭框的背景颜色。
 
-- withShadow 是否显示一个阴影，默认不显示。
+- style样式的属性，支持: backgroun, boxShadow, border-radius以及四个分开的属性, transform。
 
 **返回值**
 
@@ -194,7 +192,7 @@ alert可以多次调用，每次显示都是在样式上覆盖已有的框，但
 cover方法是对alert的封装，withCover和notClose为true。有对应的w.uncover方法是对unalert的封装。
 **返回值**：和alert同样的返回值。
 
-使用w.uncover(id)撤销。对于w.uncover，如果你不传递参数，则默认会把最近的弹框取消。
+使用w.uncover(id)撤销。对于w.uncover、w.cancelAlert，如果你不传递参数，则默认会把最近的弹框取消。
 
 如果使用cancelAlert不断地取消弹框，直到为空，那么已经启用的遮罩层也会自动取消。
 
