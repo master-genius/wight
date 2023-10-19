@@ -507,6 +507,7 @@ const w = new function () {
 
   //replace=false, notClose=false, withCover = false
   this.alert = function (info, options = {}) {
+    if (!options || typeof options !== 'object') options = {};
     let domname = 'alertdom';
     let coverdomname = 'alertcoverdom';
     let astack = this.alertStack;
@@ -618,7 +619,7 @@ const w = new function () {
   };
 
   this.alertDark = function (info, options=null) {
-    if (!options) options = {};
+    if (!options || typeof options !== 'object') options = {};
     if (!options.background) {
       options.background = '#4a4a4a';
     }
@@ -629,7 +630,7 @@ const w = new function () {
   };
 
   this.coverDark = function (info, options=null) {
-    if (!options) options = {};
+    if (!options || typeof options !== 'object') options = {};
     options.withCover = true;
     options.notClose = true;
     return this.alertDark(info, options);
@@ -638,7 +639,7 @@ const w = new function () {
   this.unalert = this.cancelAlert;
 
   this.cover = function (info, options=null) {
-    if (!options) options = {};
+    if (!options || typeof options !== 'object') options = {};
     options.withCover = true;
     options.notClose = true;
 

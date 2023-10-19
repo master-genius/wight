@@ -29,12 +29,7 @@ class page {
   }
 
   async onload(c) {
-    //显示加载信息，true表示背景透明。
-    cover('<div style="text-align:center;">loading</div>', true);
-    await _import('/static/module/u-card.js').then(m => { console.log(m); })
-    setTimeout(() => {
-      uncover();
-    }, 500);
+   
   }
 
   async onshow(c) {
