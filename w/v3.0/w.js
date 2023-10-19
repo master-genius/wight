@@ -506,7 +506,7 @@ const w = new function () {
     curZIndex: 105
   };
 
-  this.alertStyles = ['left', 'right', 'top', 'bottom', 'transform', 'color', 'background', 'boxShadow', 'border-radius', 'border-top-left-radius', 'border-top-right-radius', 'border-bottom-left-radius', 'border-bottom-right-radius'];
+  this.alertStyles = ['left', 'right', 'bottom', 'transform', 'color', 'background', 'boxShadow', 'border-radius', 'border-top-left-radius', 'border-top-right-radius', 'border-bottom-left-radius', 'border-bottom-right-radius'];
 
   //replace=false, notClose=false, withCover = false
   this.alert = function (info, options = {}) {
@@ -546,12 +546,8 @@ const w = new function () {
     if (options.transparent) dom.className += ' w-global-alert-trans';
     dom.style.zIndex = astack.curZIndex;
 
-    if (options.top) {
-      dom.style.top = options.top;
-    } else {
-      let realTop = parseInt(10 + 0.07 * total);
-      dom.style.top = `${realTop}%`;
-    }
+    let realTop = parseInt(10 + 0.07 * total);
+    dom.style.top = `${realTop}%`;
 
     if (options.autoOffset && total > 1) {
       let p_num = parseInt((this.alertStack.max-1) / 2 * Math.random() + 3);
@@ -561,12 +557,12 @@ const w = new function () {
         ox = parseInt(49 + total*factor - total);
       }
 
-      let atop = parseInt(10 + (total % p_num) * factor);
+      realTop = parseInt(10 + (total % p_num) * factor);
       if (total >= p_num) {
-        atop = parseInt(10 + total*factor - total);
+        realTop = parseInt(10 + total*factor - total);
       }
       dom.style.transform = `translateX(-${ox}%)`;
-      dom.style.top = `${atop}%`;
+      dom.style.top = `${realTop}%`;
       dom.style.boxShadow = `2px 2px 2px #e0e0e0`;
     }
 
@@ -592,7 +588,8 @@ const w = new function () {
       if (dom.style.left) closedom.style.left = dom.style.left;
     
       closedom.style.boxShadow = dom.style.boxShadow;
-      closedom.style.bottom = `${100 - parseInt(dom.style.top) - 0.09}%`;
+      closedom.style.bottom = `${100 - realTop - 0.09}%`;
+      //closedom.style.bottom = `${100 - parseInt(dom.style.top) - 0.09}%`;
       closedom.style.zIndex = dom.style.zIndex;
       closedom.style.background = options.closeBackground 
                                   || options.background
@@ -600,7 +597,7 @@ const w = new function () {
       if (options.closeBorderBottom) closedom.style.borderBottom = options.closeBorderBottom;
       closedom.innerHTML = `<div style="text-align:right;padding:0.085%;">`
         +`<a data-onclick="w.cancelAlert" data-aid="${aid}" `
-        +'style="color:#989595;font-size:105%;text-decoration:none;user-select:none;" click>'
+        +'style="color:#989595;font-size:111%;text-decoration:none;user-select:none;" click>'
         +'&nbsp;X&nbsp;</a>'
         +'</div>';
 
