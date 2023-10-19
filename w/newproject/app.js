@@ -17,7 +17,7 @@ if (!w.dev) {
 w.addHook((c) => {
   let r = checkToken(true)
   if (!r && allowPages.indexOf(c.path) < 0) {
-    acover('<user-login></user-login>')
+    cover('<user-login></user-login>')
   }
 
   return r
