@@ -10,6 +10,12 @@ let arg = npargv({
     alias: '-c',
     name: 'compress',
     default: false
+  },
+
+  '--name': {
+    alias: '-n',
+    name: 'name',
+    default: ''
   }
 })
 
@@ -39,6 +45,20 @@ try {
 
 webapp.forceCompress = arg.args.compress;
 
-for (let a of arg.list) {
-  webapp.build(`${__dirname}/apps/${fmt_name(a)}`, a);
+if (arg.list.length == 0) {
+  console.error('未指定要打包的应用')
+  process.exit(1)
+}
+
+let real_list = arg.list.map(x => {
+  if (x.indexOf('/') >= 0) {
+    return x.split('/').filter(p => p.length > 0).pop()
+  }
+
+  return x.trim()
+})
+
+for (let a of real_list) {
+  if (!a) continue;
+  webapp.build(`${__dirname}/apps/${fmt_name(a)}`, arg.args.name || a);
 }
