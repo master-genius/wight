@@ -5,6 +5,7 @@ const terser = require('terser');
 const csso = require('csso');
 const htmlstate = require('./htmlstate');
 const path = require('path');
+const zipdata = require('zipdata');
 const ssecode = require('./ssecode');
 
 const fsp = fs.promises;
@@ -1571,11 +1572,21 @@ wapp.prototype.build = async function (appdir, appname = '') {
 
   let data = await this.makeApp(appdir, true);
 
+  let appfile = `${appdir}/${appname || 'index'}.html`;
+
   try {
-    fs.writeFileSync(`${appdir}/${appname || 'index'}.html`, data, {encoding:'utf8'});
+    fs.writeFileSync(appfile, data, {encoding:'utf8'});
   } catch (err) {
     err && console.error(err);
   }
+
+  zipdata(data, true).then(zdata => {
+    fs.writeFileSync(appfile + '.gz', zdata);
+  }).catch(err => {
+    console.error('压缩html文件失败，若有需要你可以自己手动进行。')
+    console.error(err)
+  });
+  
 };
 
 wapp.prototype.newPage = function (name, pagedir) {
