@@ -5,6 +5,7 @@ process.chdir(__dirname)
 const titbit = require('titbit')
 const cluster = require('cluster')
 const fs = require('fs')
+const os = require('os')
 const {proxy, resource} = require('titbit-toolkit')
 const npargv = require('npargv')
 const loadddoc = require('./lib/loaddoc')
@@ -164,6 +165,16 @@ if (cluster.isWorker) {
 
   app.get('/self/control/applist', async ctx => {
     ctx.send(iapp.appList)
+  })
+
+  app.get('/self/control/netinfo', async ctx => {
+    try {
+      let ips = os.networkInterfaces()
+      if (!ips) return ctx.status(400).send('failed')
+      ctx.send(ips)
+    } catch (err) {
+      ctx.status(500).send('failed')
+    }
   })
 
   /* process.on('message', (msg) => {
