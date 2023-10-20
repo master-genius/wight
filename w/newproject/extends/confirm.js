@@ -65,12 +65,21 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
   let color = '#4a4a4a';
   if (opts.dark) color = '#f1f2f3';
 
+
+  let okStyle = '';
+  let cancelStyle = '';
+
+  if (opts.buttonStyle && Array.isArray(opts.buttonStyle) && opts.buttonStyle.length > 0) {
+    okStyle = opts.buttonStyle[0];
+    cancelStyle = opts.buttonStyle[1] || '';
+  }
+
   let atext = `<div style="text-align:center;font-size:95%;color:${color};">
     <p>${opts.text || ''}</p>
     <div style="box-sizing: border-box;display: flex;flex-flow: row wrap;margin-top:1.5rem;">
       <div style="padding:0.2rem 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
       <button class="small"
-        style="font-weight:bold;background:#00b2ee;" 
+        style="font-weight:bold;background:#2376b3;${okStyle}" 
         data-onclick="w.ext.confirmExec" 
         data-id="${id}">
           确定</button>
@@ -78,7 +87,7 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
 
       <div style="padding:0.2rem 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
         <button class="small inverse" 
-          style="background:#777879;" 
+          style="background:#777879;${cancelStyle}" 
           data-onclick="w.ext.confirmCancel" 
           data-id="${id}">
             取消</button>
