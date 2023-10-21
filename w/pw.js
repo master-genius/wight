@@ -281,7 +281,6 @@ let wapp = function (options = {}) {
     window.unalert = w.unalert.bind(w);
     window.alertError = w.alertError.bind(w);
     window.notify = w.notify.bind(w);
-    window.notice = w.notice.bind(w);
     window.notifyError = w.notifyError.bind(w);
     window.prompt = w.prompt.bind(w);
     window.unprompt = w.unprompt.bind(w);
@@ -314,7 +313,7 @@ let wapp = function (options = {}) {
 
   window.addEventListener('load', async function () {
     let dms = [
-      'coverdom','notifydom','alertdom', 'slidedom', 'alertcoverdom',
+      'coverdom','notifydom','alertdom', 'slidedom', 'alertcoverdom', 'notifytopdom',
       'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
     ];
 
