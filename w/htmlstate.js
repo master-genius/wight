@@ -378,7 +378,6 @@ class htmlstate {
   }
 
   diffStack () {
-
     if (this.tagStack.length !== this.tagCloseStack.length) {
       return false
     }
@@ -391,6 +390,7 @@ class htmlstate {
     this.attrType = ''
     this.curTagIndex = this.curTagEndIndex = 0
     this.tagStack = []
+    //实际上，此处没有使用到tagCloseTack，所以不进行初始化也可以，它一直是空数组。
     this.tagCloseStack = []
     this.is_script = false
     this.data = ''
@@ -453,8 +453,9 @@ class htmlstate {
     }
 
     if (!this.diffStack()) {
-      this.lastErrorMsg = `${this.lastCursor} ~ ${this.cursor} `
-          + `${this.data.substring(this.lastCursor, this.cursor+1)} 标签包含嵌套不一致。`
+      this.lastErrorMsg = `大概位置：${this.lastCursor} ~ ${this.cursor} `
+          + `${this.data.substring(this.lastCursor, this.cursor+1).trim()}... \n    `
+          + `标签包含嵌套不一致：<${this.tagStack.join('>...<')}>...`
       return false
     }
 

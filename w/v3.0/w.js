@@ -123,7 +123,6 @@ class HtmlState_ {
   }
 
   checkTagStart (next_char) {
-
     if (this.curState === this.STATE.TAG_ATTR_VALUE) {
       if (this.attrType !== '') {
         return false
@@ -152,7 +151,6 @@ class HtmlState_ {
   }
 
   checkTagEnd (cur_char, next_char) {
-    
     if (this.curState === this.STATE.TAG_CLOSE_NAME) {
       this.curState = this.STATE.TAG_CLOSE_END
       if (!this.diffCloseTag()) {
@@ -226,7 +224,6 @@ class HtmlState_ {
   }
 
   checkAttrSetValue (next_char) {
-
     if (this.curState === this.STATE.NONE) {
       this.curState = this.STATE.CHAR
       return true
@@ -302,7 +299,6 @@ class HtmlState_ {
   }
 
   checkState (cur_char, next_char) {
-
     if (cur_char !== this.attrType && this.attrType !== '') {
       if (this.curState === this.STATE.TAG_ATTR_VALUE)
       {
@@ -357,13 +353,13 @@ class HtmlState_ {
     this.attrType = ''
     this.curTagIndex = this.curTagEndIndex = 0
     this.tagStack = []
+    this.tagCloseStack = []
     this.is_script = false
     this.data = ''
     this.cursor = 0
   }
 
   parse (data) {
-    
     this.init();
 
     if ( !(typeof data === 'string' || (data instanceof String)) ) {
@@ -431,7 +427,7 @@ class HtmlState_ {
     }
 
     if (!this.diffStack()) {
-      this.lastErrorMsg = '模板标签包含嵌套不一致。'
+      this.lastErrorMsg = `模板标签包含嵌套不一致：&lt;${this.tagStack.join('&gt;...&lt;')}&gt;...`
       return false
     }
 
@@ -884,6 +880,8 @@ const w = new function () {
     let noclose = options.noclose || false;
     let glass = options.glass || false;
 
+    if (!w._htmlcheck(info)) return false;
+
     if (w.promptdom) {
       w.promptdom.className = `w-prompt-box w-prompt-${wh} w-prompt-display`;
       let pcolor = '#424242';
@@ -924,6 +922,7 @@ const w = new function () {
   };
 
   this.promptBlock = function (info, options = {}) {
+    if (!w._htmlcheck(info)) return false;
     if (w.promptdom) {
       w.promptdom.className = 'w-prompt-box w-prompt-block';
       w.promptdom.innerHTML = `<div style="color:#4a4a4f;padding:0.8rem;margin-top:5%;">`

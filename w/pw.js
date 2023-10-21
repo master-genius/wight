@@ -901,6 +901,10 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
   try {
     fs.accessSync(htmlfile);
     htext = fs.readFileSync(htmlfile, {encoding: 'utf8'});
+    if (!htmlparser.parse(htext)) {
+      throw new Error(htmlfile + '\n    ' + htmlparser.lastErrorMsg)
+    }
+
     htext = simpleComporessHTML(htext);
     htext = this.fmtPageHTML(htext, pagename);
     htext = this.replaceSrc(htext, false, '', false);
