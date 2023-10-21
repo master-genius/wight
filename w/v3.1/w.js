@@ -407,7 +407,7 @@ class HtmlState_ {
       if (!st) {
         let errt = this.data.substring(this.lastCursor, this.cursor + 10);
         
-        this.lastErrorMsg = `index ${this.lastCursor} ~ ${this.cursor}, 错误的语法。<p style="color:#df6878;">...`
+        this.lastErrorMsg = `位置： ${this.lastCursor} ~ ${this.cursor}, 错误的语法：<p style="color:#df6878;">...`
           +`${errt.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}...</p>`;
 
         console.error(this.data);
@@ -423,7 +423,8 @@ class HtmlState_ {
       && this.curState !== this.STATE.TAG_END 
       && this.curState !== this.STATE.TAG_CLOSE_END)
     {
-      this.lastErrorMsg = '标签结束状态错误，请检查模板字符串的语法格式。'
+      this.lastErrorMsg = '标签结束状态错误，请检查模板字符串的语法格式，以及属性的闭合引号。<br>'
+          + `...${this.data.substring(this.lastCursor, this.cursor+1).replaceAll('<', '&lt;').replaceAll('>', '&gt;')}...`;
       return false
     }
 
