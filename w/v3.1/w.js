@@ -846,7 +846,9 @@ const w = new function () {
       nid: nid,
       dom: ndom,
       position: posi,
-      timer: setTimeout(() => { w.cancelNotify(nid); }, tmout)
+      timer: setTimeout(() => {
+        w.cancelNotify(nid, false);
+      }, tmout)
     };
 
     nstack.count++;
@@ -859,7 +861,7 @@ const w = new function () {
     return nid;
   };
 
-  this.cancelNotify = function (ctx) {
+  this.cancelNotify = function (ctx, clearTimer=true) {
     if (!ctx) return false;
 
     let nid = typeof ctx === 'string' ? ctx : ctx.target.dataset.nid;
@@ -881,12 +883,13 @@ const w = new function () {
     nstack.count--;
     nt.dom.remove();
     delete nstack.dmap[nid];
-
     if (nstack.count <= 0) {
       realdom.className = '';
       realdom.innerHTML = '';
       nstack.count = 0;
     }
+
+    clearTimer && nt.timer && clearTimeout(nt.timer);
 
     return true;
   };
