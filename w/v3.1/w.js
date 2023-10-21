@@ -423,8 +423,9 @@ class HtmlState_ {
       && this.curState !== this.STATE.TAG_END 
       && this.curState !== this.STATE.TAG_CLOSE_END)
     {
+      let codeHintText = this.data.substring(this.lastCursor, this.cursor+1);
       this.lastErrorMsg = '标签结束状态错误，请检查模板字符串的语法格式，以及属性的闭合引号。<br>'
-          + `...${this.data.substring(this.lastCursor, this.cursor+1).replaceAll('<', '&lt;').replaceAll('>', '&gt;')}...`;
+          + `...${codeHintText.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}...`;
       return false
     }
 
