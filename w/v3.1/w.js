@@ -736,22 +736,34 @@ const w = new function () {
   };
 
   this.notifyError = function (info, tmout = 2500) {
+    if (typeof tmout === 'object') {
+      tmout.ntype = 'error';
+      return w.notify(info, tmout);
+    }
     return w.notify(info, {timeout: tmout, ntype: 'error'});
   };
 
-  this.notifyLight = function (info, tmout = 2500) {
-    return w.notify(info, {timeout: tmout, ntype: 'light'});
-  };
-
   this.notifyTop = function (info, tmout = 2500) {
+    if (typeof tmout === 'object') {
+      tmout.ntype = 'top';
+      return w.notify(info, tmout);
+    }
     return w.notify(info, {timeout:tmout, ntype: 'top'});
   };
 
   this.notifyTopError = function (info, tmout = 2500) {
+    if (typeof tmout === 'object') {
+      tmout.ntype = 'top-error';
+      return w.notify(info, tmout);
+    }
     return w.notify(info, {timeout: tmout, ntype: 'top-error'});
   };
 
   this.notifyOnly = function (info, tmout = 2500) {
+    if (typeof tmout === 'object') {
+      tmout.ntype = 'only';
+      return w.notify(info, tmout);
+    }
     return w.notify(info, {timeout: tmout, ntype: 'only'});
   };
 

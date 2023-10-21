@@ -61,9 +61,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '2.9';
+  this.defaultVersion = '3.1';
 
-  this.version = '2.9';
+  this.version = '3.1';
 
   this.forceCompress = false;
 
@@ -276,7 +276,7 @@ let wapp = function (options = {}) {
     w.tabs.pageIndex = ${JSON.stringify(this.config.tabsPageIndex)};
     w.tabs.background = '${this.config.tabsBackground}';
     w.tabs.selectedBackground = '${this.config.tabsSelectedBackground}';
-    
+
     window.alert = w.alert.bind(w);
     window.unalert = w.unalert.bind(w);
     window.alertError = w.alertError.bind(w);
@@ -285,7 +285,6 @@ let wapp = function (options = {}) {
     window.prompt = w.prompt.bind(w);
     window.unprompt = w.unprompt.bind(w);
     window.notifyTop = w.notifyTop.bind(w);
-    window.notifyLight = w.notifyLight.bind(w);
     window.notifyTopError = w.notifyTopError.bind(w);
     window.notifyOnly = w.notifyOnly.bind(w);
     window.unnotify = w.unnotify.bind(w);
