@@ -196,12 +196,19 @@ cover方法是对alert的封装，withCover和notClose为true。有对应的w.un
 
 如果使用cancelAlert不断地取消弹框，直到为空，那么已经启用的遮罩层也会自动取消。
 
+----
 
 ### 消息通知：w.notify和相关封装
 
-w.notify其实和alert实现了类似的功能，但是从默认样式，功能定位等都是不同的。这里有一个最核心的差异，就是二者是独立的DOM节点，相互不会有影响，对于复杂的应用，这是很有必要的。
+w.notify其实和alert实现了类似的功能，但是从默认样式，功能定位等都是不同的。这里有一个最核心的差异，就是二者是独立的DOM节点，相互不会有影响，对于复杂的应用，这是很有必要的。消息通知具备时效性，它一定会在一个时刻自动被清理。
 
-**w.notify有对应的w.unnotify方法用于隐藏通知消息。**
+w.notify内部管理了两个DOM节点，一个用于顶部中间位置的通知，一个用于右下角显示通知，两个互不影响。
+
+**w.notify有对应的w.unnotify方法用于隐藏通知消息，需要注意的是，这个接口会把所有的消息通知都取消。**
+
+**cancelNotify(nid)**
+
+用于取消一个消息通知，nid是必须要传递的，或者是一个Element对象，属性的dataset上具备nid属性。实际上大部分情况你都不需要自己去管理消息通知，让框架层面自动处理即可，你只需要显示一个消息通知。
 
 notify的通知消息默认在右下角位置。
 
@@ -228,22 +235,42 @@ w.notify('<h2>消息</h2><p>这是消息</p>', {
 })
 ```
 
-- timeout
+ntype包含top表示使用顶部的消息通知。
+
+#### 选项
+
+- **timeout**
 
 超时，默认为3500毫秒，超时后就会自动隐藏通知，这也是和alert一个大的区别，alert是需要手动关闭的。
 
 基于notify封装了一些方法用于提高效率：
 
-- notifyError(info, timeout=2500)
+> notifyError(info, timeout=15000)
+> notifyTopError(info, timeout=15000)
+> notifyTop(info, timeout=3500)
+> notifyOnly(info, timeout=3500)
 
-- notifyTopError(info, timeout=2000)
+注意：timeout也可以是一个object，使用选项的方式传递，并传递其他选项。
 
-- notifyTop(info, timeout=2500)
+- **ntype**
 
-- notifyOnly(info, timeout=2500)
+用于指定通知的类型和位置。
 
-- notifyLight(info, timeout=2500)
+- **样式属性**
 
+支持的样式有：
+
+```javascript
+this.notifyStyles = [
+    'boxShadow', 'margin', 'marginBottom', 'border', 'borderBottom', 'borderLeft',
+    'borderRight', 'borderTop', 'background', 'color', 'fontSize', 'padding',
+    'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom'
+];
+```
+
+你可以访问w.notifyStyles获取支持的自定义样式。
+
+----
 
 ### prompt弹出模态框
 
