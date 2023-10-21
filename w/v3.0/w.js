@@ -1302,13 +1302,43 @@ const w = new function () {
 
 };
 
+//因为JS的主线程以事件循环的方式运转，目前的浏览器模式不必考虑多线程竞争问题。
 w._htmlparse = new HtmlState_();
+/*Object.defineProperties(w, {
+  __hparse_pool: {
+    enumerable: true,
+    configurable: false,
+    writable: false,
+    value: [new HtmlState_()]
+  },
+  htmlparsePool: {
+    enumerable: true,
+    configurable: false,
+    writable: false,
+    value: () => {
+      return w.__hparse_pool.pop() || new HtmlState_()
+    }
+  },
+  htmlparseFree: {
+    enumerable: true,
+    configurable: false,
+    writable: false,
+    value: (p) => {
+      if (w.__hparse_pool.length < 10) {
+        w.__hparse_pool.push(p)
+      }
+    }
+  }
+});*/
 
 w._htmlcheck = function (data) {
+  //let hparse = w.htmlparsePool();
   if (!w._htmlparse.parse(data)) {
+    //w.htmlparseFree(hparse);
     w.notify(w._htmlparse.lastErrorMsg, {tmout: 10000, ntype: 'top-error'});
     return false;
   }
+  //w.htmlparseFree(hparse);
   return true;
 };
 
