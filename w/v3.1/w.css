@@ -117,7 +117,7 @@
   line-height: 150%;
   color: var(--w-notify-color, #f1f2f3);
   min-height: 9%;
-  max-height: 46.5%;
+  max-height: 56.5%;
   overflow-y: auto;
   overflow-x: hidden;
   word-break: break-all;

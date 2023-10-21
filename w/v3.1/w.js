@@ -251,6 +251,7 @@ class HtmlState_ {
         || this.STATE.TAG_NAME === this.curState
         || this.STATE.TAG_ATTR === this.curState
         || this.STATE.TAG_ATTR_PRE === this.curState
+        || this.STATE.TAG_ATTR_VALUE_END === this.curState
       ) {
         this.cursor += 1
         this.curState = this.STATE.TAG_CLOSE_END
