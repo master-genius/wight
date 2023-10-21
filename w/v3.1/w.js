@@ -735,7 +735,7 @@ const w = new function () {
     }
   };
 
-  this.notifyError = function (info, tmout = 2500) {
+  this.notifyError = function (info, tmout = 15000) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'error';
       return w.notify(info, tmout);
@@ -751,7 +751,7 @@ const w = new function () {
     return w.notify(info, {timeout:tmout, ntype: 'top'});
   };
 
-  this.notifyTopError = function (info, tmout = 2500) {
+  this.notifyTopError = function (info, tmout = 15000) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'top-error';
       return w.notify(info, tmout);
@@ -814,7 +814,10 @@ const w = new function () {
       for (let k in nstack.dmap) {w.cancelNotify(k);}
     }
 
-    if (nstack.count > 111) return false;
+    if (nstack.count > 111) {
+      w.debug && console.error('超出消息通知最大限制：111。');
+      return false;
+    }
 
     let ndom = document.createElement('div');
     let nid = `${posi[0]}_${Date.now().toString(16)}${Math.random().toString(16).substring(2)}`;
@@ -841,7 +844,6 @@ const w = new function () {
 
     nstack.dmap[nid] = {
       nid: nid,
-      text: info,
       dom: ndom,
       position: posi,
       timer: setTimeout(() => { w.cancelNotify(nid); }, tmout)
@@ -1539,7 +1541,7 @@ w.loadPage = async function (R) {
 
   if (pg.init === false) {
     if (!w._htmlcheck(pg.orgHTML)) {
-      w.notifyTopError(`页面初始化错误：${pg.__name__}.html`, 10000);
+      w.notifyTopError(`页面初始化错误：${pg.__name__}.html`, 15000);
       return false;
     }
     pg.init = true;
