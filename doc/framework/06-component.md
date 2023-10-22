@@ -105,9 +105,8 @@ this.properties = {
     },
 
     list: {
-        //会自动进行JSON.parse处理。但是如果数据不是合法的JSON则会设置为空对象。
+        //会自动进行JSON.parse处理。但是如果数据不是合法的JSON则会设置为默认值或空对象。
         type: 'json',
-
     }
 
 }
@@ -132,7 +131,13 @@ this.properties = {
 
 - json
 
-目前没有更多辅助属性
+目前没有更多辅助属性，但是json的处理要和encodeURIComponent配合使用。因为你不可能直接把json字符串通过属性传递给组件，json文本包含了双引号，还可能包括单引号，还有其他各种可能的字符，但是你可以通过encodeURIComponent把json字符串进行序列化，这种在url中可以传递的字符用在属性里是没有问题的。
+
+对一个声明为json类型的属性，如果JSON.parse失败，会检测一些特殊字符并自动进行decodeURIComponent解码处理，并自动再次进行JSON.parse处理。
+
+- urijson uri-json encodejson
+
+这三种写法都可以，都认为是进行了encodeURIComponent的json数据。会自动进行 `decodeURIComponent(JSON.parse(data))` 处理。
 
 
 ## attrs和attributes
@@ -368,7 +373,7 @@ class UserLogin extends Component {
 
 this.attributes是组件原始的属性，它是一个NamedNodeMap实例对象。但是使用起来十分复杂并且还需要自己去处理得到的数据，比如转换成数字或数组等。
 
-this.attributes仍然存在另一个问题，那就是如果不是节点的默认具备的属性，就要是明确写在html代码中的属性才会出现在这里，也才可以具备监听的机制。
+this.attributes仍然存在另一个问题，那就是如果不是节点的默认具备的属性，是无法监听到属性变化的事件的。就要是明确写在html代码中的属性才会出现在这里，也才可以具备监听的机制。
 
 组件内必须存在以下方法才可以具备监听属性变化和处理变化回调函数的能力：
 
@@ -404,3 +409,34 @@ this.attributes仍然存在另一个问题，那就是如果不是节点的默�
 
 获取所有的属性，返回值是一个object，其实就是把this.__attrs__属性返回了。
 
+
+----
+
+## 组件的数据传递
+
+组件在需要进行数据操作的时候，比如要进行网络请求。这些都不是通用的处理，不同的应用会有不同的需求，所以组件要做到尽可能通用，就要把这些操作独立出来。有两种方式可以让组件尽可能做到通用：
+
+1. 通过传递一个函数，让组件去执行。
+
+2. 组件把数据传递出去。
+
+### 第一种方式：传递函数
+
+组件支持某些属性，利用属性告知组件在某些动作完成的时候进行某些操作。但是属性传递的都是字符串，需要利用w.runFunc接口。
+
+wight框架具备runFunc接口，可以执行一个在w上存在的函数：
+
+```javascript
+//执行w.config.login函数。
+w.runFunc('config.login', {username: 'xxxx', passwd: 'xxxxxx'})
+```
+
+### 第二种方式：组件传递数据
+
+组件使用w.share传递数据，其实组件还可以利用w.share获取数据。
+
+w.share是框架层面提供的全局共享数据的机制。并且利用 `w.registerShareNotice(options)` 注册的函数可以监听某些数据的更改。
+
+具体参考全局API部分。
+
+<br>
