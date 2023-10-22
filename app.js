@@ -386,13 +386,66 @@ if (app.isWorker) {
     }
 
     //改名字会涉及到重新修改id
-    
+    let data = JSON.parse(await fsp.readFile(serverPath + '/' + ctx.param.id + '.json', {encoding:'utf8'}))
 
+    //改名字要在更改后，把原来的数据文件删除并创建新的文件。
+    for (let k in ctx.body) {
+      if (k !== 'id' && k !== 'name') data[k] = ctx.body[k]
+    }
 
+    if (ctx.body.name) {
+      let rname = ctx.body.name.trim()
+      if (rname !== data.name) {
+        data.id = ctx.helper.sha1(rname)
+        data.name = rname
+        //检测是否存在同名的文件
+        let checkfile = data.id + '.json'
+        try {
+          await fsp.access(serverPath + '/' + checkfile)
+          return ctx.status(400).send('已经存在同名的应用')
+        } catch (err) {}
+
+        try {
+          await fsp.unlink(serverPath + '/' + ctx.param.id + '.json')
+        } catch (err) {
+          return ctx.status(400).send('无法删除旧文件，并重建应用，请检查权限')
+        }
+
+        try {
+          await fsp.writeFile(serverPath + '/' + checkfile, JSON.stringify(data))
+        } catch (err) {
+          return ctx.status(400).send('更新应用信息失败')
+        }
+
+        return ctx.send(data)
+      }
+    }
+
+    try {
+      await fsp.writeFile(serverPath + '/' + ctx.param.id + '.json', JSON.stringify(data))
+    } catch (err) {
+      return ctx.status(400).send('更新应用信息失败')
+    }
+
+    return ctx.send(data)
   })
 
   app.delete('/self/control/server/:id', async ctx => {
+    let fname = serverPath + '/' + ctx.param.id + '.json'
 
+    try {
+      await fsp.access(fname)
+    } catch (err) {
+      return ctx.status(400).send('应用不存在')
+    }
+
+    try {
+      await fsp.unlink(fname)
+    } catch (err) {
+      return ctx.status(400).send('无法删除应用，请检查权限')
+    }
+
+    return ctx.send('ok')
   })
 }
 
