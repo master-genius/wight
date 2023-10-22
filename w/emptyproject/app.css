@@ -385,6 +385,7 @@ table {
 }
 
 .click,[click] {
+  user-select: none;
   cursor: pointer;
 }
 
