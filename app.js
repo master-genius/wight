@@ -6,7 +6,7 @@ const titbit = require('titbit')
 const cluster = require('cluster')
 const fs = require('fs')
 const os = require('os')
-const {proxy, resource} = require('titbit-toolkit')
+const {proxy, resource, parsebody, tofile} = require('titbit-toolkit')
 const npargv = require('npargv')
 const loadddoc = require('./lib/loaddoc')
 
@@ -74,7 +74,7 @@ const cfg = require('./config/config')
 let args = arg.args
 
 let app = new titbit({
-  maxBody: 50,
+  maxBody: 10_000_000,
   debug: true,
   showLoadInfo: false,
   timeout : 10000,
@@ -267,6 +267,7 @@ if (app.isWorker) {
 const fsp = fs.promises
 //处理服务端请求部分
 if (app.isWorker) {
+  app.use(new tofile).use(new parsebody)
   /**
    * authorization指定token 提交的消息头，默认是authorization
    * token_api_response 描述一个登录接口的返回值并描述如何存储相关的辅助字段
@@ -297,14 +298,14 @@ if (app.isWorker) {
       'token', 'refreshToken', 'expires', 'refreshExpires'
     ]
 
-    if (!mustkeys.token_api_response.type || ['string', 'json'].indexOf(mustkeys.token_api_response.type) < 0)
+    if (!data.token_api_response.type || ['string', 'json'].indexOf(data.token_api_response.type) < 0)
     {
       return {ok: false, errmsg: 'token_api_response 不符合要求'}
     }
 
-    if (mustkeys.token_api_response.type === 'json') {
+    if (data.token_api_response.type === 'json') {
       for (let k of token_api_response_keys) {
-        if (!mustkeys.token_api_response[k]) {
+        if (!data.token_api_response[k]) {
           return {ok: false, errmsg: `缺少 token_api_response.${k}`}
         }
       }
@@ -342,6 +343,7 @@ if (app.isWorker) {
   //必须提交的字段：name、host、is_token、authorization、token_api、token_api_response
   //可选字段：route: {GET: {}, POST: {}}
   app.post('/self/control/server', async ctx => {
+    console.log(ctx.body)
     if (!ctx.body.name || !ctx.body.name.trim()) {
       return ctx.status(400).send('名称不符合要求')
     }
