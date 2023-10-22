@@ -40,14 +40,14 @@ button {
 }
 
 .btn-circle,[btn-circle] {
-  width: 2.64rem;
-  height: 2.64rem;
-  border-radius: 1.32rem;
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 1.325rem;
   background-color: #f5f6f8;
   box-shadow: var(--w-common-shadow, -0.12rem 0.2rem 0.23rem rgba(125, 125, 125, 0.56));
-  line-height: 2.64rem;
+  line-height: 2.65rem;
   text-align: center;
-  font-size: 89%;
+  font-size: 0.95em;
   color: #4a4a4f;
   overflow: hidden;
   margin-left: 0.28rem;
@@ -198,11 +198,11 @@ input[ok] {
   color: #dfdfe2;
 }
 
-.padding-2-5,[padding-2-5] {
+.padding-0-25,[padding-0-25] {
   padding: 0.25rem;
 }
 
-.padding-5,[padding-5] {
+.padding-0-5,[padding-0-5] {
   padding: 0.5rem;
 }
 

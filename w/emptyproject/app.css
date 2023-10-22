@@ -198,11 +198,11 @@ input[ok] {
   color: #dfdfe2;
 }
 
-.padding-2-5,[padding-2-5] {
+.padding-0-25,[padding-0-25] {
   padding: 0.25rem;
 }
 
-.padding-5,[padding-5] {
+.padding-0-5,[padding-0-5] {
   padding: 0.5rem;
 }
 
