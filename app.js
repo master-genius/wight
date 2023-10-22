@@ -118,6 +118,12 @@ if (cluster.isMaster) {
       process.kill(0, 'SIGTERM')
     }
   })
+
+  try {
+    fs.accessSync('./config/server')
+  } catch (err) {
+    fs.mkdirSync('./config/server')
+  }
 }
 
 if (cluster.isWorker) {
@@ -254,6 +260,138 @@ if (app.isWorker) {
    * }
    */
   app.put('/control/:name', async ctx => {
+
+  })
+}
+
+const fsp = fs.promises
+//处理服务端请求部分
+if (app.isWorker) {
+  /**
+   * authorization指定token 提交的消息头，默认是authorization
+   * token_api_response 描述一个登录接口的返回值并描述如何存储相关的辅助字段
+   * {
+   *    //返回值的类型，string表示直接就是token
+   *    type: 'json|string',
+   *    //返回值的token字段
+   *    token: 'access_token',
+   *    refreshToken: '',
+   *    //有效期类型，number表示固定数字，此时expires就是一个数字，field表示一个字段，expires指明了哪个字段。
+   *    expiresType: 'number|field'
+   *    expires: '',
+   *    refreshExpiresType: 'number|field',
+   *    refreshExpires: ''
+   *    //验证失败的状态码，默认是401。
+   *    failedCode: 401,
+   *    
+   * }
+   */
+  function checkServerData(data) {
+    let mustkeys = ['name', 'host', 'is_token', 'authorization', 'token_api', 'token_api_response'];
+
+    for (let k of mustkeys) {
+      if (!data[k]) return {ok: false, errmsg: `${k} 必须存在`}
+    }
+
+    let token_api_response_keys = [
+      'token', 'refreshToken', 'expiresType', 'expires', 'refreshExpiresType',
+      'refreshExpires'
+    ]
+
+    if (!mustkeys.token_api_response.type || ['string', 'json'].indexOf(mustkeys.token_api_response.type) < 0)
+    {
+      return {ok: false, errmsg: 'token_api_response 不符合要求'}
+    }
+
+    if (mustkeys.token_api_response.type === 'json') {
+      for (let k of token_api_response_keys) {
+        if (!mustkeys.token_api_response[k]) {
+          return {ok: false, errmsg: `缺少 token_api_response.${k}`}
+        }
+      }
+    }
+
+    return {ok: true}
+  }
+
+  let serverPath = './config/server'
+
+  app.get('/self/control/server', async ctx => {
+    let flist = await fsp.readdir(serverPath, {withFileTypes: true})
+    let jlist = []
+    for (let f of flist) {
+      if (f.isFile() && f.name.substring(f.name.length - 5) === '.json') {
+        jlist.push(f.name)
+      }
+    }
+
+    let datalist = []
+    let data
+    for (let f of jlist) {
+      try {
+        data = JSON.parse(await fsp.readFile(serverPath + '/' + f, {encoding: 'utf8'}))
+        datalist.push(data)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    ctx.send(datalist)
+  })
+
+  //sha1(应用名字)作为文件名
+  //必须提交的字段：name、host、is_token、authorization、token_api、token_api_response
+  //可选字段：route: {GET: {}, POST: {}}
+  app.post('/self/control/server', async ctx => {
+    if (!ctx.body.name || !ctx.body.name.trim()) {
+      return ctx.status(400).send('名称不符合要求')
+    }
+
+    let name = ctx.body.name.trim()
+
+    let shaname = ctx.helper.sha1(name)
+
+    let filename = shaname + '.json'
+
+    try {
+      await fsp.access(serverPath + '/' + filename)
+      return ctx.status(400).send('应用已经存在，请更改名字')
+    } catch (err) {
+
+    }
+
+    let chk = checkServerData(ctx.body)
+    if (!chk.ok) {
+      return ctx.status(400).send(chk.errmsg)
+    }
+
+    ctx.body.id = shaname
+    ctx.body.name = name
+
+    fsp.writeFile(serverPath + '/' + filename, JSON.stringify(ctx.body))
+
+    return ctx.send(ctx.body)
+  })
+
+  app.put('/self/control/server/:id', async ctx => {
+    try {
+      await fsp.access(serverPath + '/' + ctx.param.id + '.json')
+    } catch (err) {
+      return ctx.status(400).send('应用不存在')
+    }
+
+    let chk = checkServerData(ctx.body)
+    if (!chk.ok) {
+      return ctx.status(400).send(chk.errmsg)
+    }
+
+    //改名字会涉及到重新修改id
+    
+
+
+  })
+
+  app.delete('/self/control/server/:id', async ctx => {
 
   })
 }

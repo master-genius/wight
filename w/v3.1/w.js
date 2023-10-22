@@ -840,7 +840,7 @@ const w = new function () {
       ndom.style.display = 'flex';
       ndom.style.flexFlow = 'row wrap';
       ndom.innerHTML = `<div style="width:95%;">${info}</div>
-        <div data-onclick="w.cancelNotify" data-nid="${nid}" style="display: grid;place-items: center;color:#df3456;cursor:pointer;user-select:none;">X</div>`
+        <div data-onclick="w.cancelNotify" data-nid="${nid}" style="display: grid;place-items: center;color:#df4567;cursor:pointer;user-select:none;">X</div>`
     } else {
       ndom.innerHTML = info;
     }
