@@ -3215,14 +3215,34 @@ class Component extends HTMLElement {
         }
         break;
 
+      case 'urijson':
+      case 'encodejson':
+      case 'uri-json':
+        if (typeof val === 'string') {
+          try {
+            let jval = decodeURIComponent(val);
+            val = JSON.parse(jval);
+          } catch (err) {
+            val = obj.default || {};
+          }
+        } else {val = obj.default || {}}
+        break;
+
       case 'json':
         if (typeof val === 'string') {
           try {
             val = JSON.parse(val);
           } catch (err) {
-            val = {};
+            //可能是encodeURIComponent编码的
+            try {
+              if (val.indexOf('%22') > 0 || val.indexOf('%5B') >= 0 || val.indexOf('%7B') >= 0) {
+                val = JSON.parse(decodeURIComponent(val));
+              }
+            } catch (err) {
+              val = obj.default || {};
+            }
           }
-        } else {val = {}}
+        } else {val = obj.default || {}}
         break;
     }
 

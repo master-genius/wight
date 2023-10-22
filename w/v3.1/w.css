@@ -204,20 +204,20 @@
 .w-prompt-bottom {
   bottom: 5%;
   min-height: 25%;
-  max-height: 68%;
+  max-height: 72%;
 }
 
 .w-prompt-middle {
   bottom: 50%;
   min-height: 28%;
-  max-height: 72%;
+  max-height: 78%;
   transform: translate(-50%, 45%);
 }
 
 .w-prompt-top {
   top: 10%;
   min-height: 28%;
-  max-height: 75%;
+  max-height: 82%;
 }
 
 .w-prompt-block {
