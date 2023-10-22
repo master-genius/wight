@@ -343,7 +343,6 @@ if (app.isWorker) {
   //必须提交的字段：name、host、is_token、authorization、token_api、token_api_response
   //可选字段：route: {GET: {}, POST: {}}
   app.post('/self/control/server', async ctx => {
-    console.log(ctx.body)
     if (!ctx.body.name || !ctx.body.name.trim()) {
       return ctx.status(400).send('名称不符合要求')
     }
