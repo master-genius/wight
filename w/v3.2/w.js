@@ -1517,10 +1517,8 @@ w.loadPage = async function (R) {
   
   c.dom = pg.__dom__;
   c.loaded = pg.loaded;
-
   c.name = pg.__name__;
   this.going = pg.__name__;
-
   pg.__ctx__ = c;
 
   //loadPage是一个异步函数，如果此时在runHook中的函数执行了重定向操作会导致页面显示失败。
@@ -3413,7 +3411,6 @@ class Component extends HTMLElement {
 
   cover (info, options = null) {
     if (!options || typeof options !== 'object') options = {};
-    
     options.notClose = true;
     options.withCover = true;
     return this.alert(info, options);
