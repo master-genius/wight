@@ -294,8 +294,7 @@ if (app.isWorker) {
     }
 
     let token_api_response_keys = [
-      'token', 'refreshToken', 'expiresType', 'expires', 'refreshExpiresType',
-      'refreshExpires'
+      'token', 'refreshToken', 'expires', 'refreshExpires'
     ]
 
     if (!mustkeys.token_api_response.type || ['string', 'json'].indexOf(mustkeys.token_api_response.type) < 0)
