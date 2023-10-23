@@ -17,3 +17,28 @@
 | timestr.js | 格式化时间字符串 | 格式：2023-10-23_23-15-06 |
 
 这些扩展其实就是按照扩展的规则编写的，但是从一开始就内置到项目上，开发者根据需求选择是否启用。
+
+### htmltag扩展
+
+htmltag是一个函数，并且htmltag.ehtml也是一个函数，两个函数都是用于模板字符串的格式化。区别在于：
+
+- htmltag会把需要格式化的字符串做检测处理，如果是合法的html文本则不会对 &lt; 和 &gt; 进行转义处理。
+
+- htmltag.ehtml 表示的就是直接转义处理，不会做html语法检测。
+
+示例：
+
+```javascript
+
+let code = '<p>OK</p>'
+let text = htmltag`<div>${code}</div>`
+
+//输出：<div><p>OK</p></div>
+console.log(text)
+
+let text2 = htmltag`<div>${code}</div>`
+
+//输出：<div>&lt;p&gt;OK&lt;/p&gt;</div>
+console.log(text2)
+
+```
