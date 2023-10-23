@@ -190,7 +190,7 @@
 .w-prompt-close {
   z-index: 100;
   position: fixed;
-  background: rgba(37, 38, 39, 0.0235);
+  background: rgba(38, 38, 38, 0.0258);
   width:99.999%;
   height:99.999%;
   top:0%;
@@ -198,7 +198,7 @@
 }
 
 .w-prompt-close-glass {
-  background: rgba(37, 38, 39, 0.0123);
+  background: rgba(38, 38, 38, 0.0123);
 }
 
 .w-prompt-bottom {
