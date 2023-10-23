@@ -367,6 +367,8 @@ if (app.isWorker) {
 
     ctx.body.id = shaname
     ctx.body.name = name
+    ctx.body.create_time = Date.now()
+    ctx.body.update_time = Date.now()
 
     fsp.writeFile(serverPath + '/' + filename, JSON.stringify(ctx.body))
 
@@ -420,7 +422,9 @@ if (app.isWorker) {
         return ctx.send(data)
       }
     }
-
+    
+    data.update_time = Date.now()
+    
     try {
       await fsp.writeFile(serverPath + '/' + ctx.param.id + '.json', JSON.stringify(data))
     } catch (err) {

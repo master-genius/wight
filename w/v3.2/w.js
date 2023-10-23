@@ -2456,10 +2456,12 @@ w.initDomEvent = function (pg, dom, evtname) {
 
   nds = dom.querySelectorAll(`[data-on${evtname}]`);
 
+  let evtlist = '';
   for (let d of nds) {
-    d.addEventListener(evtname, 
-      w.genEventProxy(pg, d.dataset[`on${evtname}`])
-    );
+    evtlist = d.dataset[`on${evtname}`].trim().split(' ').filter(x => x.length > 0);
+    evtlist.forEach(ehandle => {
+      d.addEventListener(evtname, w.genEventProxy(pg, ehandle));
+    });
   }
 
 };

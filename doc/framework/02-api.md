@@ -289,6 +289,8 @@ w.prompt = function (info, options) {}
 
 - wh 位置，where的前两个字母，可以是bottom、top、middle
 
+- unpromptHandle 传递一个值，一般是Promise或函数，传递此选项，当执行unprompt操作的时候，会先检测此选项的状态或运行函数，根据返回值是否为true确定是否继续操作，若为true则会继续执行，取消弹框。
+
 基于prompt封装了快速调用api：
 
 - promptMiddle(info)
