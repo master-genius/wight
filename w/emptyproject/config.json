@@ -50,7 +50,9 @@
         "confirm",
         "loginRedirect",
         "pushStart",
-        "userinfo"
+        "userinfo",
+        "htmltag",
+        "ejson"
     ],
 
     "components" : [
