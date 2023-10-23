@@ -3226,7 +3226,8 @@ class Component extends HTMLElement {
       if (csslist && Array.isArray(csslist) && csslist.length > 0) {
         let sty = '';
         let ctext= '';
-        if (nd.content.firstChild && nd.content.firstChild.id === csslist[0]) {
+        cssmap_key = csslist[0].indexOf('./') === 0 ? (tempid + '/' + csslist[0]) : csslist[0];
+        if (nd.content.firstChild && nd.content.firstChild.id === cssmap_key) {
           init_style = false;
         }
 
