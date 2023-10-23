@@ -955,6 +955,7 @@ wapp.prototype.replaceRequire = function (ctext) {
 }
 
 wapp.prototype.loadExt = async function (cdir) {
+  let extend_name_preg = /^[a-z][a-z0-9\_\-]{0,100}$/i;
   try {
     let data = '';
     let orgdata = '';
@@ -971,6 +972,11 @@ wapp.prototype.loadExt = async function (cdir) {
 
         if (f.name[0] === '!') continue;
 
+        if (!extend_name_preg.test(f.name)) {
+          console.error(`${f.name} 不是合法的扩展文件名字，请更改，允许字母数字下划线减号，字母开头。`);
+          continue;
+        }
+
         this.config.extends.push(f.name.substring(0, f.name.length - 3));
       }
     }
@@ -978,6 +984,11 @@ wapp.prototype.loadExt = async function (cdir) {
     let names = this.config.extends;
 
     for (let i=0; i < names.length; i++) {
+
+      if (!extend_name_preg.test(names[i])) {
+        delayOutError(`${names[i]} 不是合法的扩展文件名字，请更改，允许字母数字下划线减号，字母开头。`, 'extends:');
+        continue;
+      }
 
       try {
         orgdata = fs.readFileSync(`${cdir}/${names[i]}.js`, 'utf8') + '\n';
