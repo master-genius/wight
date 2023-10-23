@@ -654,7 +654,10 @@ const w = new function () {
 
     let domname = 'alertdom';
     let dom = this.alertStack.dmap[aid];
-    if (!dom) return false;
+    if (!dom) {
+      w.debug && console.error(aid, 'not found');
+      return false;
+    }
 
     let d_zindex = dom.style.zIndex;
     if (this.alertStack.curZIndex - 1 === d_zindex) {
@@ -738,7 +741,7 @@ const w = new function () {
     }
   };
 
-  this.notifyError = function (info, tmout = 15000) {
+  this.notifyError = function (info, tmout = 10000) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'error';
       return w.notify(info, tmout);
@@ -754,7 +757,7 @@ const w = new function () {
     return w.notify(info, {timeout:tmout, ntype: 'top'});
   };
 
-  this.notifyTopError = function (info, tmout = 15000) {
+  this.notifyTopError = function (info, tmout = 10000) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'top-error';
       return w.notify(info, tmout);
@@ -956,7 +959,7 @@ const w = new function () {
 
   //wh = 'bottom', noclose = false, glass = false
   this.prompt = function (info, options = {}) {
-
+    if (!options || typeof options !== 'object') options = {};
     let wh = options.wh || 'bottom';
     let noclose = options.noclose || false;
     let glass = options.glass || false;
@@ -999,6 +1002,10 @@ const w = new function () {
       w.initPageDomEvents(options.target || w.curpage, w.promptdom);
     }
 
+    if (options.unpromptHandle && typeof options.unpromptHandle === 'function') {
+      w.unprompt.__unprompt_handle__ = options.unpromptHandle;
+    }
+
     return w.promptdom;
   };
 
@@ -1014,7 +1021,17 @@ const w = new function () {
     return w.promptdom;
   };
 
-  this.unprompt = function () {
+  //有些时候prompt需要一个监听操作，当某些数据改变，取消弹框的时候需要询问用户是否继续。
+  this.unprompt = async function () {
+    if (w.unprompt.__unprompt_handle__) {
+      try {
+        if (!(await w.unprompt.__unprompt_handle__())) return false;
+      } catch (err){
+        w.debug && console.error(err);
+      }
+      w.unprompt.__unprompt_handle__ = null;
+    }
+
     if (w.promptdom) {
       w.promptdom.className = '';
       w.promptdom.innerHTML = '';

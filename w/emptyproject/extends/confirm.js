@@ -95,8 +95,8 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
     </div>
   </div>`;
 
-  let func = w.cover.bind(w);
-  if (opts.dark) func = w.coverDark.bind(w);
+  let func = opts.dark ? w.coverDark.bind(w) : w.cover.bind(w);
+  
   let options = {
     transparent: !!opts.transparent
   };
