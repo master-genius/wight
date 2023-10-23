@@ -3220,6 +3220,7 @@ class Component extends HTMLElement {
     if (!nd) return false;
 
     let init_style = true;
+    let cssmap_key;
     if (w.__components_css__ && w.__components_css__[tempid]) {
       let csslist = w.__components_css__[tempid];
       if (csslist && Array.isArray(csslist) && csslist.length > 0) {
@@ -3231,12 +3232,13 @@ class Component extends HTMLElement {
 
         if (init_style) {
             for (let i = csslist.length - 1; i>=0; i--) {
-              if (!w.__css_code_map__ || !w.__css_code_map__[csslist[i]]) continue;
+              cssmap_key = csslist[i].indexOf('./') === 0 ? (tempid + '/' + csslist[i]) : csslist[i];
+              if (!w.__css_code_map__ || !w.__css_code_map__[cssmap_key]) continue;
               try {
                 sty = document.createElement('style');
-                sty.id = csslist[i];
+                sty.id = cssmap_key;
                 //ctext = decodeURIComponent(w.__css_code_map__[csslist[i]]);
-                ctext = w.__css_code_map__[csslist[i]];
+                ctext = w.__css_code_map__[cssmap_key];
                 sty.appendChild(document.createTextNode(ctext));
                 nd.content.insertBefore(sty, nd.content.firstChild);
               } catch (err) {

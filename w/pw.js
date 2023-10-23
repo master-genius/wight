@@ -1163,6 +1163,29 @@ wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
     }
   }
 
+  /**
+   * ---- componentCss:
+    {
+      'head-menu': [ 'mgrid.css', 'basic.css', 'concise.min.css', 'concise-ui.min.css' ],
+      'user-info': [ 'mgrid.css', 'basic.css', 'concise.min.css', 'concise-ui.min.css' ],
+      'doc-list': [ 'mgrid.css', 'basic.css', 'concise.min.css', 'concise-ui.min.css' ],
+      'doc-content': [ 'mgrid.css', 'basic.css', 'concise.min.css', 'concise-ui.min.css' ],
+      'x-app': [ 'mgrid.css', 'basic.css', 'concise.min.css', 'concise-ui.min.css' ],
+      'x-test': [
+        'mgrid.css',
+        'basic.css',
+        'concise.min.css',
+        'concise-ui.min.css',
+        './static/css/a.css'
+      ]
+    }
+   */
+
+  let makemapkey = (f, name) => {
+    if (f.indexOf('./') === 0) return name + '/' + f;
+    return f;
+  }
+
   for (let k in this.config.componentCss) {
   
     if (this.config.components.indexOf(k) < 0) continue;
@@ -1171,12 +1194,17 @@ wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
 
     if (!Array.isArray(flist)) continue;
 
+    let css_key;
     for (let f of flist) {
-      if (csscodemap[f]) continue;
+      css_key = makemapkey(f, k);
+      if (csscodemap[css_key]) continue;
       try {
-        ctemp = fs.readFileSync(`${cssdir}/${f}`, {encoding: 'utf8'})
+        let css_pathfile = `${cssdir}/${f}`;
+        //引入组件自己的css
+        if (f.indexOf('./') === 0) css_pathfile = `${cdir}/${k}/${f}`;
+        ctemp = fs.readFileSync(css_pathfile, {encoding: 'utf8'})
         ctemp = this.replaceCssUrl(ctemp)
-        csscodemap[f] = csso.minify(ctemp).css
+        csscodemap[css_key] = csso.minify(ctemp).css
         //csscodemap[f] = encodeURIComponent(csso.minify(ctemp).css)
       } catch(err) {
         console.error(err)
@@ -1184,7 +1212,7 @@ wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
     }
 
   }
-
+  
   this.compsCssCode = JSON.stringify(csscodemap);
 };
 
