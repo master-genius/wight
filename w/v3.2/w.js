@@ -1305,7 +1305,14 @@ const w = new function () {
       return nds;
     };
     pg.setAttr = function (data) {w.setAttr(name, data);};
-    pg.setStyle = function(data){for(let k in data) { w.setAttr(name, {k: {style:data[k]}}); }};
+    pg.setStyle = function(data) {
+      let obj;
+      for(let k in data) {
+        obj = {};
+        obj[k] = {style: data[k]};
+        w.setAttr(name, obj);
+      }
+    };
   }
 
   this.initPage = function () {
@@ -1727,7 +1734,7 @@ w.setAttr = function (pagename, data) {
   let pgdom = pg.__dom__;
 
   let qcss, nds, attr;
-
+  
   for (let k in data) {
     qcss = `[data-name=${k}]`;
 
@@ -1997,7 +2004,7 @@ w._setData = function (pagename, pg, nds, data) {
         dtemp = pg[nds[i].dataset.list]({data: data, target: nds[i], type: 'list', dataType}) || '';
       }
     } else {
-      if (pg.display && typeof pg.display === 'object' 
+      if (pg.display && typeof pg.display === 'object' && nds[i].dataset.name
         && pg.display[nds[i].dataset.name]
         && typeof pg.display[nds[i].dataset.name] === 'function')
       {
@@ -3401,8 +3408,11 @@ class Component extends HTMLElement {
   }
 
   setStyle(data) {
+    let obj;
     for (let k in data) {
-      this.setAttr({k: { style: data[k] } });
+      obj = {};
+      obj[k] = {style: data[k]};
+      this.setAttr(obj);
     }
   }
 
