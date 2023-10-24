@@ -19,7 +19,7 @@ function makeSSE (name) {
       es.addEventListener('update', e => {
         updateTime = w.storage.get('app_reload_time') || 0
         let tm = Date.now()
-        if (tm - parseInt(updateTime) > 2000) {
+        if (tm - parseInt(updateTime) > 2500) {
           w.storage.set('app_reload_time', tm)
           location.reload(true)
         } else {
@@ -29,7 +29,7 @@ function makeSSE (name) {
             esTimer = null
             w.storage.set('app_reload_time', tm)
             location.reload(true)
-          }, 2000)
+          }, 2500)
         }
       })
     })();
