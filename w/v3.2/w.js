@@ -3087,6 +3087,13 @@ class Component extends HTMLElement {
     if (!obj.type) return val;
 
     switch (obj.type) {
+      case 'string':
+        if (typeof val === 'string') {
+          if (obj.match && obj.match instanceof RegExp) {
+            !obj.match.test(val) && (val = obj.default || '');
+          }
+        } else { val = `${val}`; }
+        break;
       case 'number':
       case 'int':
         val = parseInt(val);
@@ -3134,10 +3141,12 @@ class Component extends HTMLElement {
         break;
     }
 
-    if (typeof val !== 'object' && obj.limit !== undefined && Array.isArray(obj.limit)) {
+    let val_type = typeof val;
+
+    if (val_type !== 'object' && obj.limit !== undefined && Array.isArray(obj.limit)) {
       if (obj.limit.indexOf(val) < 0)
         return (obj.default !== undefined ? obj.default : obj.limit[0]);
-    } else if (typeof val === 'number') {
+    } else if (val_type === 'number') {
       let valState = 0;
       if (obj.min !== undefined && val < obj.min) valState = -1;
       if (obj.max !== undefined && val > obj.max) valState = 1;

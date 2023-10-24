@@ -61,9 +61,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '3.1';
+  this.defaultVersion = '3.2';
 
-  this.version = '3.1';
+  this.version = '3.2';
 
   this.forceCompress = false;
 
@@ -1864,7 +1864,7 @@ wapp.prototype.newComps = function (cname, cdir) {
   fs.writeFileSync(`${compsdir}/${cname}.js`, renderCompsClass(cname), {encoding: 'utf8'});
 
   fs.writeFileSync(`${compsdir}/template.html`, 
-    `<template>\n<style>\n/* 目前浏览器part属性(参考MDN ::part)不支持组件嵌套，如果组件需要嵌套使用请注意样式问题。 */\n</style>\n\n<div>${cname}组件</div>\n</template>\n`, 
+    `<template>\n<style></style>\n\n<div>${cname}组件</div>\n</template>\n`, 
     {encoding: 'utf8'});
 
   return true;
