@@ -1293,9 +1293,19 @@ const w = new function () {
         else { w.pages[name].__dom__.scrollTop = scr; }
     };
     pg.destroy = function () {w.destroyPage(w.pages[name]);};
-    pg.query = function(qstr) {return w.pages[name].__dom__.querySelector(qstr);};
-    pg.queryAll = function(qstr) {return w.pages[name].__dom__.querySelectorAll(qstr);};
+    pg.query = function(qstr,callback=null) {
+      let nod = w.pages[name].__dom__.querySelector(qstr);
+      if (!nod) return null;
+      if (callback && typeof callback === 'function') callback(nod);
+      return nod;
+    };
+    pg.queryAll = function(qstr, callback=null) {
+      let nds = w.pages[name].__dom__.querySelectorAll(qstr);
+      if (callback && typeof callback === 'function') nds.forEach(callback);
+      return nds;
+    };
     pg.setAttr = function (data) {w.setAttr(name, data);};
+    pg.setStyle = function(data){for(let k in data) { w.setAttr(name, {k: {style:data[k]}}); }};
   }
 
   this.initPage = function () {
@@ -1737,6 +1747,7 @@ w.setAttr = function (pagename, data) {
       for (let a in attr) {
         switch (a) {
           case 'class':
+          case 'className':
             d.className = attr[a];
             break;
 
@@ -3366,6 +3377,7 @@ class Component extends HTMLElement {
         for (let a in attr) {
           switch (a) {
             case 'class':
+            case 'className':
               d.className = attr[a];
               break;
 
@@ -3388,12 +3400,23 @@ class Component extends HTMLElement {
     }//end for data
   }
 
-  queryAll (qss) {
-    return this.shadow.querySelectorAll(qss);
+  setStyle(data) {
+    for (let k in data) {
+      this.setAttr({k: { style: data[k] } });
+    }
   }
 
-  query (qss) {
-    return this.shadow.querySelector(qss);
+  queryAll (qss, callback=null) {
+    let nds = this.shadow.querySelectorAll(qss);
+    if (callback && typeof callback === 'function') nds.forEach(callback);
+    return nds;
+  }
+
+  query (qss,callback=null) {
+    let nod = this.shadow.querySelector(qss);
+    if (!nod) return null;
+    if (callback && typeof callback === 'function') callback(nod);
+    return nod;
   }
 
   connectedCallback () {

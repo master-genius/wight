@@ -313,9 +313,18 @@ class initapp {
       let appdata = c.service.apps[ c.param.name ]
 
       if (appdata === undefined) {
-        c.status(404)
-        c.res.body = c.service.appNotFound
-        return
+        //说明正在构建中···
+        if (this.appList.indexOf(c.param.name) >= 0) {
+          for (let i = 0; i < 1000; i++) {
+            await new Promise((rv, rj) => {
+              setTimeout(rv, 10)
+            })
+          }
+          appdata = c.service.apps[ c.param.name ]
+        }
+        if (!appdata) {
+          return c.status(404).send(c.service.appNotFound)
+        }
       }
   
       c.setHeader('cache-control', `public, max-age=${this.maxAge}`)
