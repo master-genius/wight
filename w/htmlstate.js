@@ -246,7 +246,6 @@ class htmlstate {
   }
 
   checkAttrSetValue (next_char) {
-
     if (this.curState === this.STATE.NONE) {
       this.curState = this.STATE.CHAR
       return true
@@ -262,6 +261,16 @@ class htmlstate {
 
     if (this.STATE.TAG_ATTR === this.curState) {
       this.curState = this.STATE.TAG_ATTR_SET_VALUE
+      return true
+    }
+
+    //=“==”这种方式，仍然是等号，但是属于属性值部分。
+    if (this.curState === this.STATE.TAG_ATTR_VALUE_START) {
+      this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (this.curState === this.STATE.TAG_ATTR_VALUE) {
       return true
     }
 

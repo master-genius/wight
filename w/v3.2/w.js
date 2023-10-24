@@ -242,6 +242,16 @@ class HtmlState_ {
       return true
     }
 
+    //=“==”这种方式，仍然是等号，但是属于属性值部分。
+    if (this.curState === this.STATE.TAG_ATTR_VALUE_START) {
+      this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (this.curState === this.STATE.TAG_ATTR_VALUE) {
+      return true
+    }
+
     return false
   }
 
