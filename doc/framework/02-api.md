@@ -151,6 +151,28 @@ setTimeout(() => {
 
 ```
 
+key支持前缀模式和正则表达式，这带来了极大的灵活性。前缀使用`data*`这种格式表示。对于执行的顺序问题，如果是确定的key值则先执行，如果是前缀匹配或正则匹配则后执行，最后是*表示的key执行。前缀和正则没有规则上的顺序，按照添加顺序执行。
+
+请不要让添加执行函数的逻辑和状态依赖于执行顺序，这会带来未知的问题。
+
+前缀示例：
+
+```javascript
+//返回值为唯一标识id
+let id = w.registerShareNotice({
+    //mode支持always或once
+    mode: 'always',
+    //要监听的key，data开头的key都会执行。
+    key: 'data*',
+    //操作类型，type支持 get、set、delete、all，默认为set。
+    type: 'set',
+    callback: (ctx) => {
+        //ctx中包括data、type、key
+        console.log(ctx)
+    }
+})
+
+```
 
 > ----
 > ## 界面交互
