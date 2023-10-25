@@ -500,6 +500,13 @@ const w = new function () {
       return this.curTitle;
     }
   });
+  
+  Object.defineProperty(this, 'randid', {
+    value: (pre='') => {
+      return `${pre}${Date.now().toString(16)}.${Math.random().toString(16).substring(2)}`;
+    },
+    writable: false
+  });
 
   this.attachTitle = (t) => {
     this.title = `${this.__title__}${t}`;
@@ -602,7 +609,7 @@ const w = new function () {
 
     astack.curZIndex <= astack.maxZIndex && astack.curZIndex++;
 
-    let aid = `a_${Date.now().toString(16)}${Math.random().toString(16).substring(2)}`;
+    let aid = w.randid('a_');
 
     astack.dmap[aid] = dom;
     astack.count++;
@@ -836,8 +843,8 @@ const w = new function () {
     }
 
     let ndom = document.createElement('div');
-    let nid = `${posi[0]}_${Date.now().toString(16)}${Math.random().toString(16).substring(2)}`;
-
+    let nid = w.randid(posi[0]+'_');
+    
     ndom.style.boxSizing = 'border-box';
     ndom.style.lineHeight = '1.5';
     this.notifyStyles.forEach(x => {
@@ -2237,7 +2244,7 @@ w.addHook = function (callback, name='') {
     }
   }
 
-  if (!opts.name) opts.name = (Math.random().toString(16).substring(2));
+  if (!opts.name) opts.name = w.randid();
 
   if (!w.hookFunc[opts.name]) {
     w.hookFunc[opts.name] = {func: callback, options: opts};
@@ -2722,7 +2729,7 @@ w.registerShareNotice = function (options) {
 
   options.count = 0;
 
-  options.id = `${options.key}::${Date.now()}.${Math.random().toString(16).substring(2)}`;
+  options.id = w.randid(`${options.key}::`);
 
   if (!w.shareNoticeList.funcmap[ options.key ]) {
       let okey = options.key;
