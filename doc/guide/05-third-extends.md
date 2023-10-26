@@ -36,7 +36,7 @@ let text = htmltag`<div>${code}</div>`
 //输出：<div><p>OK</p></div>
 console.log(text)
 
-let text2 = htmltag`<div>${code}</div>`
+let text2 = htmltag.ehtml`<div>${code}</div>`
 
 //输出：<div>&lt;p&gt;OK&lt;/p&gt;</div>
 console.log(text2)
