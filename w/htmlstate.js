@@ -119,6 +119,7 @@ class htmlstate {
       return true
     }
 
+    //属性值状态
     if (this.curState === this.STATE.TAG_ATTR_VALUE) {
       if (this.attrType === '') {
         this.curState = this.STATE.TAG_ATTR_PRE
@@ -128,6 +129,11 @@ class htmlstate {
     }
 
     if (this.STATE.TAG_NAME === this.curState || this.curState === this.STATE.TAG_ATTR) {
+      //<div title = "">这种属性的=前后有空格情况
+      if (next_char === '=' && this.curState === this.STATE.TAG_ATTR) {
+        return true
+      }
+
       this.curState = this.STATE.TAG_ATTR_PRE
     }
     else if (this.STATE.NONE === this.curState) {

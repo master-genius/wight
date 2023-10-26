@@ -110,6 +110,10 @@ class HtmlState_ {
     }
 
     if (this.STATE.TAG_NAME === this.curState || this.curState === this.STATE.TAG_ATTR) {
+      if (next_char === '=' && this.curState === this.STATE.TAG_ATTR) {
+        return true
+      }
+      
       this.curState = this.STATE.TAG_ATTR_PRE
     }
     else if (this.STATE.NONE === this.curState) {
