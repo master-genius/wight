@@ -2728,7 +2728,11 @@ w.registerShareNotice = function (options) {
     return false;
   }
 
-  if (!options.type) options.type = 'set';
+  if (!options.type) options.type = ['set'];
+  else if (options.type !== 'all' && !Array.isArray(options.type)) {
+    options.type = [options.type];
+  }
+
   if (!options.mode) options.mode = 'always';
 
   options.count = 0;
@@ -2831,7 +2835,7 @@ w.runShareNotice = function (type, obj, k, data = null) {
   let delids = [];
 
   for (let a of kmlist) {
-    if (a.type !== 'all' && a.type !== type) continue;
+    if (a.type !== 'all' && a.type.indexOf(type) < 0) continue;
     if (a.mode === 'once' && a.count > 0) {
       delids.push(a.id);
       continue;
