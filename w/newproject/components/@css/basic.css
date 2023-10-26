@@ -17,7 +17,12 @@ h1,h2,h3,h4,h5,h6,p,span,div {
   font-family: 'JetBrainsMono,Helvetica,Arial,sans-serif';
 }
 
+button:hover,input[type=submit]:hover {
+  background-color: #5a7de5;
+}
+
 button {
+  background: #148de3;
   border-radius: 0.08rem;
 }
 
@@ -106,6 +111,7 @@ button {
 
 input[type=submit] {
   background: #a84e70;
+  border-radius: 0.08rem;
 }
 
 input[ok] {
