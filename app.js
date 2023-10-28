@@ -124,6 +124,12 @@ if (cluster.isMaster) {
   } catch (err) {
     fs.mkdirSync('./config/server')
   }
+
+  try {
+    fs.accessSync('./config/server/history')
+  } catch (err) {
+    fs.mkdirSync('./config/server/history')
+  }
 }
 
 if (cluster.isWorker) {
@@ -252,16 +258,6 @@ if (app.isWorker) {
     }
     
   })
-
-  /**
-   * {
-   *    action: "create",
-   *    type: "component|extend"
-   * }
-   */
-  app.put('/control/:name', async ctx => {
-
-  })
 }
 
 const fsp = fs.promises
@@ -315,6 +311,7 @@ if (app.isWorker) {
   }
 
   let serverPath = './config/server'
+  let historyPath = `${serverPath}/history`
 
   app.get('/self/control/server', async ctx => {
     let flist = await fsp.readdir(serverPath, {withFileTypes: true})
@@ -419,6 +416,12 @@ if (app.isWorker) {
           return ctx.status(400).send('更新应用信息失败')
         }
 
+        try {
+          let hfile = historyPath + '/' + ctx.param.id + '.json'
+          await fsp.access(hfile)
+          await fsp.rename(hfile, historyPath + '/' + checkfile)
+        } catch (err) {}
+
         return ctx.send(data)
       }
     }
@@ -432,6 +435,89 @@ if (app.isWorker) {
     }
 
     return ctx.send(data)
+  })
+
+  /**
+   * {
+   *    GET: {
+   *      path1: {},
+   *      path2: {}
+   *    },
+   *    POST: {
+   *      path1: {},
+   *      path2: {}
+   *    }
+   * }
+   */
+  let methods = [
+    'GET', 'POST', 'PUT', 'DELETE', 'PATCH'
+  ]
+
+  app.put('/self/control/server/history/:id', async ctx => {
+    if (typeof ctx.body !== 'object' || ctx.body instanceof Buffer) {
+      return ctx.status(400).send('提交的数据格式不符合要求')
+    }
+
+    try {
+      await fsp.access(serverPath + '/' + ctx.param.id + '.json')
+    } catch (err) {
+      return ctx.status(400).send('应用不存在')
+    }
+
+    let hdata = {}
+    let hfile = historyPath+'/'+ctx.param.id+'.json'
+
+    try {
+      let data = await fsp.readFile(hfile, {encoding:'utf8'})
+      hdata = JSON.parse(data)
+    } catch (err) {
+      console.error('解析历史请求记录文件错误，将会重置为空重新记录')
+      console.error(err)
+    }
+    
+    let obj, hlist
+    for (let k in ctx.body) {
+      if (methods.indexOf(k) < 0) continue
+      if (!hdata[k]) {
+        hdata[k] = {}
+      }
+
+      if (!Array.isArray(ctx.body[k])) {
+        continue
+      }
+
+      hlist = ctx.body[k]
+
+      for (let h of hlist) {
+        if (typeof h !== 'object') continue
+        //h.url h.time h.headers
+        hdata[k][h.url] = h
+      }
+    }
+
+    try {
+      await fsp.writeFile(hfile, JSON.stringify(hdata), {encoding:'utf8'})
+    } catch (err) {
+      return ctx.status(500).send(err.message)
+    }
+
+    ctx.send('ok')
+
+  })
+
+  app.get('/self/control/server/history/:id', async ctx => {
+    try {
+      await fsp.access(serverPath + '/' + ctx.param.id + '.json')
+    } catch (err) {
+      return ctx.status(400).send('应用不存在')
+    }
+
+    try {
+      let data = await fsp.readFile(historyPath+'/'+ctx.param.id+'.json',{encoding:'utf8'})
+      ctx.send(JSON.parse(data))
+    } catch (err) {
+      ctx.send({})
+    }
   })
 
   app.delete('/self/control/server/:id', async ctx => {
@@ -448,6 +534,12 @@ if (app.isWorker) {
     } catch (err) {
       return ctx.status(400).send('无法删除应用，请检查权限')
     }
+
+    try {
+      let hfile = historyPath + '/' + ctx.param.id + '.json'
+      await fsp.access(hfile)
+      await fsp.unlink(hfile)
+    } catch(err) {}
 
     return ctx.send('ok')
   })

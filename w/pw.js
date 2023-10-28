@@ -226,7 +226,16 @@ let wapp = function (options = {}) {
     `;
 
     if (this.config.closePrompt === false) {
-      closePromptText = `window.addEventListener('unload', (evt) => { w.destroyAllPage(); });`;
+      closePromptText = `
+        window.addEventListener('beforeunload', (e) => {
+          for (let k in w.pages) {
+            if (w.pages[k].onbeforeunload && typeof w.pages[k].onbeforeunload === 'function') {
+              w.pages[k].onbeforeunload();
+            }
+          }
+        }, {capture:true});
+        window.addEventListener('unload', (evt) => { w.destroyAllPage(); });
+      `;
     }
 
     return `<!DOCTYPE html><html${this.config.lang}>
