@@ -26,6 +26,15 @@ button {
   border-radius: 0.08rem;
 }
 
+textarea:focus {
+  outline: none;
+}
+
+input:not([type=submit]):focus {
+  outline: none;
+  border:solid 0.5px #27a3fb;
+}
+
 .short-input,[short-input] {
   width: 60%;
 }
