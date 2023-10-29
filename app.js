@@ -479,7 +479,7 @@ if (app.isWorker) {
     for (let k in ctx.body) {
       if (methods.indexOf(k) < 0) continue
       if (!hdata[k]) {
-        hdata[k] = {}
+        hdata[k] = []
       }
 
       if (!Array.isArray(ctx.body[k])) {
@@ -488,11 +488,11 @@ if (app.isWorker) {
 
       hlist = ctx.body[k]
 
-      for (let h of hlist) {
-        if (typeof h !== 'object') continue
-        //h.url h.time h.headers
-        hdata[k][h.url] = h
+      if (hlist.length > 200) {
+        hlist = hlist.slice(0, 200)
       }
+
+      hdata[k] = hlist
     }
 
     try {
