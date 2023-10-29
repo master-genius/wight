@@ -392,6 +392,8 @@ if (app.isWorker) {
       if (k !== 'id' && k !== 'name') data[k] = ctx.body[k]
     }
 
+    data.update_time = Date.now()
+
     if (ctx.body.name) {
       let rname = ctx.body.name.trim()
       if (rname !== data.name) {
@@ -425,8 +427,6 @@ if (app.isWorker) {
         return ctx.send(data)
       }
     }
-    
-    data.update_time = Date.now()
     
     try {
       await fsp.writeFile(serverPath + '/' + ctx.param.id + '.json', JSON.stringify(data))
