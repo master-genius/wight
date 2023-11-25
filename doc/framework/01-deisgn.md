@@ -1,7 +1,7 @@
 <!--name:框架设计-->
 # 框架整体设计
 
-![](./images/wight-design.jpg)
+![](./images/wight-design.webp)
 
 pw.js的角色类似于编程语言的编译器，只是这个过程没有编译处理那么复杂。
 
