@@ -1,7 +1,7 @@
 
 process.chdir(__dirname);
 
-const wpg = require('./w/pw');
+const wpg = require('./w/pw.js');
 
 if (process.argv.length < 4) {
   console.log('使用需要携带参数：[项目名称(项目的目录名)] [组件名称]····');

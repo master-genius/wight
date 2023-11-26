@@ -8,7 +8,7 @@ const fs = require('fs')
 const os = require('os')
 const {proxy, resource, parsebody, tofile} = require('titbit-toolkit')
 const npargv = require('npargv')
-const loadddoc = require('./lib/loaddoc')
+const loadddoc = require('./lib/loaddoc.js')
 
 let arg = npargv({
   '--http2': {

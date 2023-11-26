@@ -1,7 +1,7 @@
 
 process.chdir(__dirname);
 
-const wpg = require('./w/pw');
+const wpg = require('./w/pw.js');
 const fs = require('fs');
 const npargv = require('npargv');
 

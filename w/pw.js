@@ -3,10 +3,10 @@
 const fs = require('fs');
 const terser = require('terser');
 const csso = require('csso');
-const htmlstate = require('./htmlstate');
+const htmlstate = require('./htmlstate.js');
 const path = require('path');
 const zipdata = require('zipdata');
-const ssecode = require('./ssecode');
+const ssecode = require('./ssecode.js');
 
 const fsp = fs.promises;
 

@@ -3,7 +3,7 @@
 //const cluster = require('cluster')
 const fs = require('fs')
 const zlib = require('zlib')
-const wpg = require('./w/pw')
+const wpg = require('./w/pw.js')
 const wkthread = require('worker_threads')
 const {resource, sse} = require('titbit-toolkit')
 const path = require('path')
