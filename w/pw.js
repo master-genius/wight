@@ -912,7 +912,7 @@ wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename)
       throw new Error(htmlfile + '\n    ' + htmlparser.lastErrorMsg)
     }
 
-    htext = simpleComporessHTML(htext);
+    htext = simpleComporessHTML(htext.replaceAll('`', ''));
     htext = this.fmtPageHTML(htext, pagename);
     htext = this.replaceSrc(htext, false, '', false);
   } catch (err) {
