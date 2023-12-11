@@ -263,7 +263,7 @@ if (app.isWorker) {
 const fsp = fs.promises
 //处理服务端请求部分
 if (app.isWorker) {
-  app.use(new tofile).use(new parsebody)
+  app.use(new tofile)
   /**
    * authorization指定token 提交的消息头，默认是authorization
    * token_api_response 描述一个登录接口的返回值并描述如何存储相关的辅助字段
@@ -502,7 +502,6 @@ if (app.isWorker) {
     }
 
     ctx.send('ok')
-
   })
 
   app.get('/self/control/server/history/:id', async ctx => {
