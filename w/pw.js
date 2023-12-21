@@ -61,9 +61,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '3.2';
+  this.defaultVersion = '3.3';
 
-  this.version = '3.2';
+  this.version = '3.3';
 
   this.forceCompress = false;
 
