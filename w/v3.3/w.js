@@ -1455,6 +1455,11 @@ w.sliderPage = function(html = null, append = true, obj=null) {
     w.slidexdom.className = 'w-common-slide-right-close';
     w.slidexdom.onclick = w.hideSliderPage;
 
+    //直接显示
+    if (html === null) {
+      return w.slidedom;
+    }
+
     if (html !== null) {
       if (typeof html === 'string') {
         let check_stat = true;
@@ -1475,11 +1480,15 @@ w.sliderPage = function(html = null, append = true, obj=null) {
   return w.slidedom;
 };
 
-w.hideSliderPage = function () {
+w.lockSliderText = false;
+w.hideSliderPage = function (clearText=true) {
   if (w.slidedom) {
     w.slidedom.className = 'w-hide-common-slide-right';
     w.slidexdom.className = 'w-hide-common-slide-right-close';
-    w.slidedom.innerHTML = '';
+    if (!w.lockSliderText && clearText) {
+      w.slidedom.innerHTML = '';
+    }
+    //w.lockSliderText = false;
   }
 };
 
