@@ -350,6 +350,13 @@ w.navi = function(text, options={}){}
 
 lr的值可以是right，默认是left，在左侧。up表示是否向上的位置显示，默认的导航条是在底部。
 
+### w.sliderPage和w.hideSlider
+
+w.sliderPage侧面滑动显示内容，左侧一条半透明用于关闭。调用w.hideSlider也可以关闭滑块页面。
+
+w.lockSliderText是用于锁定内容的标志，默认为false。当设置为true。则在隐藏滑动页面，不会清空内容。w.sliderPage()调用不传递参数则表示使用上一次设置的值。
+
+
 > ----
 > ## 模块相关
 > ----

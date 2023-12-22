@@ -54,6 +54,28 @@ explain.json是组件的说明文件。
 <div data-onclick="clickHandle">Event Test</div>
 ```
 
+## 组件的生命周期函数
+
+- onload 组件被挂载到节点上触发。
+
+- onremove 组件被从节点上一出的时候上触发。
+
+- onadopted 组件被移动到另一个节点上触发。
+
+- onattrchange 组件的属性发生改变触发。
+
+- init 组件初始化时执行此函数。
+
+- render 初始化后首次渲染使用此函数的返回值。
+
+- afterRender render渲染后，执行此函数。
+
+组件首次加载的执行顺序：
+
+```shell
+onload init render afterRender
+```
+
 ## 组件的可用方法
 
 - query和queryAll
@@ -61,9 +83,9 @@ explain.json是组件的说明文件。
 就是对querySelector的封装，但是查询的节点仅限于组件内。
 
 
-- sliderPage和hideSliderPage
+- sliderPage和hideSlider
 
-对w.sliderPage和w.hideSlidePage的封装。
+对w.sliderPage和w.hideSlider的封装。
 
 
 - render()

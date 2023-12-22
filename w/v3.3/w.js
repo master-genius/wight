@@ -1453,7 +1453,7 @@ w.sliderPage = function(html = null, append = true, obj=null) {
   if (w.slidedom) {
     w.slidedom.className = 'w-common-slide-right';
     w.slidexdom.className = 'w-common-slide-right-close';
-    w.slidexdom.onclick = w.hideSliderPage;
+    w.slidexdom.onclick = w.hideSlider;
 
     //直接显示
     if (html === null) {
@@ -1481,7 +1481,7 @@ w.sliderPage = function(html = null, append = true, obj=null) {
 };
 
 w.lockSliderText = false;
-w.hideSliderPage = function (clearText=true) {
+w.hideSlider = function (clearText=true) {
   if (w.slidedom) {
     w.slidedom.className = 'w-hide-common-slide-right';
     w.slidexdom.className = 'w-hide-common-slide-right-close';
@@ -1491,8 +1491,6 @@ w.hideSliderPage = function (clearText=true) {
     //w.lockSliderText = false;
   }
 };
-
-w.hideSlider = w.hideSliderPage;
 
 w.scrollTop = function (bh='smooth') {
   w.scroll({
@@ -3573,7 +3571,7 @@ class Component extends HTMLElement {
 
   sliderPage(text, append=false) { w.sliderPage(text, append, this); }
 
-  hideSliderPage() { w.hideSliderPage(); }
+  hideSlider() { w.hideSlider(); }
 
   prompt(info, options={}) {
     if (!options || typeof options !== 'object') {
