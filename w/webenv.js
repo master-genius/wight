@@ -2452,6 +2452,7 @@ w.sliderPage = function(html = null, append = true, obj=null) {
   return w.slidedom;
 };
 
+w.lockSliderText = false;
 w.hideSliderPage = function () {
   if (w.slidedom) {
     w.slidedom.className = 'w-hide-common-slide-right';
