@@ -166,8 +166,11 @@ exports.apicall = async function (api, options = {}, deep = 0) {
               return res.text();
             }
             
-            return res.text();
+            if (res.status && res.text) {
+              return res.text();
+            }
 
+            return 'Request Error';
           })
           .then(d => {
             orgtext = d;
