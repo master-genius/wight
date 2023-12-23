@@ -8,6 +8,7 @@
     ],
 
     "buildInApp": false,
+    "scriptUrl": "",
 
     "host" : "https://www.a.com",
 

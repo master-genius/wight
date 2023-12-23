@@ -1468,7 +1468,12 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
       }
     }
 
-    this.w_script_src = `<script src="${this.config.prepath}/static/${fname}"></script>`;
+    let script_url = `${this.config.prepath}/static/${fname}`;
+    if (this.config.scriptUrl) {
+      script_url = this.config.scriptUrl;
+    }
+
+    this.w_script_src = `<script src="${script_url}"></script>`;
 
     try {
       fs.writeFileSync(`${pdir}/static/w-${this.usedVersion}.js`, this.jch.orgjs, {encoding:'utf8'});
