@@ -65,9 +65,14 @@ let wapp = function (options = {}) {
 
   this.version = '3.3';
 
+  this.usedVersion = this.version;
+
   this.forceCompress = false;
 
+  this.debug = false;
+
   this.config = {
+    buildInApp: true,
     lang: '',
     manifest: '',
     test : false,
@@ -100,6 +105,7 @@ let wapp = function (options = {}) {
   this.jch = {
     css : '',
     js  : '',
+    orgjs: ''
   };
 
   this.getCssCode = (cssfile, attach = false) => {
@@ -122,11 +128,13 @@ let wapp = function (options = {}) {
       fs.accessSync(wdir);
     } catch (err) {
       console.error(err);
+      this.usedVersion = this.defaultVersion;
       wdir = `${this.mydir}/v${this.defaultVersion}`;
     }
 
     this.jch.css += fs.readFileSync(`${wdir}/w.css`, {encoding: 'utf8'});
     this.jch.js = fs.readFileSync(wdir + '/w.js', {encoding: 'utf8'});
+    this.jch.orgjs = this.jch.js;
 
     if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)) {
       let data = await terser.minify(this.jch.js+'\n');
@@ -162,6 +170,7 @@ let wapp = function (options = {}) {
     for (let k in options) {
       switch (k) {
         case 'debug':
+          this.debug = !!options[k];
         case 'closePrompt':
         case 'test':
           this.config[k] = options[k]; break;
@@ -199,6 +208,7 @@ let wapp = function (options = {}) {
   this.compsCssCode = '';
   //构建时，打包到应用内部的css代码。
   this.buildCssCode = '';
+  this.w_script_src = '';
 
   this.oid = Math.random().toString(16).substring(2);
 
@@ -254,10 +264,8 @@ let wapp = function (options = {}) {
     ${csso.minify(this.cssCode+'\n').css}
   </style>
   <style>a{outline:none;text-decoration: none;}</style>
-    ${this.jstext}
-  <script>
-    ${this.jch.js}
-  </script>
+    ${this.jstext}${this.config.buildInApp ? '' : this.w_script_src}
+    ${this.config.buildInApp ? '<script>' + this.jch.js + '</script>' : ''}
 </head>
 <body style="overflow-x:hidden;overflow-wrap:break-word;">
   <div id="w-pages-container-${this.oid}"></div>
@@ -591,6 +599,17 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
           if (cfg[k]) {
             let kwdtext = Array.isArray(cfg[k]) ? cfg[k].join(',') : cfg[k];
             this.config.metaKeywords = `<meta name="keywords" content="${kwdtext.replaceAll('"', '')}">`;
+          }
+          break;
+
+        case 'buildInApp':
+          this.config[k] = !!cfg[k];
+          break;
+
+        case 'debug':
+          //如果传参指定了开启调试模式，则选项不再生效
+          if (!this.debug) {
+            this.config.debug = !!cfg[k];
           }
           break;
 
@@ -1399,7 +1418,6 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
 };
 
 wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
-
   this.errorCount = 0;
 
   let pdir = appdir || this.config.pagedir;
@@ -1436,6 +1454,27 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
     let lend = this.config.prepath.length - 1;
     if (this.config.prepath[lend] === '/')
       this.config.prepath = this.config.prepath.substring(0, lend);
+  }
+
+  if (!this.config.buildInApp) {
+    let fname = `w-${this.usedVersion}.js`;
+
+    if (!this.config.debug) {
+      fname = `w-min-${this.usedVersion}.js`;
+      try {
+        fs.writeFileSync(`${pdir}/static/${fname}`, this.jch.js, {encoding:'utf8'});
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    this.w_script_src = `<script src="${this.config.prepath}/static/${fname}"></script>`;
+
+    try {
+      fs.writeFileSync(`${pdir}/static/w-${this.usedVersion}.js`, this.jch.orgjs, {encoding:'utf8'});
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   if (this.config.buildCss && Array.isArray(this.config.buildCss)) {

@@ -7,6 +7,8 @@
         "list"
     ],
 
+    "buildInApp": false,
+
     "host" : "https://www.a.com",
 
     "testHost" : "http://localhost:2025",
@@ -71,7 +73,7 @@
 
     "radius" : "small",
 
-    "debug": true,
+    "debug": false,
 
     "animation": true,
 
