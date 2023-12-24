@@ -102,7 +102,33 @@ onload init render afterRender
 
 此方法最主要的作用是获取要初始化的template节点，id可以不传，直接传递data，默认会选择第一个template。如果传递了id，则表示要使用指定id的template。这意味着你可以在template.html中编写多个template，并使用id属性进行标记。
 
+- bindEvent(DOM)
 
+绑定DOM节点的事件，如果渲染过程不是通过HTML文本，直接通过DOM API，这个时候，要利用框架的事件绑定机制，可以通过此方法。
+
+示例：
+
+```javascript
+
+class TestComp {
+  //....
+  
+  loadImage() {
+    let img = new Image()
+
+    img.src = '/static/images/a.jpg'
+
+    img.dataset.onclick = 'handleImageClick'
+
+    this.bindEvent(img)
+  }
+
+  handleImageClick(dom) {
+
+  }
+  //....
+}
+```
 
 ## properies
 
