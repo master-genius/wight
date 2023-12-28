@@ -71,6 +71,9 @@ let wapp = function (options = {}) {
 
   this.debug = false;
 
+  this.buildInApp = true;
+  this.lockBuildInApp = false;
+
   this.config = {
     buildInApp: true,
     lang: '',
@@ -169,6 +172,9 @@ let wapp = function (options = {}) {
   if (typeof options === 'object') {
     for (let k in options) {
       switch (k) {
+        case 'buildInApp':
+          this.buildInApp = !!options[k];
+          this.lockBuildInApp = true;
         case 'debug':
           this.debug = !!options[k];
         case 'closePrompt':
@@ -603,7 +609,8 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
           break;
 
         case 'buildInApp':
-          this.config[k] = !!cfg[k];
+          if (!this.lockBuildInApp)
+            this.config[k] = !!cfg[k];
           break;
 
         case 'debug':

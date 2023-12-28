@@ -16,6 +16,12 @@ let arg = npargv({
     alias: '-n',
     name: 'name',
     default: ''
+  },
+
+  '--min': {
+    alias: '--not-in-app',
+    name: 'min',
+    default: false
   }
 })
 
@@ -25,7 +31,9 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 
-let webapp = new wpg();
+let webapp = new wpg({
+  buildInApp: !arg.args.min
+});
 
 let pdir = process.argv[2];
 
