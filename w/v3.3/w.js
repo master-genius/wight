@@ -2477,16 +2477,18 @@ Object.defineProperty(w, '_devents', {
   writable: false,
   configurable: false,
   value: [
-    'animationcancel', 'animationend', 'animationiteration', 'animationstart',
-    'blur', 'click', 'copy', 'cut', 'compositionend', 'compositionstart', 'compositionupdate',
-    'change', 'contextmenu', 'dblclick', 'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 
-    'auxclick', 'securitypolicyviolation', 'beforematch',
-    'dragenter', 'drop', 'error', 'fullscreenchange', 'fullscreenerror', 'focus', 'focusin',
-    'focusout', 'input', 'keyup', 'keydown', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 
-    'mouseout', 'mouseover', 'mouseup', 'pointercancel', 'pointerdown', 'pointerenter', 
-    'pointerleave', 'pointermove', 'pointerout', 'pointerover', 'pointerup', 'paste', 
-    'submit', 'scroll', 'scrollend', 'select', 'transitioncancel', 'transitionend', 'transitionrun',
-    'transitionstart', 'touchcancel', 'touchend', 'touchmove', 'touchstart',  'wheel'
+    "animationcancel", "animationend", "animationiteration", "animationstart", "auxclick",
+    "beforematch", "blur", "canplay", "change", "click", "close", "compositionend",
+    "compositionstart", "compositionupdate", "contextmenu", "copy", "cut", "dblclick",
+    "drag", "dragend", "dragenter", "dragleave", "dragover", "dragstart", "drop",
+    "ended", "error", "focus", "focusin", "focusout", "fullscreenchange",
+    "fullscreenerror", "input", "invalid", "keydown", "keyup", "load", "mousedown",
+    "mouseenter", "mouseleave", "mousemove", "mouseout", "mouseover", "mouseup",
+    "paste", "play", "playing", "pointercancel", "pointerdown", "pointerenter",
+    "pointerleave", "pointermove", "pointerout", "pointerover", "pointerup", "reset",
+    "resize", "scroll", "scrollend", "securitypolicyviolation", "seeked", "seeking",
+    "select", "submit", "touchcancel", "touchend", "touchmove", "touchstart",
+    "transitioncancel", "transitionend", "transitionrun", "transitionstart", "wheel"
   ]
 });
 
