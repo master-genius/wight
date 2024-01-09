@@ -16,6 +16,11 @@ function makeSSE (name) {
       
       })
 
+      es.addEventListener('server-error', e => {
+        //w.alert()
+        //console.log(e)
+      })
+
       es.addEventListener('update', e => {
         updateTime = w.storage.get('app_reload_time') || 0
         let tm = Date.now()
