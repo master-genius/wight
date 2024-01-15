@@ -3573,7 +3573,7 @@ class Component extends HTMLElement {
 
   sliderPage(text, append=false) { w.sliderPage(text, append, this); }
 
-  hideSlider() { w.hideSlider(); }
+  hideSlider(clearText=true) { w.hideSlider(clearText); }
 
   prompt(info, options={}) {
     if (!options || typeof options !== 'object') {
