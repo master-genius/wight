@@ -1449,10 +1449,24 @@ w.setCoverText = (text = '', style = '') => {
   w.alertcoverdom.style.cssText = style;
 };
 
-w.sliderPage = function(html = null, append = true, obj=null) {
+w.sliderPageLeft = function (html=null, append=true, obj=null) {
+  return w.sliderPage(html, append, obj, 'left');
+};
+
+w.sliderPage = function(html=null, append=true, obj=null, pos='right') {
   if (w.slidedom) {
-    w.slidedom.className = 'w-common-slide-right';
-    w.slidexdom.className = 'w-common-slide-right-close';
+    let cname = 'w-common-slide-public';
+    let close_name = 'w-common-slide-close-public';
+    if (pos === 'left') {
+      cname += ' w-common-slide-left';
+      close_name += ' w-common-slide-left-close';
+    } else {
+      cname += ' w-common-slide-right';
+      close_name += ' w-common-slide-right-close';
+    }
+
+    w.slidedom.className = cname;
+    w.slidexdom.className = close_name;
     w.slidexdom.onclick = w.hideSlider;
 
     //直接显示
@@ -1460,19 +1474,24 @@ w.sliderPage = function(html = null, append = true, obj=null) {
       return w.slidedom;
     }
 
+    let html_type = typeof html;
+
     if (html !== null) {
-      if (typeof html === 'string') {
+      if (html_type === 'string') {
         let check_stat = true;
         w.checkhtml && (check_stat = w._htmlcheck(html));
         check_stat && (w.slidedom.innerHTML = html);
-      } else {
+      } else if (html_type === 'object') {
         if (append) {
           w.slidedom.innerHTML = '';
           w.slidedom.appendChild(html);
         } else {
           w.slidedom.innerHTML = html.innerHTML;
         }
+      } else if (html_type === 'number' || html_type === 'boolean') {
+        w.slidedom.innerHTML = html.toString();
       }
+      
       w.initPageDomEvents(obj || w.curpage, w.slidedom);
     }
   }

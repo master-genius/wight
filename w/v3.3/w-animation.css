@@ -1,9 +1,9 @@
-.w-common-slide-right {
-  animation: -w-common-slide-show 0.18s 1;
+.w-common-slide-public {
+  animation: -w-common-slide-show 0.182s 1;
 }
 
-.w-common-slide-right-close {
-  animation: -w-common-slide-close 0.18s 1;
+.w-common-slide-close-public {
+  animation: -w-common-slide-close 0.182s 1;
 }
 
 .w-notify-bottom {
@@ -30,14 +30,14 @@
   0% {width: 15%;}
   50% {width: 35%;}
   80% {width: 55;}
-  100% {width: 72%;}
+  100% {width: 75%;}
 }
 
 @keyframes -w-common-slide-close {
-  0% {width: 2%;}
+  0% {width: 5%;}
   50% {width: 10%;}
-  80% {width: 20%;}
-  100% {width: 27.8%;}
+  80% {width: 15%;}
+  100% {width: 20%;}
 }
 
 @keyframes -w-notify-from-top {
@@ -66,8 +66,6 @@
 
 @keyframes -w-prompt-show-top {
   0% { top: 0%; min-height: 25%; max-height: 70%;overflow-y: hidden;}
-  
   50% { top: 5%; min-height: 25%; max-height: 72%;overflow-y: hidden;}
-  
   100% { top: 10%; min-height: 28%; max-height: 75%;overflow-y: auto;}
 }
