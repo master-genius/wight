@@ -356,6 +356,7 @@ w.sliderPage侧面滑动显示内容，左侧一条半透明用于关闭。调�
 
 w.lockSliderText是用于锁定内容的标志，默认为false。当设置为true。则在隐藏滑动页面，不会清空内容。w.sliderPage()调用不传递参数则表示使用上一次设置的值。
 
+**w.sliderPageLeft**用于在左侧显示内容。
 
 > ----
 > ## 模块相关
