@@ -19,7 +19,7 @@
     "marked": "^11.0.1",
     "npargv": "^1.0.9",
     "qrcode": "^1.5.3",
-    "terser": "^5.26.0",
+    "terser": "^5.27.0",
     "titbit": "^23.6.6",
     "titbit-loader": "^22.6.3",
     "titbit-token": "^2.1.2",
