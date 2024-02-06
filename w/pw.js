@@ -30,9 +30,9 @@ function simpleComporessHTML (html) {
   return html.replace(/\/\*(.|[\r\n])*?\*\//mg, '')
             .replace(/>[\s]+/g, '>')
             .replace(/[\s]+</g, '<')
-            .replace(/\}[\s]+/g, '}')
-            .replace(/\{[\s]+/g, '{')
             .replace(/;[\r\n][\s]+/g, ';')
+            //.replace(/\}[\s]+/g, '}')
+            //.replace(/\{[\s]+/g, '{')
             //.replace(/>[\s]+</g, '><')
 }
 
@@ -904,20 +904,20 @@ wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = ''
   }
 
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+"[^"]+"[^>]*>/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src\s+=\s+"[^"]+"[^>]*>/ig, 
     fix_src_space);
 
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+'[^']+'[^>]*>/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src\s+=\s+'[^']+'[^>]*>/ig, 
     fix_src_space);
 
   //audio embed iframe img input source track video
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src="[^"]+"[^>]*>/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src="[^"]+"[^>]*>/ig, 
     match_replace);
 
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src='[^']+'[^>]*>/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src='[^']+'[^>]*>/ig, 
     match_replace);
 
   /* codetext = codetext.replace(
