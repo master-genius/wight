@@ -1564,7 +1564,6 @@ w.handleNotFound = function () {
 };
 
 w.going = null;
-
 w.routeInfo = function() {
   return w.curpage ? (w.curpage.__ctx__ || null) : null;
 };
@@ -1575,7 +1574,6 @@ w.loadPage = async function (R) {
   }
 
   w.loadPageLock = true;
-
   let route = R.path;
   if (route == '' || route == '/') {
     route = this.homepage;
@@ -1598,7 +1596,6 @@ w.loadPage = async function (R) {
       //经过这个延迟，页面有可能已经准备好。
       await new Promise(rv => {setTimeout(rv, 1101)});
     }
-  
   }
 
   if (this.pages[route] === undefined) {
