@@ -61,9 +61,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '3.3';
+  this.defaultVersion = '3.4';
 
-  this.version = '3.3';
+  this.version = '3.4';
 
   this.usedVersion = this.version;
 
@@ -336,14 +336,18 @@ let wapp = function (options = {}) {
   window.addEventListener('load', async function () {
     let dms = [
       'coverdom','notifydom','alertdom', 'slidedom', 'alertcoverdom', 'notifytopdom',
-      'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom'
+      'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom', 'promptmiddledom', 'promptmiddleclosedom',
     ];
 
     for (let i=0; i<dms.length; i++) {
-      w[ dms[i] ] = w.interfacedom.insertBefore(
-        document.createElement('div'),
-        w.interfacedom.firstChild
-      );
+      Object.defineProperty(w, dms[i], {
+        enumerable: false,
+        writable: false,
+        value: w.interfacedom.insertBefore(
+          document.createElement('div'),
+          w.interfacedom.firstChild
+        )
+      });
     }
 
     ${this.config.asyncPage ? 'await new Promise(rv => {setTimeout(rv, 5);});' : ''}
