@@ -643,7 +643,7 @@ const w = new function () {
         +'</div>';
 
       w[domname].appendChild(closedom);
-      w.initPageDomEvents(options.context || w.curpage, closedom);
+      w.initPageDomEvents(options.context || w.curpage, closedom, false);
     }
 
     if (typeof info === 'object' && info.innerHTML) {
@@ -1020,7 +1020,7 @@ const w = new function () {
         info = w.replaceSrc(info);
       }
 
-      w.initPageDomEvents(options.target || w.curpage, w.promptdom);
+      w.initPageDomEvents(options.target || w.curpage, w.promptdom, false);
     }
 
     if (options.unpromptHandle && typeof options.unpromptHandle === 'function') {
@@ -1038,7 +1038,7 @@ const w = new function () {
           + `${info}`
           + `</div>`;
     }
-    w.initPageDomEvents(options.target || w.curpage, w.promptdom);
+    w.initPageDomEvents(options.target || w.curpage, w.promptdom, false);
     return w.promptdom;
   };
 
@@ -1315,8 +1315,8 @@ const w = new function () {
       if (callback && typeof callback === 'function') nds.forEach(callback);
       return nds;
     };
-    pg.bindEvent = function (dom) {
-      w.initPageDomEvents(pg, dom);
+    pg.bindEvent = function (dom, bindSelf=true) {
+      w.initPageDomEvents(pg, dom, bindSelf);
     };
     pg.setAttr = function (data) {w.setAttr(name, data);};
     pg.setStyle = function(data) {
@@ -1492,7 +1492,7 @@ w.sliderPage = function(html=null, append=true, obj=null, pos='right') {
         w.slidedom.innerHTML = html.toString();
       }
       
-      w.initPageDomEvents(obj || w.curpage, w.slidedom);
+      w.initPageDomEvents(obj || w.curpage, w.slidedom, false);
     }
   }
 
@@ -2124,11 +2124,12 @@ w._setData = function (pagename, pg, nds, data) {
         default:
           nds[i].innerHTML = dtemp;
       }
+      //初始化和上一层的操作已经让nds[i]绑定了事件。
       if (pagename)
-        w.initPageDomEvents(pg, nds[i]);
+        w.initPageDomEvents(pg, nds[i], false);
       else if (pagename === 0) {
         //如果在组件里，使用view，则需要执行initPageDomEvents，目前使用pagename为0表示组件内调用。
-        w.initPageDomEvents(pg, nds[i]);
+        w.initPageDomEvents(pg, nds[i], false);
       }
     }
 
@@ -2477,7 +2478,7 @@ w.navi = function (htext, opts = {}) {
   setTimeout(() => {
     w.navibtndom.className = classtext;
     w.navibtndom.innerHTML = htext;
-    w.initPageDomEvents(opts.context || w.curpage, w.navibtndom);
+    w.initPageDomEvents(opts.context || w.curpage, w.navibtndom, false);
   }, 5);
   
 };
@@ -2511,7 +2512,7 @@ Object.defineProperty(w, '_devents', {
   ]
 });
 
-w.initDomEvent = function (pg, dom, evtname) {
+w.initDomEvent = function (pg, dom, evtname, bindSelf=true) {
   if (!dom || !dom.querySelectorAll) return false;
   
   let nds = dom.querySelectorAll('form');
@@ -2527,23 +2528,35 @@ w.initDomEvent = function (pg, dom, evtname) {
   nds = dom.querySelectorAll(`[data-on${evtname}]`);
 
   let bind_event = (d) => {
-    let evtlist = '';
-    evtlist = d.dataset[`on${evtname}`].trim().split(' ').filter(x => x.length > 0);
+    let evtlist = d.dataset[`on${evtname}`].trim().split(' ').filter(x => x.length > 0);
+    if (!d.__events_map__) {
+      Object.defineProperty(d, '__events_map__', {
+        enumerable: false,
+        writable: true,
+        value: {}
+      });
+    }
+    let ek = '';
     evtlist.forEach(ehandle => {
+      ek = evtname + ':' + ehandle;
+      if (d.__events_map__[ek]) {console.log(ek, 'binded');return;}
+      d.__events_map__[ek] = ek;
       d.addEventListener(evtname, w.genEventProxy(pg, ehandle));
     });
   };
 
+  bindSelf && dom.dataset && dom.dataset[`on${evtname}`] && bind_event(dom);
+
+  if (bindSelf === 'self') return;
+
   for (let d of nds) {
     bind_event(d);
   }
-
-  dom.dataset && dom.dataset[`on${evtname}`] && bind_event(dom);
 };
 
-w.initPageDomEvents = function (pg, dom) {
+w.initPageDomEvents = function (pg, dom, bindSelf=true) {
   for (let e of w._devents) {
-    w.initDomEvent(pg, dom, e);
+    w.initDomEvent(pg, dom, e, bindSelf);
   }
 };
 
@@ -3630,8 +3643,8 @@ class Component extends HTMLElement {
     w.promptTopDark(info, options);
   }
 
-  bindEvent(dom) {
-    w.initPageDomEvents(this, dom);
+  bindEvent(dom, bindSelf=true) {
+    w.initPageDomEvents(this, dom, bindSelf);
   }
 
   findMethod(name, wh=['config', 'ext']) {
