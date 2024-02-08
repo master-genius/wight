@@ -527,16 +527,21 @@ const w = new function () {
     this.isFirefox = true;
   }
 
-  this.alertStack = {
-    max: 10,
-    zindex: 105,
-    dmap: {},
-    closemap: {},
-    count: 0,
-    coverCount:0,
-    maxZIndex: 9999,
-    curZIndex: 105
-  };
+  Object.defineProperty(this, 'alertStack', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: {
+      max: 10,
+      zindex: 105,
+      dmap: {},
+      closemap: {},
+      count: 0,
+      coverCount:0,
+      maxZIndex: 9999,
+      curZIndex: 105
+    }
+  });
 
   this.alertStyles = ['left', 'right', 'bottom', 'transform', 'color', 'background', 'boxShadow', 'border-radius', 'border-top-left-radius', 'border-top-right-radius', 'border-bottom-left-radius', 'border-bottom-right-radius'];
 
