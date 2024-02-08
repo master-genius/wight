@@ -2539,7 +2539,7 @@ w.initDomEvent = function (pg, dom, evtname, bindSelf=true) {
     let ek = '';
     evtlist.forEach(ehandle => {
       ek = evtname + ':' + ehandle;
-      if (d.__events_map__[ek]) {console.log(ek, 'binded');return;}
+      if (d.__events_map__[ek]) return;
       d.__events_map__[ek] = ek;
       d.addEventListener(evtname, w.genEventProxy(pg, ehandle));
     });
