@@ -1266,6 +1266,10 @@ wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
   this.compsCssCode = JSON.stringify(csscodemap);
 };
 
+/* wapp.prototype.loadOneComponent = async function (compdir, appdir) {
+
+}
+ */
 /**
  * 一个组件是一个目录，其中包括和目录同名的.js文件、explain.json文件、.html文件，若html文件不存在则表示不存在template。
  * explain.json文件描述组件的类名和组件名称，以及相关其他描述，其属性如下：
@@ -1274,7 +1278,6 @@ wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
  *  - detail 相关的详细描述
  * @param {string} cdir 
  */
-
 wapp.prototype.loadComps = async function (cdir, appdir) {
   try {
     fs.accessSync(cdir + '/@css');
@@ -1392,6 +1395,21 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
       } catch (err) {
         console.error(err.message);
         this.errorCount += 1;
+      }
+
+      //检测依赖
+      if (cex.dependency) {
+        if (typeof cex.dependency === 'string') {
+          cex.dependency = [cex.dependency]
+        }
+
+        if (Array.isArray(cex.dependency)) {
+          cex.dependency.forEach(x => {
+            if (x && typeof x === 'string' && x.trim() && names.indexOf(x.trim()) < 0) {
+              names.push(x.trim())
+            }
+          })
+        }
       }
     }
 
@@ -1819,8 +1837,24 @@ function renderExplainJSON (cname) {
     "version": "1.0.0",
     "className" : "${className}",
     "detail" : "...",
-    "doc" : "readme.md"
+    "doc" : "readme.md",
+    "dependency": []
 }`;
+}
+
+function parseDependency(arr) {
+  if (typeof arr === 'string') arr = [arr]
+
+  let obj = {}
+  for (let a of arr) {
+    if (!a || typeof a !== 'string') continue
+    let names = a.split('@')
+    let name = names[0].trim()
+    let version = names[1] ? names[1].trim() : '1.0.0'
+    obj[name] = version
+  }
+
+  return obj
 }
 
 function renderCompsClass (cname) {
@@ -1892,7 +1926,7 @@ class ${className} extends Component {
   static get observedAttributes() {
     //如果你要监控某些属性的变化，你需要在onattrchange中处理。
     //要在属性变化时触发onattrchange函数，你需要在此函数中返回对应的属性。
-    //return ['class', 'name']; 
+    //return ['class', 'name'];
   }
 
 
