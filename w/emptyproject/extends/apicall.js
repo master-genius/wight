@@ -62,7 +62,7 @@ const token = await require('token');
 
 exports.apicall = async function (api, options = {}, deep = 0) {
 
-  if (typeof api === 'object') {
+  if (typeof api === 'object' && api !== null) {
     options = api;
     api = options.url;
     delete options.url;
