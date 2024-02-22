@@ -169,7 +169,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
             if (res.status && res.text) {
               return res.text();
             }
-            
+
             return 'Request Error';
           })
           .then(d => {
@@ -250,7 +250,7 @@ let acall = exports.apicall;
 
 ;['GET', 'POST', 'DELETE', 'PUT'].forEach(m => {
   acall[m.toLowerCase()] = async function (api, options={}) {
-    if (typeof api === 'object') {
+    if (typeof api === 'object' && api !== null) {
       options = api;
       api = options.url;
       delete options.url;
