@@ -1089,6 +1089,10 @@ const w = new function () {
 
   };
 
+  this.unpromptMiddle = function () {
+    return this.unprompt(false);
+  };
+
   this.parseHashUrl = function (h) {
     let url = {
       query : {},
@@ -3637,7 +3641,8 @@ class Component extends HTMLElement {
     w.prompt(info, options);
   }
 
-  unprompt() {w.unprompt();}
+  unprompt(isbottom=true) {w.unprompt(isbottom);}
+  unpromptMiddle(){w.unprompt(false);}
 
   promptTop(info, options={}) {
     options.wh = 'top';
