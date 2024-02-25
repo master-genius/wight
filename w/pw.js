@@ -1812,9 +1812,11 @@ function checkCompsName (cname) {
   return true;
 }
 
-function fmtCompsClassName (cname) {
+function fmtCompsClassName (name) {
   let namearr = []
 
+  let cname = name.trim().replace(/[\-]{2,}/g, '-');
+  if (!cname || cname === '-') return `Component_${Math.random().toString(16).substring(2)}`;
   let end = cname.length - 1;
 
   for (let i = 0; i < cname.length; i++) {
