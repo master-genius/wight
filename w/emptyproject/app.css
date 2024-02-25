@@ -18,7 +18,8 @@ h1,h2,h3,h4,h5,h6,p,span,div {
 }
 
 button:hover,input[type=submit]:hover {
-  background-color: #5a7de5;
+  font-weight: bold;
+  transform: scale(1.05);
 }
 
 button {
