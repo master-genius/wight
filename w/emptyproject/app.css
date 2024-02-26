@@ -411,7 +411,7 @@ table {
 }
 
 a:hover,.click:hover,[click]:hover {
-  color: #212223;
+  font-weight: bold;
   text-shadow: 2px 2px 0.5rem #d1d1d1;
 }
 
