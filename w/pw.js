@@ -1285,8 +1285,6 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
     fs.mkdirSync(cdir + '/@css');
   }
 
-  this.loadCompsCss(cdir, `${cdir}/@css`);
-
   try {
     let data = '';
     let orgdata = '';
@@ -1412,6 +1410,8 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
         }
       }
     }
+
+    this.loadCompsCss(cdir, `${cdir}/@css`);
 
     /* if (this.isbuild) {
       let comp_dir = appdir + '/static/components';
