@@ -623,6 +623,13 @@ const w = new function () {
     astack.dmap[aid] = dom;
     astack.count++;
 
+    let width = 0;
+    if (options.width && typeof options.width === 'number' && options.width > 1 && options.width <= 100) {
+      width = options.width;
+    }
+
+    width && width > 0 && (dom.style.width = `${width}%`);
+
     if (!options.notClose) {
       let closedom = document.createElement('div');
       astack.closemap[aid] = closedom;
@@ -632,7 +639,9 @@ const w = new function () {
       closedom.style.left = '50%';
       if (dom.style.transform) closedom.style.transform = dom.style.transform;
       if (dom.style.left) closedom.style.left = dom.style.left;
-    
+
+      width && width > 0 && (closedom.style.width = `${width}%`);
+
       closedom.style.boxShadow = dom.style.boxShadow;
       closedom.style.bottom = `${100 - realTop - 0.09}%`;
       //closedom.style.bottom = `${100 - parseInt(dom.style.top) - 0.09}%`;
