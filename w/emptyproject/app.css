@@ -22,6 +22,11 @@ button:hover,input[type=submit]:hover {
   transform: scale(1.05);
 }
 
+button:active,input[type=submit]:active {
+  font-style: italic;
+  transform: scale(0.98);
+}
+
 button {
   background: #148de3;
   border-radius: 0.08rem;
