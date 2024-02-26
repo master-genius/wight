@@ -409,11 +409,6 @@ table {
   color: #666666;
 }
 
-.editor-title {
-  background: #565758;
-  color: #dfdfdf;
-}
-
 .hide,[hide] {
   display: none;
   visibility: hidden;
