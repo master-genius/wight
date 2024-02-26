@@ -175,3 +175,11 @@ html文件：
 
 通过this.query()可以查询DOM节点，内部就是调用的querySelector，但是每个页面使用此方法只会查询自己页面内的节点。
 
+## view方法
+
+view可以进行链式调用，并且可以传递第一个参数是字符串，第二个参数是渲染的数据：
+
+```javascript
+this.view('[data-tag=icons]', `<img src="/static/icon/a.png">`)
+    .view('[data-group=grp]', 'OK')
+```
