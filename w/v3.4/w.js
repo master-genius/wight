@@ -1325,7 +1325,17 @@ const w = new function () {
         }
     }
 
-    pg.view = function (data) {return w.view(name, data);};
+    pg.view = function (data, obj=null) {
+      if (typeof data === 'string') {
+        let rd = {};
+        rd[data] = obj;
+        w.view(name, rd);
+      } else {
+        w.view(name, data);
+      }
+      return this;
+    };
+    
     pg.resetView = function (data) {return w.resetView(name, data);};
     pg.setScroll = function(scr) {
         if (scr < 0) { w.pages[name].__dom__.scrollTop += scr; }
@@ -3467,9 +3477,15 @@ class Component extends HTMLElement {
     return qcss;
   }
 
-  view (data) {
+  view (data, obj=null) {
     if (!this.__init__) {
       this.initPlateTemplate(null, null);
+    }
+
+    if (typeof data === 'string') {
+      let orgdata = data;
+      data = {};
+      data[orgdata] = obj;
     }
 
     let qcss = '';
@@ -3494,6 +3510,8 @@ class Component extends HTMLElement {
         }
       }
     }
+
+    return this;
   }
 
   resetView(qss) {
