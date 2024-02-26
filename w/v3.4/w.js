@@ -3636,18 +3636,26 @@ class Component extends HTMLElement {
   }
 
   alertDark(info, options={}) {
+    if (!options || typeof options !== 'object') options = {};
     options.context = this;
     return w.alertDark(info, options);
   }
 
   cancelAlert(aid='') {return w.cancelAlert(aid);}
 
-  cover (info, options = null) {
+  cover (info, options=null) {
     if (!options || typeof options !== 'object') options = {};
     options.notClose = true;
     options.withCover = true;
     return this.alert(info, options);
-  };
+  }
+
+  coverDark(info, options=null) {
+    if (!options || typeof options !== 'object') options = {};
+    options.notClose = true;
+    options.withCover = true;
+    return this.alertDark(info, options);
+  }
 
   uncover (aid='last') { return w.uncover(aid); }
 
