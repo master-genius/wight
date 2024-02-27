@@ -37,6 +37,11 @@
   box-sizing: border-box;
 }
 
+.c-0, [c-0] {
+  width: 0%;
+  box-sizing: border-box;
+}
+
 .c-0-5, [c-0-5] {
   width: 4.15%;
   box-sizing: border-box;
@@ -73,7 +78,7 @@
 }
 
 .c-7, [c-7] {
-  width: 58.336666%;
+  width: 58.333333%;
   box-sizing: border-box;
 }
 
@@ -154,7 +159,7 @@
   }
   
   .sm-7, [sm-7] {
-    width: 58.33%;
+    width: 58.333%;
     box-sizing: border-box;
   }
   
