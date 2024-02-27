@@ -225,7 +225,7 @@
   z-index:103;
   bottom: 50%;
   min-height: 28%;
-  max-height: 78%;
+  max-height: 86%;
   transform: translate(-50%, 45%);
 }
 
@@ -233,7 +233,7 @@
   z-index: 103;
   top: 10%;
   min-height: 28%;
-  max-height: 82%;
+  max-height: 86%;
 }
 
 .w-prompt-block {
