@@ -4,10 +4,10 @@
 }
 
 [container] {
-  max-width: 1920px;
+  max-width: 2048px;
 }
 
-:root {
+:root,:host {
   font-size: 16px;
   font-family: 'JetBrainsMono,Helvetica,Arial,sans-serif';
   --w-prompt-bg-color: #f7f9fc;
@@ -27,7 +27,7 @@ button:active,input[type=submit]:active {
   transform: scale(0.98);
 }
 
-button {
+button,[button] {
   background: #148de3;
   border-radius: 0.08rem;
 }
@@ -60,14 +60,14 @@ input:not([type=submit]):focus {
 }
 
 .btn-circle,[btn-circle] {
-  width: 2.65rem;
-  height: 2.65rem;
-  border-radius: 1.325rem;
+  width: 2.64rem;
+  height: 2.64rem;
+  border-radius: 1.32rem;
   background-color: #f5f6f8;
   box-shadow: var(--w-common-shadow, -0.12rem 0.2rem 0.23rem rgba(125, 125, 125, 0.56));
-  line-height: 2.65rem;
+  line-height: 2.64rem;
   text-align: center;
-  font-size: 0.95em;
+  font-size: 89%;
   color: #4a4a4f;
   overflow: hidden;
   margin-left: 0.28rem;
@@ -84,49 +84,49 @@ input:not([type=submit]):focus {
   border-radius: 0.25rem;
 }
 
-.btn-circle-orange {
+.btn-orange,[btn-orange] {
   background: #ee5832;
   color: #424345;
 }
 
-.btn-circle-gray {
+.btn-gray,[btn-gray] {
   background: #d1d2d5;
   color: #424345;
 }
 
-.btn-circle-light-gray {
+.btn-light-gray,[btn-light-gray] {
   background: #dfdfe1;
   color: #424345;
 }
 
-.btn-circle-dark {
+.btn-dark,[btn-dark] {
   background: #6a6a6a;
   color: #dfdfdf;
 }
 
-.btn-circle-dark-rgba {
+.btn-dark-rgba,[btn-dark-rgba] {
   background: rgba(105, 105, 105, 0.58);
   color: #dfdfdf;
 }
 
-.btn-circle-ok {
+.btn-blue,[btn-blue] {
   background: #4268df;
   color: #38373d;
 }
 
-.btn-circle-red {
+.btn-red,[btn-red] {
   background: #ca4545;
   color: #424245;
 }
 
-.ok-btn {
+.btn-ok,[btn-ok] {
   background: #3ca8bb;
   color: #424345;
 }
 
 input[type=submit] {
-  background: #a84e70;
-  border-radius: 0.08rem;
+  /* background: #a84e70; */
+  background:#248ad3;
 }
 
 input[ok] {
@@ -144,7 +144,7 @@ input[ok] {
 
 .search-btn {
   background: #5e5ef5;
-  color: #424345;
+  color: #2f2f30;
 }
 
 .alert-btn {
@@ -263,12 +263,16 @@ input[ok] {
   margin-bottom: 1rem;
 }
 
+.ok,[ok] {
+  color: #2a4eee;
+}
+
 .loadinfo-worker {
-  border: 0.05rem solid #4556d5;
+  border: 1px solid #4556d5;
 }
 
 .loadinfo-master {
-  border: 0.05rem solid #676869;
+  border: 1px solid #676869;
 }
 
 .image,[image] {
@@ -291,6 +295,10 @@ input[ok] {
 
 .inset-shadow,[inset-shadow] {
   box-shadow: 0px 0.1rem 1.2rem 0.1rem rgba(15, 15, 15, 0.1),inset 0px -0.1rem 0px 0px rgba(15,15,15,0.1);
+}
+
+.text-shadow, [text-shadow] {
+  text-shadow: 2px 2px 2px #d7d8d9;
 }
 
 .card-space, [card-space] {
@@ -318,7 +326,7 @@ input[ok] {
 }
 
 .block,[block] {
-  border: #e5e8e9 solid 0.05rem;
+  border: #e5e8e9 solid 1px;
   padding: 0.35rem;
 }
 
@@ -349,24 +357,9 @@ table {
 }
 
 .line,[line] {
-  width: 100%;
   height: 0.25rem;
   margin-bottom: 0.58rem;
   border-bottom: solid #cdcdcf 0.08rem;
-}
-
-.rotate,[rotate] {
-  animation: rotating 0.36s infinite;
-}
-
-@keyframes rotating {
-  0% {transform: rotateZ(0deg);}
-  15% {transform: rotateZ(60deg);}
-  35% {transform: rotateZ(120deg);}
-  55% {transform: rotateZ(180deg);}
-  75% {transform: rotateZ(240deg);}
-  95% {transform: rotateZ(300deg);}
-  100% {transform: rotateZ(360deg);}
 }
 
 .blue-dark, [blue-dark] {
@@ -386,7 +379,7 @@ table {
 }
 
 .red,[red] {
-  color: #cd5245;
+  color: #f33030;
 }
 
 .pink-red,[pink-red] {
@@ -402,7 +395,11 @@ table {
 }
 
 .orange,[orange] {
-  color: #F17F42;
+  color: #f17f42;
+}
+
+.orange-red,[orange-red] {
+  color: #e7562a;
 }
 
 .gray,[gray] {
@@ -420,9 +417,8 @@ table {
 }
 
 a:hover,.click:hover,[click]:hover {
-  /* color: #212223; */
   font-weight: bold;
-  text-shadow: 2px 2px 0.5rem #d1d1d1;
+  text-shadow: 3px 2px 0.5rem #d1d1d1;
 }
 
 a:active,.click:active,[click]:active {
@@ -453,4 +449,25 @@ a:active,.click:active,[click]:active {
 
 .circle-image,[circle-image] {
   border-radius: 50%;
+}
+
+/* 动画 */
+
+.am-rotate,[am-rotate] {
+  animation: rotate 0.9s 1;
+}
+
+@keyframes rotate {
+  0% {transform: rotateZ(30deg);}
+  16% {transform: rotateZ(60deg);}
+  24% {transform: rotateZ(90deg);}
+  32% {transform: rotateZ(120deg);}
+  40% {transform: rotateZ(150deg);}
+  48% {transform: rotateZ(180deg);}
+  56% {transform: rotateZ(210deg);}
+  64% {transform: rotateZ(240deg);}
+  72% {transform: rotateZ(270deg);}
+  80% {transform: rotateZ(300deg);}
+  88% {transform: rotateZ(330deg);}
+  100% {transform: rotateZ(360deg);}
 }
