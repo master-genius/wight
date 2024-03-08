@@ -1391,14 +1391,14 @@ const w = new function () {
       if (!options || typeof options !== 'object') options = {};
       options.notClose = true;
       options.withCover = true;
-      return this.alert(info, options);
+      return pg.alert(info, options);
     };
   
     pg.coverDark = function (info, options=null) {
       if (!options || typeof options !== 'object') options = {};
       options.notClose = true;
       options.withCover = true;
-      return this.alertDark(info, options);
+      return pg.alertDark(info, options);
     };
   }
 
