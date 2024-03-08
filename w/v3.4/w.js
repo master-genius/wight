@@ -1374,6 +1374,32 @@ const w = new function () {
         w.setAttr(name, obj);
       }
     };
+
+    pg.alert = function (info, options=null) {
+      if (!options || typeof options !== 'object') options = {};
+      options.context = this;
+      return w.alert(info, options);
+    }
+  
+    pg.alertDark = function (info, options={}) {
+      if (!options || typeof options !== 'object') options = {};
+      options.context = this;
+      return w.alertDark(info, options);
+    }
+  
+    pg.cover =function (info, options=null) {
+      if (!options || typeof options !== 'object') options = {};
+      options.notClose = true;
+      options.withCover = true;
+      return this.alert(info, options);
+    }
+  
+    pg.coverDark(info, options=null) {
+      if (!options || typeof options !== 'object') options = {};
+      options.notClose = true;
+      options.withCover = true;
+      return this.alertDark(info, options);
+    }
   }
 
   this.initPage = function () {
