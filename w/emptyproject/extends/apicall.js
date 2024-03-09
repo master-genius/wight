@@ -69,6 +69,11 @@ exports.apicall = async function (api, options = {}, deep = 0) {
     if (!deep || typeof deep !== 'number') deep = 0;
   }
 
+  if (!api || typeof api !== 'string') {
+    console.error(api, options)
+    return makeResponse(new Error(`api不是合法的字符串`))
+  }
+
   options.mode = 'cors';
 
   if (options.dataType === undefined) {
@@ -166,11 +171,8 @@ exports.apicall = async function (api, options = {}, deep = 0) {
               return res.text();
             }
             
-            if (res.status && res.text) {
-              return res.text();
-            }
+            return res.text();
 
-            return 'Request Error';
           })
           .then(d => {
             orgtext = d;
@@ -201,7 +203,9 @@ exports.apicall = async function (api, options = {}, deep = 0) {
         errorHandle = w.config.requestError[ret.status]
       }
       
-      if (errorHandle && typeof errorHandle === 'function') {
+      if (errorHandle && typeof errorHandle === 'function' 
+        && (!options.fail || typeof options.fail !== 'function'))
+      {
         errorHandle.bind(w.config)(ret);
       }
     }
@@ -248,7 +252,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
 
 let acall = exports.apicall;
 
-;['GET', 'POST', 'DELETE', 'PUT'].forEach(m => {
+;['GET', 'POST', 'DELETE', 'PUT', 'PATCH'].forEach(m => {
   acall[m.toLowerCase()] = async function (api, options={}) {
     if (typeof api === 'object' && api !== null) {
       options = api;
