@@ -217,22 +217,22 @@
 
 .w-prompt-bottom {
   bottom: 5%;
-  min-height: 25%;
+  min-height: 10%;
   max-height: 72%;
 }
 
 .w-prompt-middle {
   z-index:103;
   bottom: 50%;
-  min-height: 28%;
+  min-height: 20%;
   max-height: 86%;
-  transform: translate(-50%, 45%);
+  transform: translate(-50%, 46.5%);
 }
 
 .w-prompt-top {
   z-index: 103;
-  top: 10%;
-  min-height: 28%;
+  top: 9%;
+  min-height: 20%;
   max-height: 86%;
 }
 
