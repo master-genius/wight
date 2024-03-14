@@ -1053,7 +1053,7 @@ const w = new function () {
       w.initPageDomEvents(options.target || w.curpage, w[domname], false);
 
     if (options.unpromptHandle && typeof options.unpromptHandle === 'function') {
-      w.unprompt.__unprompt_handle__ = options.unpromptHandle;
+      w[closedom].__unprompt_handle__ = options.unpromptHandle;
     }
 
     return w[domname];
@@ -1073,17 +1073,17 @@ const w = new function () {
 
   //有些时候prompt需要一个监听操作，当某些数据改变，取消弹框的时候需要询问用户是否继续。
   this.unprompt = async function (isbottom=true) {
-    if (w.unprompt.__unprompt_handle__) {
-      try {
-        if (!(await w.unprompt.__unprompt_handle__())) return false;
-      } catch (err){
-        w.debug && console.error(err);
-      }
-      w.unprompt.__unprompt_handle__ = null;
-    }
-
     let domname = isbottom ? 'promptdom' : 'promptmiddledom';
     let closedom = isbottom ? 'promptclosedom' : 'promptmiddleclosedom';
+
+    if (w[closedom].__unprompt_handle__) {
+      try {
+        if (!(await w[closedom].__unprompt_handle__())) return false;
+      } catch (err) {
+        w.debug && console.error(err);
+      }
+      w[closedom].__unprompt_handle__ = null;
+    }
 
     if (w[domname]) {
       w[domname].className = '';
@@ -1393,6 +1393,7 @@ const w = new function () {
       options.withCover = true;
       return pg.alert(info, options);
     };
+    pg.uncover = function(cid='last') {w.uncover(cid);}
   
     pg.coverDark = function (info, options=null) {
       if (!options || typeof options !== 'object') options = {};
