@@ -1040,8 +1040,7 @@ const w = new function () {
           };
         }
 
-        w[domname].innerHTML = `<div style="overflow:auto;word-wrap:break-word;">`
-          + `<p style="color:${pcolor};">${info}</p></div>`;
+        w[domname].innerHTML = `<div style="overflow:auto;word-wrap:break-word;color:${pcolor}">${info}</div>`;
       }
 
       if (options.target && options.target.tagName) {
