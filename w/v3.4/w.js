@@ -1102,6 +1102,8 @@ const w = new function () {
     return this.unprompt(false);
   };
 
+  this.unpromptTop = this.unpromptMiddle;
+
   this.parseHashUrl = function (h) {
     let url = {
       query : {},

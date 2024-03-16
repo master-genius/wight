@@ -307,6 +307,8 @@ let wapp = function (options = {}) {
     window.notifyError = w.notifyError.bind(w);
     window.prompt = w.prompt.bind(w);
     window.unprompt = w.unprompt.bind(w);
+    window.unpromptMiddle = w.unpromptMiddle.bind(w);
+    window.unpromptTop = window.unpromptMiddle;
     window.notifyTop = w.notifyTop.bind(w);
     window.notifyTopError = w.notifyTopError.bind(w);
     window.notifyOnly = w.notifyOnly.bind(w);
