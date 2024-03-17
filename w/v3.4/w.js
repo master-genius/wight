@@ -2963,7 +2963,7 @@ w.runShareNotice = function (type, obj, k, data = null) {
       continue;
     }
 
-    a.count < 100000000 && (a.count += 1);
+    a.count < 200000000 && (a.count += 1);
     try {
       a.callback({
         type,
