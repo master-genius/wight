@@ -338,7 +338,7 @@ let wapp = function (options = {}) {
   window.addEventListener('load', async function () {
     let dms = [
       'coverdom','notifydom','alertdom', 'slidedom', 'alertcoverdom', 'notifytopdom',
-      'tabsdom','tabsmenudom', 'historydom','slidexdom', 'promptdom', 'navibtndom', 'promptclosedom', 'promptmiddledom', 'promptmiddleclosedom',
+      'tabsdom','tabsmenudom', 'historydom','slidexdom', 'navibtndom', 'promptdom', 'promptclosedom', 'promptmiddledom', 'promptmiddleclosedom',
     ];
 
     for (let i=0; i<dms.length; i++) {

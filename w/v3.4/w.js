@@ -1035,6 +1035,7 @@ const w = new function () {
             w.unprompt(false);
           };
         } else {
+          w[closedom].style.zIndex = 100;
           w[closedom].onclick = evt => {
             w.unprompt();
           };
