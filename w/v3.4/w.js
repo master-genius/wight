@@ -532,7 +532,7 @@ const w = new function () {
     configurable: false,
     writable: false,
     value: {
-      max: 13,
+      max: 28,
       zindex: 105,
       dmap: {},
       closemap: {},
