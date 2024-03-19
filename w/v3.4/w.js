@@ -478,6 +478,7 @@ const w = new function () {
   });
 
   this.config.notFound = '';
+  this.config.imgerror = (evt) => {}; 
 
   this.host = '';
   this.prepath = '';
