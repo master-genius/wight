@@ -147,7 +147,6 @@ class htmlstate {
   }
 
   checkTagStart (next_char) {
-
     if (this.curState === this.STATE.TAG_ATTR_VALUE) {
       if (this.attrType !== '') {
         return false
@@ -172,12 +171,20 @@ class htmlstate {
       return true
     }
 
-    return false
+    //<input value="<<<">
+    if (this.curState === this.STATE.TAG_ATTR_VALUE_START && this.attrType !== '') {
+      this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
 
+    if (this.curState === this.STATE.TAG_ATTR_VALUE && this.attrType !== '') {
+      return true
+    }
+
+    return false
   }
 
   checkTagEnd (cur_char, next_char) {
-    
     if (this.curState === this.STATE.TAG_CLOSE_NAME) {
       this.curState = this.STATE.TAG_CLOSE_END
       if (!this.diffCloseTag()) {
@@ -194,6 +201,16 @@ class htmlstate {
     {
       this.curState = this.STATE.TAG_END
       this.pushTag()
+      return true
+    }
+
+    //<input value=">>>">
+    if (this.curState === this.STATE.TAG_ATTR_VALUE_START && this.attrType !== '') {
+      this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (this.curState === this.STATE.TAG_ATTR_VALUE && this.attrType !== '') {
       return true
     }
 

@@ -151,6 +151,16 @@ class HtmlState_ {
       return true
     }
 
+    //<input value="<<<">
+    if (this.curState === this.STATE.TAG_ATTR_VALUE_START && this.attrType !== '') {
+      this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (this.curState === this.STATE.TAG_ATTR_VALUE && this.attrType !== '') {
+      return true
+    }
+
     return false
   }
 
@@ -171,6 +181,16 @@ class HtmlState_ {
     {
       this.curState = this.STATE.TAG_END
       this.pushTag()
+      return true
+    }
+
+    //<input value=">>>">
+    if (this.curState === this.STATE.TAG_ATTR_VALUE_START && this.attrType !== '') {
+      this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (this.curState === this.STATE.TAG_ATTR_VALUE && this.attrType !== '') {
       return true
     }
 
