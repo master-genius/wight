@@ -788,7 +788,7 @@ const w = new function () {
     return true;
   };
 
-  this.alertError = function (info, tmout = 0) {
+  this.alertError = function (info, tmout=0) {
     info = `<span style="color:#e73949;">${info}</span>`;
     let aid = w.alert(info);
     if (tmout > 0) {
@@ -796,7 +796,7 @@ const w = new function () {
     }
   };
 
-  this.notifyError = function (info, tmout = 5900) {
+  this.notifyError = function (info, tmout=5000) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'error';
       return w.notify(info, tmout);
@@ -804,7 +804,7 @@ const w = new function () {
     return w.notify(info, {timeout: tmout, ntype: 'error'});
   };
 
-  this.notifyTop = function (info, tmout = 3500) {
+  this.notifyTop = function (info, tmout=3500) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'top';
       return w.notify(info, tmout);
@@ -812,7 +812,7 @@ const w = new function () {
     return w.notify(info, {timeout:tmout, ntype: 'top'});
   };
 
-  this.notifyTopError = function (info, tmout = 5900) {
+  this.notifyTopError = function (info, tmout=5000) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'top-error';
       return w.notify(info, tmout);
@@ -820,7 +820,7 @@ const w = new function () {
     return w.notify(info, {timeout: tmout, ntype: 'top-error'});
   };
 
-  this.notifyOnly = function (info, tmout = 3500) {
+  this.notifyOnly = function (info, tmout=3500) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'only';
       return w.notify(info, tmout);
