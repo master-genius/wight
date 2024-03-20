@@ -796,7 +796,7 @@ const w = new function () {
     }
   };
 
-  this.notifyError = function (info, tmout = 10000) {
+  this.notifyError = function (info, tmout = 5900) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'error';
       return w.notify(info, tmout);
@@ -812,7 +812,7 @@ const w = new function () {
     return w.notify(info, {timeout:tmout, ntype: 'top'});
   };
 
-  this.notifyTopError = function (info, tmout = 10000) {
+  this.notifyTopError = function (info, tmout = 5900) {
     if (typeof tmout === 'object') {
       tmout.ntype = 'top-error';
       return w.notify(info, tmout);
