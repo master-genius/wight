@@ -2629,12 +2629,40 @@ w.initDomEvent = function (pg, dom, evtname, bindSelf=true) {
         value: {}
       });
     }
+
     let ek = '';
     evtlist.forEach(ehandle => {
+      let ind = ehandle.indexOf(':');
+      let options = false;
+      if (ind > 0) {
+        let real_ehandle = ehandle.substring(0, ind);
+        let optstr = ehandle.substring(ind+1);
+        ehandle = real_ehandle;
+
+        if (optstr.length > 0) {
+          options = {};
+          for (let i = 0; i < optstr.length; i++) {
+            switch (optstr[i]) {
+              case 'c':
+                options.capture = true;
+                break;
+              case 'o':
+                options.once = true;
+                break;
+              case 'p':
+                options.passive = true;
+                break;
+              case 's':
+                options.signal = true;
+                break;
+            }
+          }
+        }
+      }
       ek = evtname + ':' + ehandle;
       if (d.__events_map__[ek]) return;
       d.__events_map__[ek] = ek;
-      d.addEventListener(evtname, w.genEventProxy(pg, ehandle));
+      d.addEventListener(evtname, w.genEventProxy(pg, ehandle), options);
     });
   };
 
