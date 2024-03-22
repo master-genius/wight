@@ -2099,6 +2099,10 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
     /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src='[^']+'[^>]*>/ig, 
     match_replace);
 
+  if (w.__replace_src_regex__ && (w.__replace_src_regex__ instanceof RegExp)) {
+    codetext = codetext.replace(w.__replace_src_regex__, match_replace);
+  }
+ 
   return codetext;
 };
 

@@ -97,6 +97,7 @@ let wapp = function (options = {}) {
     pagedir : '',
     components : [],
     componentCss: {},
+    componentReplaceSrc: [],
     extends: [],
     exts: [],
     iconPath: '/favicon.ico',
@@ -215,6 +216,7 @@ let wapp = function (options = {}) {
   //构建时，打包到应用内部的css代码。
   this.buildCssCode = '';
   this.w_script_src = '';
+  this.componentReplaceRegex = '';
 
   this.oid = Math.random().toString(16).substring(2);
 
@@ -299,6 +301,12 @@ let wapp = function (options = {}) {
     w.tabs.pageIndex = ${JSON.stringify(this.config.tabsPageIndex)};
     w.tabs.background = '${this.config.tabsBackground}';
     w.tabs.selectedBackground = '${this.config.tabsSelectedBackground}';
+    Object.defineProperty(w, '__replace_src_regex__', {
+      enumerable: false,
+      configurable: false,
+      writable: true,
+      value: ${this.componentReplaceRegex.toString()}
+    });
 
     window.alert = w.alert.bind(w);
     window.unalert = w.unalert.bind(w);
@@ -527,7 +535,6 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
           break;
 
         case 'tabs':
-          
           if (cfg.tabs.list && cfg.tabs.list instanceof Array && cfg.tabs.list.length > 0) {
             let width = 100 / cfg.tabs.list.length;
             this.config.tabs = cfg.tabs.list;
@@ -593,6 +600,12 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
         case 'componentCss':
           if (typeof cfg[k] === 'object')
             this.config[k] = cfg[k];
+          break;
+        
+        case 'componentReplaceSrc':
+          if (Array.isArray(cfg[k])) {
+            this.config[k] = cfg[k];
+          }
           break;
 
         case 'lang':
@@ -925,6 +938,11 @@ wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = ''
   codetext = codetext.replace(
     /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src='[^']+'[^>]*>/ig, 
     match_replace);
+
+  //如何替换组件的src：需要配置哪些组件是需要替换的。
+  if (this.componentReplaceRegex) {
+    codetext = codetext.replace(this.componentReplaceRegex, match_replace);
+  }
 
   /* codetext = codetext.replace(
       /<(audio|embed|iframe|img|input|source|track|video)[^>]* src=[^\s]+ [^>]*>/g, 
@@ -1306,6 +1324,26 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
         this.config.components.push(f.name.substring(0, f.name.length - 3));
       }
     }
+
+    //replace-src::this.config.components是最终解析后的数组。
+    if (Array.isArray(this.config.componentReplaceSrc)) {
+      let comarr = [];
+      this.config.componentReplaceSrc.forEach(x => {
+        if (this.config.components.indexOf(x) >= 0) {
+          comarr.push(x);
+        }
+      });
+
+      if (this.config.componentReplaceSrc.length !== comarr.length) {
+        this.config.componentReplaceSrc = comarr;
+      }
+
+      if (this.config.componentReplaceSrc.length > 0) {
+        this.componentReplaceRegex = new RegExp(`<(${this.config.componentReplaceSrc.join('|')})[^>]* src\\s*=\\s*"[^"]+"[^>]*>`, 'ig');
+      }
+    } else {
+      this.config.componentReplaceSrc = [];
+    }
     
     let names = this.config.components;
     let cex;
@@ -1324,7 +1362,6 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
     };
 
     for (let i=0; i < names.length; i++) {
-
       //检测组件是否存在相关文件。
       try {
         fs.accessSync(`${cdir}/${names[i]}/explain.json`);

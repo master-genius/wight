@@ -69,6 +69,8 @@
 
     "componentModule": [],
 
+    "componentReplaceSrc": [],
+
     "version": "3.4",
 
     "manifest": false,
