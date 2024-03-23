@@ -1911,21 +1911,26 @@ class ${className} extends Component {
     //this.attrs是为了方便而做的映射。
 
     //this.shadow可以访问shadow DOM，注意这是shadowRoot。
-    //直接通过this访问组件自己的节点。
+    //直接通过this访问组件节点自己。
     
-    //以下是属性声明的示例。
-    //用于声明支持的属性和类型限制，若不需要请去掉properties的定义。
-    this.properties = {
-      tag: {
+    //属性声明示例：用于声明支持的属性和类型限制，若不需要请去掉properties的定义。
+    this.properties = { 
+      style: {
         //type默认就是字符串
         type: 'string',
         default: 'xxx'
       },
-      mode: {
-        //限制mode属性可选的值，如果不符合要求则使用default设置值。
-        //数组类型的限制，如果没有设置default则第一个元素作为默认值。
-        limit: ['mode1', 'mode2'],
-        default: 'mode1'
+
+      //用于对外共享数据
+      sharekey: {
+        type: 'string',
+        default: '${cname}-message'
+      },
+
+      //用于接收事件通知
+      noticekey: {
+        type: 'string',
+        default: '${cname}-notice'
       }
     };
   }
@@ -1937,7 +1942,7 @@ class ${className} extends Component {
 
   //返回字符串或DOM节点。
   render() {
-    // 也可以返回字符串 return '${cname}组件';
+    // 也可以返回字符串，比如： return '${cname}组件';
     return this.plate();
   }
 
@@ -1969,7 +1974,6 @@ class ${className} extends Component {
     //要在属性变化时触发onattrchange函数，你需要在此函数中返回对应的属性。
     //return ['class', 'name'];
   }
-
 
 }`;
 
