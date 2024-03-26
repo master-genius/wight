@@ -3487,7 +3487,7 @@ class Component extends HTMLElement {
    * @param {string} id 
    * @param {object} data 
    */
-  plate (id = null, data = {}) {
+  plate(id = null, data = {}) {
     if (typeof id === 'object' && id) {
       data = id;
       id = null;
