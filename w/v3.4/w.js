@@ -2940,8 +2940,16 @@ w.registerShareNotice = function (options) {
         list: [options]
       };
   } else {
-    if (options.only) return false;
+    if (options.only && !options.reuse) return false;
     let kn = w.shareNoticeList.funcmap[options.key];
+    //原始的模式也是only reuse
+    if (options.only && options.reuse && kn.list[0] && kn.list[0].only && kn.list[0].reuse) {
+      options.id = kn.list[0].id;
+      kn.list = [ options ];
+      w.shareNoticeList.idmap[options.id] = options;
+      return options.id;
+    }
+
     if (kn.list.length >= 111) {
       w.notifyError('同一个key注册通知函数不能超过111个。');
       return false;
@@ -2950,9 +2958,7 @@ w.registerShareNotice = function (options) {
   }
 
   w.shareNoticeList.length += 1;
-
   w.shareNoticeList.idmap[options.id] = options;
-
   return options.id;
 };
 
@@ -3017,11 +3023,25 @@ w.runShareNotice = function (type, obj, k, data = null) {
 
     a.count < 200000000 && (a.count += 1);
     try {
+      //如果是指定了动作模式，则会格式化数据。
+      let real_data = data
+      if (a.action) {
+        let typ = typeof data;
+        if (!data || typ !== 'object') {
+          real_data = {
+            data: data,
+            action: typ === 'string' ? data : ''
+          }
+        } else if (data.action === undefined) {
+          data.action = ''
+        }
+      }
+
       a.callback({
         type,
         obj,
         key: k,
-        data: data
+        data: real_data
       });
     } catch (err) {
       w.notifyError(err.message);
