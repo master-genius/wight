@@ -174,6 +174,9 @@ let id = w.registerShareNotice({
 
 ```
 
+在only模式，可以使用选项reuse开启重用。
+
+
 > ----
 > ## 界面交互
 > ----
@@ -201,7 +204,7 @@ w.alert = function (info, options){}
 
 - closeBackground 关闭框的背景颜色。
 
-- style样式的属性，支持: backgroun, boxShadow, border-radius以及四个分开的属性, transform。
+- style样式的属性，支持: background, boxShadow, border-radius以及四个分开的属性, transform。
 
 **返回值**
 

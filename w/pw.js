@@ -106,6 +106,11 @@ let wapp = function (options = {}) {
     metaKeywords: ''
   };
 
+  this.builtinExtends = [
+    'htmltag', 'apicall', 'ejson', 'djson', 'confirm',
+    'pushStart', 'querybind', 'renders', 'storageEvent'
+  ]
+
   this.jch = {
     css : '',
     js  : '',
@@ -1038,6 +1043,17 @@ wapp.prototype.loadExt = async function (cdir) {
 
         this.config.extends.push(f.name.substring(0, f.name.length - 3));
       }
+    }
+
+    let need_push = [];
+    this.builtinExtends.forEach(x => {
+      if (this.config.extends.indexOf(x) < 0) {
+        need_push.push(x);
+      }
+    });
+
+    if (need_push.length > 0) {
+      this.config.extends = this.config.extends.concat(need_push);
     }
     
     let names = this.config.extends;
