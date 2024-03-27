@@ -42,4 +42,38 @@ exports.editorReload = function() {
 
 ```
 
+**也可以使用module.exports**
+
+```javascript
+module.exports = function() {
+
+}
+```
+
 **冲突的模块导出会提示错误。**
+
+### 内置扩展
+
+内置扩展是必须存在的，它们为组件的正常运行提供支持，很多组件都依赖于某些扩展，所以内置扩展有一部分是自动加载的，不必主现在config.json配置文件中也会默认启用。
+
+这些扩展有：
+
+- htmltag
+
+- apicall
+
+- ejson
+
+- djson
+
+- confirm
+
+- pushStart
+
+- querybind
+
+- renders
+
+- storageEvent
+
+具体说明，参考《指导》部分的内置扩展说明。

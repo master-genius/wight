@@ -12,6 +12,7 @@
 | checkToken.js | 检测是否登录 |  |
 | userinfo.js | 管理登录用户的基本信息 |  |
 | ejson.js | 对object进行encodeURIComponent(JSON.stringify(data))处理 |  |
+| djson.js | ejson的反向操作，解析ejson的数据。 |  |
 | htmltag.js | 用于模板字符串的格式化处理 | 自动进行各个插值数据的检测，并对非标准的html文本转码，使用htmltag.ehtml可以直接转码带标签的数据，htmltag默认是会检测插入的文本是不是合法的html文本，如果是合法的则不会转码 &lt; 和 &gt; |
 | storageEvent.js | 监听storage变化并触发对应的函数 | 此扩展可以实现一个浏览器打开多个页面，页面之前的状态同步，比如一个页面退出了，另一个页面会检测到，并且也可以跳转到登录页。 |
 | timestr.js | 格式化时间字符串 | 格式：2023-10-23_23-15-06 |
