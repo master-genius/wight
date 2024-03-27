@@ -581,7 +581,7 @@ const w = new function () {
     w.checkhtml && (check_stat = w._htmlcheck(info));
 
     if (!check_stat) {
-      w.notifyTopError(w._htmlcheck.lastErrorMsg);
+      w.notifyTopError(w._htmlcheck.lastErrorMsg, 10000);
       return false;
     }
 
@@ -3587,7 +3587,7 @@ class Component extends HTMLElement {
     return qcss;
   }
 
-  view (data, obj=null) {
+  view(data, obj=null) {
     if (!this.__init__) {
       this.initPlateTemplate(null, null);
     }
@@ -3635,7 +3635,7 @@ class Component extends HTMLElement {
     this.view(data);
   }
 
-  setAttr (data) {
+  setAttr(data) {
     if (!data || typeof data !== 'object') {
       return;
     }
@@ -3685,27 +3685,27 @@ class Component extends HTMLElement {
     }
   }
 
-  queryAll (qss, callback=null) {
+  queryAll(qss, callback=null) {
     let nds = this.shadow.querySelectorAll(qss);
     if (callback && typeof callback === 'function') nds.forEach(callback);
     return nds;
   }
 
-  query (qss,callback=null) {
+  query(qss,callback=null) {
     let nod = this.shadow.querySelector(qss);
     if (!nod) return null;
     if (callback && typeof callback === 'function') callback(nod);
     return nod;
   }
 
-  connectedCallback () {
+  connectedCallback() {
     if (this.onload && typeof this.onload === 'function') {
       this.onload();
     }
   }
 
   //remove from page
-  disconnectedCallback () {
+  disconnectedCallback() {
     if (this.onremove && typeof this.onremove === 'function') {
       this.onremove();
     }
@@ -3728,7 +3728,7 @@ class Component extends HTMLElement {
     w.navi(text, { context: this, position: pr, background: 'glass', up });
   }
 
-  naviHide () { w.naviHide(); }
+  naviHide() { w.naviHide(); }
 
   alert(info, options=null) {
     if (!options || typeof options !== 'object') options = {};
@@ -3744,7 +3744,7 @@ class Component extends HTMLElement {
 
   cancelAlert(aid='') {return w.cancelAlert(aid);}
 
-  cover (info, options=null) {
+  cover(info, options=null) {
     if (!options || typeof options !== 'object') options = {};
     options.notClose = true;
     options.withCover = true;
@@ -3758,9 +3758,9 @@ class Component extends HTMLElement {
     return this.alertDark(info, options);
   }
 
-  uncover (aid='last') { return w.uncover(aid); }
+  uncover(aid='last') { return w.uncover(aid); }
 
-  loadScript (src) {
+  loadScript(src) {
     return w.loadScript(src, this.tagName.toLowerCase());
   }
 
