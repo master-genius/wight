@@ -92,5 +92,4 @@ data-on后面跟的事件名称就是浏览器支持的所有事件对应的名�
 <div data-onclick="handle2:c"></div>
 <div data-onclick="handle3:po"></div>
 ```
-
 触发函数的名字后面加上:以及选项首字母，几个字母没有顺序，出现即表示启用此选项。
