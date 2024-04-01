@@ -2630,6 +2630,7 @@ w.initDomEvent = function (pg, dom, evtname, bindSelf=true) {
       Object.defineProperty(d, '__events_map__', {
         enumerable: false,
         writable: true,
+        configurable: true,
         value: {}
       });
     }
@@ -3207,7 +3208,13 @@ w.runFunc = function (str, ...args) {
 }
 
 //--------Component---------------
-w.__comps_loop__ = {};
+//w.__comps_loop__ = {};
+Object.defineProperty(w, '__comps_loop__', {
+  enumerable: false,
+  configurable: true,
+  writable: false,
+  value: {}
+});
 
 class Component extends HTMLElement {
   constructor () {
