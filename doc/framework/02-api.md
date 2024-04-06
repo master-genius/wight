@@ -384,6 +384,38 @@ window._import = w.import = async function(path, reload=false){}
 
 w.import另一个好处是会自动加入前缀路径，而直接使用浏览器的import则要自己构建url，就是要使用w.prepath属性进行拼接。
 
+### w.Model
+
+框架层面，从v3.4版本开始，提供了w.Model类方便用于接口请求。此类提供了基本的url参数格式处理，并指定apitable是编写路由表的属性。
+
+```javascript
+
+class Goods extends w.Model {
+    constructor() {
+        super()
+
+        this.prepath = '/api'
+        this.apitable = {
+            get_goods: '/goods/:id',
+            create_goods: '/goods',
+            update_goods: '/goods/:id',
+        }
+    }
+
+    getGoods(id) {
+        return apicall.get(this.fmtParam('get_goods', {id}))
+    }
+
+    createGoods(data) {
+        return apicall.post(this.fmtParam('create_goods'), {
+            body: data
+        })
+    }
+
+}
+
+```
+
 > ----
 > ## 属性和其他相关操作
 > ----
