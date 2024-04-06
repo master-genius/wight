@@ -3832,3 +3832,57 @@ class Component extends HTMLElement {
     return null;
   }
 }
+
+/* Model */
+w.Model = class Model {
+  constructor() {
+    this.prepath = ''
+    this.apitable = {}
+    Object.defineProperty(this, '__api_table__', {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: {}
+    })
+
+    queueMicrotask(() => {
+      for (let k in this.apitable) {
+        this.__api_table__[k] = (this.prepath + this.apitable[k]).split('/').filter(p => p.length > 0)
+      }
+    })
+  }
+
+  fmtParam(url, obj={}) {
+    let nurl;
+    if (typeof url === 'string') {
+      if (url.indexOf('/') < 0 && this.__api_table__[url]) {
+        url = this.__api_table__[url]
+      }
+    }
+
+    if (!obj || typeof obj !== 'object') {
+      obj = {id: obj}
+    }
+
+    if (Array.isArray(url)) {
+      nurl = []
+      url.forEach(x => {
+        let k = x.substring(1)
+        if (x[0] === ':' && obj[k] !== undefined) {
+          nurl.push(encodeURIComponent(obj[k]))
+        } else {
+          nurl.push(x)
+        }
+      })
+
+      return '/' + nurl.join('/')
+    }
+
+    nurl = url;
+    for (let k in obj) {
+      nurl = nurl.replace(`:${k}`, encodeURIComponent(obj[k]))
+    }
+
+    return nurl
+  }
+}
