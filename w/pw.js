@@ -1019,18 +1019,38 @@ wapp.prototype.replaceRequire = function (ctext) {
 }
 
 wapp.prototype.loadExt = async function (cdir) {
-  let extend_name_preg = /^[a-z][a-z0-9\_\-]{0,100}$/i;
+  let extend_name_preg = /^[a-z][a-z0-9\_\-\/]{0,100}(\.js)?$/i;
   try {
     let data = '';
     let orgdata = '';
 
-    if (this.config.extends === '*'
-      || (this.config.extends.length > 0 && this.config.extends[0] === '*') )
-    {
+    if (this.config.extends === '*' || this.config.extends[0] === '/*'
+      || (this.config.extends.length > 0 
+          && (this.config.extends[0] === '*'
+              || this.config.extends[0] === '/*'
+              || this.config.extends[0] === 'extends/*'
+              || this.config.extends[0] === '/extends/*')
+        )
+    ){
       let flist = fs.readdirSync(`${cdir}`, {withFileTypes: true})
       this.config.extends = []
 
       for (let f of flist) {
+        if (f.isDirectory()) {
+          try {
+            let subflist = fs.readdirSync(`${cdir}/${f.name}`, {withFileTypes: true})
+            for (let a of subflist) {
+              a.isFile() && flist.push({
+                name: `${f.name}/${a.name}`,
+                isFile:()=>{return true},
+                isDirectory:()=>{return false}
+              })
+            }
+          } catch (err) {
+            delayOutError(err, 'load sub extends: ' + f.name)
+          }
+        }
+
         if (!f.isFile() || f.name.substring(f.name.length - 3) !== '.js')
           continue;
 
@@ -1043,6 +1063,36 @@ wapp.prototype.loadExt = async function (cdir) {
 
         this.config.extends.push(f.name.substring(0, f.name.length - 3));
       }
+    } else {
+      let real_extends = []
+      let subcount = 0
+      for (let a of this.config.extends) {
+        a = a.replaceAll('//', '/').trim()
+        let ind = a.indexOf('/*')
+
+        if (ind > 0) {
+          let submod = a.substring(0, ind)
+          try {
+            let subflist = fs.readdirSync(cdir + '/' + submod, {withFileTypes: true})
+            for (let f of subflist) {
+              if (!f.isFile() || f.name.substring(f.name.length - 3) !== '.js') {
+                continue
+              }
+
+              real_extends.push(submod + '/' + f.name.substring(0, f.name.length - 3))
+            }
+          } catch (err) {
+            delayOutError(err, 'load sub extends: ' + submod)
+          }
+          continue
+        }
+
+        real_extends.push(
+          a.substring(a.length - 3) === '.js' ? a.substring(0, a.length - 3) : a
+        )
+      }
+
+      this.config.extends = real_extends
     }
 
     let need_push = [];

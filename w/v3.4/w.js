@@ -2820,7 +2820,6 @@ w.ext = new Proxy(w.__ext__, {
     else {
       console.error(`${k}: 扩展名重复，请检查。`);
     }
-    
   },
 
   get: (obj, k) => {
@@ -2828,7 +2827,7 @@ w.ext = new Proxy(w.__ext__, {
     console.error(`${k}: 没有此扩展。`);
   },
 
-  deleteProperty : (obj, k) => {
+  deleteProperty: (obj, k) => {
     if (obj[k]) delete obj[k];
 
     return true;
@@ -2845,6 +2844,21 @@ Object.defineProperty(w, '__require_loop__', {
 window.require = async function (name) {
   try {
     if (w.__ext__[name]) return w.__ext__[name];
+
+    let nleng = name.length;
+    if (name[nleng - 1] === '/') {
+      let mobj = {};
+      await new Promise((rv) => {
+        setTimeout(() => { rv(); }, 10);
+      });
+      for (let k in w.__ext__) {
+        if (k.indexOf(name) === 0) {
+          mobj[k.substring(nleng)] = w.__ext__[k];
+        }
+      }
+
+      return mobj;
+    }
     
     let loop = w.__require_loop__;
 
