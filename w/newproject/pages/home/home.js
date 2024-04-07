@@ -17,13 +17,16 @@ class page {
 
   constructor () {
     this.timer = null;
-  }
-
-  renderList(a) {
-    return `
-        <h4>${a.data.id}</h4>
-        <div>${a.data.name}</div>
-      `;
+    this.display = {
+      list: (ctx) => {
+        return ctx.data.renders((a) => {
+          return `
+            <h4>${a.data.id}</h4>
+            <div>${a.data.name}</div>
+          `;
+        })
+      }
+    }
   }
 
   clickTest(evt) {
@@ -38,7 +41,6 @@ class page {
   }
 
   submitTest(a) {
-    console.log(a);
     notifyTop(JSON.stringify(a.value));
   }
 
