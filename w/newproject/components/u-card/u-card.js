@@ -10,6 +10,20 @@ class UCard extends Component {
 
     //this.shadow可以访问shadow DOM，注意这是shadowRoot。
 
+    this.display = {
+      users: {
+        dataType: 'array',
+        cb: ctx => {
+          return ctx.data.renders(u => {
+            return `<div row card>
+                <div sm-12 md-6 lg-3>Name: ${u.name}</div>
+                <div sm-12 md-6 lg-3>Role: ${u.role}</div>
+            </div>`;
+          })
+        }
+      }
+    }
+
   }
 
   //在render之前执行，此时已经创建好shadow DOM。
@@ -28,14 +42,6 @@ class UCard extends Component {
     this.view({
       users: this.users
     });
-  }
-
-  renderUser (t) {
-    let u = t.data;
-    return `<div row card>
-          <div sm-12 md-6 lg-3>Name: ${u.name}</div>
-          <div sm-12 md-6 lg-3>Role: ${u.role}</div>
-      </div>`;
   }
 
   onload () {
