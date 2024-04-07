@@ -34,5 +34,3 @@ Object.defineProperty(Object.prototype, 'renders', {
   writable: false,
   configurable: false
 });
-
-module.exports = {}

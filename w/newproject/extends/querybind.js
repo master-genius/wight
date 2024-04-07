@@ -21,4 +21,3 @@ if (window.DocumentFragment && typeof window.DocumentFragment === 'function' && 
   window.DocumentFragment.prototype.queryAll = queryAll;
 }
 
-module.exports = {}
