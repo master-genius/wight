@@ -2122,15 +2122,17 @@ w._setData = function (pagename, pg, nds, data) {
 
     } else if (nds[i].dataset.list && typeof pg[nds[i].dataset.list] === 'function') {
       if (Array.isArray(data)) {
+        let textarr = [];
         data.forEach((a, ind) => {
-          dtemp += pg[nds[i].dataset.list]({
+          textarr.push(pg[nds[i].dataset.list]({
             data: a, 
             index: ind, 
             key: ind, 
             target: nds[i], 
             type: 'list', 
-            dataType: (typeof a)}) || '';
+            dataType: (typeof a)}) || '');
         });
+        dtemp = textarr.join('');
       } else if (data && typeof data === 'object') {
         for (let k in data) {
           dtemp += pg[nds[i].dataset.list]({
