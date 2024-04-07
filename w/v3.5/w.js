@@ -3169,7 +3169,7 @@ Object.defineProperty(w, '__module__', {
     let oo = {}
     Object.defineProperty(oo, 'exports', {
       set: (val) => {
-        if (w.__ext__[name]) delete w.__ext__[name];
+        //if (w.__ext__[name]) delete w.__ext__[name];
         w.ext[name] = val;
       },
       get: () => {
