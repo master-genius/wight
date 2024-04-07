@@ -150,7 +150,7 @@ if (cluster.isWorker) {
 
   app.get('/favicon.ico', async c => {
     await c.setHeader('content-type', 'image/x-icon')
-            .helper.pipe('./wight-app/favicon.ico', c.reply)
+            .ext.pipe('./wight-app/favicon.ico', c.reply)
   })
   
   let opts = {
@@ -222,7 +222,7 @@ if (app.isWorker) {
       if (!doc) {
         try {
           ctx.setHeader('cache-control', 'public,max-age=600')
-          return await ctx.helper.pipe('./doc/' + fname, ctx.reply)
+          return await ctx.pipe('./doc/' + fname)
         } catch (err) {
           return ctx.status(404).send('没有找到文档，该文档可能丢失。')
         }
@@ -251,10 +251,10 @@ if (app.isWorker) {
   app.get('/', async ctx => {
     try {
       ctx.setHeader('content-encoding', 'gzip').setHeader('content-type', 'text/html;charset=utf-8')
-      await ctx.helper.pipe('./wight-app/index.html.gz', ctx.reply)
+      await ctx.pipe('./wight-app/index.html.gz')
     } catch (err) {
       ctx.setHeader('content-encoding', 'identity')
-      await ctx.helper.pipe('./wight-app/index.html', ctx.reply)
+      await ctx.pipe('./wight-app/index.html')
     }
     
   })
@@ -346,7 +346,7 @@ if (app.isWorker) {
 
     let name = ctx.body.name.trim()
 
-    let shaname = ctx.helper.sha1(name)
+    let shaname = ctx.ext.sha1(name)
 
     let filename = shaname + '.json'
 
@@ -397,7 +397,7 @@ if (app.isWorker) {
     if (ctx.body.name) {
       let rname = ctx.body.name.trim()
       if (rname !== data.name) {
-        data.id = ctx.helper.sha1(rname)
+        data.id = ctx.ext.sha1(rname)
         data.name = rname
         //检测是否存在同名的文件
         let checkfile = data.id + '.json'
