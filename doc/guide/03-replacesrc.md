@@ -48,7 +48,6 @@ node build.js xtest
 
 如果src已经是w.prepath开头或者是完整的url，是 `https://xxx.cn/xxx` 这种形式则不会替换。
 
-<br>
 
 ## 构建过程组件的静态资源处理
 
