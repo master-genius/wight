@@ -310,7 +310,7 @@ let wapp = function (options = {}) {
       enumerable: false,
       configurable: false,
       writable: true,
-      value: ${this.componentReplaceRegex.toString()}
+      value: ${this.componentReplaceRegex.toString()||'null'}
     });
 
     window.alert = w.alert.bind(w);

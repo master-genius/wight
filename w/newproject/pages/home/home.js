@@ -21,8 +21,8 @@ class page {
       list: (ctx) => {
         return ctx.data.renders((a) => {
           return `
-            <h4>${a.data.id}</h4>
-            <div>${a.data.name}</div>
+            <h4>${a.id}</h4>
+            <div>${a.name}</div>
           `;
         })
       }

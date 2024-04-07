@@ -2143,7 +2143,7 @@ w._setData = function (pagename, pg, nds, data) {
           }
 
           if (vds.dataLimit && typeof vds.dataLimit === 'function') {
-            !vds.dataLimit(data) && (dataOk = false);
+            if (!vds.dataLimit(data)) dataOk = false;
           }
         }
 
