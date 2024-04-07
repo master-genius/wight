@@ -2731,6 +2731,17 @@ w.eventProxy = function (evt, pg, funcname) {
     event: evt,
     type: evt.type,
     value: '',
+    getData: function(name, defval=null) {
+      if (this.target && this.target.dataset) {
+        if (this.target.dataset[name]) return this.target.dataset[name];
+      }
+
+      if (this.currentTarget && this.currentTarget.dataset) {
+        if (this.currentTarget.dataset[name]) return this.currentTarget.dataset[name];
+      }
+
+      return defval;
+    }
   }
 
   let tag = evt.target.tagName.toLowerCase();
