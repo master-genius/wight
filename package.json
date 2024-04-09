@@ -20,7 +20,7 @@
     "npargv": "^1.0.9",
     "qrcode": "^1.5.3",
     "terser": "^5.30.3",
-    "titbit": "^24.0.2",
+    "titbit": "^24.0.3",
     "titbit-loader": "^22.6.5",
     "titbit-token": "^2.1.2",
     "titbit-toolkit": "^3.6.3",
