@@ -77,30 +77,29 @@ class Xtest extends Component {
     async init() {
         if (this.__init__)return;
 
-        if (this.attrs.key) {
-            w.registerShareNotice({
-                type: 'set',
-                key: this.attrs.key,
-                callback: (ctx) => {
-                    //执行相关处理，这里只是示例代码，此处表示识别传递的数据是object并使用action指定动作。
-                    if (ctx.data && typeof ctx.data === 'object' && ctx.data.action) {
-                        switch (ctx.data.action) {
-                            case 'test':
-                                this.view({
-                                    message: ctx.data.message
-                                })
-                                break
+        this.attrs.key
+            &&
+        w.registerShareNotice({
+            type: 'set',
+            key: this.attrs.key,
+            callback: (ctx) => {
+                //执行相关处理，这里只是示例代码，此处表示识别传递的数据是object并使用action指定动作。
+                if (ctx.data && typeof ctx.data === 'object' && ctx.data.action) {
+                    switch (ctx.data.action) {
+                        case 'test':
+                            this.view({
+                                message: ctx.data.message
+                            })
+                            break
 
-                            case 'xxxx':
-                                //...
-                                break
-                        }
+                        case 'xxxx':
+                            //...
+                            break
                     }
                 }
-            })
-        }
+            }
+        })
     }
-
 
 }
 
