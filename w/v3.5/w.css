@@ -314,7 +314,7 @@
   line-height:2rem;
   color:var(--w-alert-color, #4a4a4a);
   min-height: 4rem;
-  max-height: 90%;
+  max-height: 86.5%;
   overflow-y: auto;
   background: var(--w-alert-bg-color, #f7f8fa);
   padding:0.5rem;
