@@ -23,24 +23,24 @@
 }
 
 .w-prompt-top {
-  animation: -w-prompt-show-top 0.09s 1;
+  animation: -w-prompt-show-top 0.1s 1;
 }
 
 /* close dom animation */
 .m-w-common-slide-right {
-  animation: -w-hide-common-slide-right 0.15s 1;
+  animation: -w-hide-common-slide-right 0.159s 1;
 }
 
 .m-w-common-slide-right-close {
-  animation: -w-hide-common-slide-right-close 0.15s 1;
+  animation: -w-hide-common-slide-right-close 0.159s 1;
 }
 
 .m-w-prompt-top {
-  animation: -w-prompt-top-close 0.15s 1;
+  animation: -w-prompt-top-close 0.159s 1;
 }
 
 .m-w-prompt-middle {
-  animation: -w-prompt-middle-close 0.15s 1;
+  animation: -w-prompt-middle-close 0.159s 1;
 }
 
 @keyframes -w-common-slide-show {
@@ -114,16 +114,16 @@
   0% { max-height: 65%; overflow-y: hidden;}
   25% { max-height: 35%; overflow-y: hidden;}
   50% { max-height: 20%; overflow-y: hidden;}
-  75% { max-height: 15%;height: 15%; overflow-y: hidden;}
-  90% { height: 10%; overflow-y: hidden;}
-  100% { height: 2%; overflow-y: hidden;}
+  75% { min-height: 0%;max-height: 15%;height: 15%; overflow-y: hidden;}
+  90% { min-height: 0%;max-height: 10%;height: 10%; overflow-y: hidden;}
+  100% { min-height: 0%;max-height: 2%;height: 2%; overflow-y: hidden;}
 }
 
 @keyframes -w-prompt-top-close {
   0% { top: 9%; max-height: 65%; overflow-y: hidden;}
   25% { top:5%; max-height: 35%; overflow-y: hidden;}
   50% { top: 0%; max-height: 20%; overflow-y: hidden;}
-  75% { top: 0%; max-height: 15%; height:15%; overflow-y: hidden;}
-  90% { top: 0%; height: 10%; overflow-y: hidden;}
-  100% { top: 0%; height: 2%;overflow-y: hidden;}
+  75% { top: 0%; min-height: 0%;max-height: 15%; height:15%; overflow-y: hidden;}
+  90% { top: 0%; min-height: 0%;max-height: 10%;height: 10%; overflow-y: hidden;}
+  100% { top: 0%; min-height: 0%;max-height: 2%;height: 2%;overflow-y: hidden;}
 }
