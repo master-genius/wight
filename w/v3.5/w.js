@@ -1610,11 +1610,11 @@ w.sliderPage = function(html=null, append=true, obj=null, pos='right') {
 w.lockSliderText = false;
 w.hideSlider = function (clearText=true) {
   if (w.slidedom) {
-    w.slidedom.className += ' m-w-hide-common-slide-right';
-    w.slidexdom.className += ' m-w-hide-common-slide-right-close';
+    w.slidedom.className += ' m-w-common-slide-right';
+    w.slidexdom.className += ' m-w-common-slide-right-close';
     setTimeout(() => {
-      w.slidedom.className = 'w-hide-common-slide-right';
-      w.slidexdom.className = 'w-hide-common-slide-right-close';
+      w.slidedom.className = '';
+      w.slidexdom.className = '';
       if (!w.lockSliderText && clearText) {
         w.slidedom.innerHTML = '';
       }

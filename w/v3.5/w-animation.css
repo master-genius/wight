@@ -27,11 +27,11 @@
 }
 
 /* close dom animation */
-.m-w-hide-common-slide-right {
+.m-w-common-slide-right {
   animation: -w-hide-common-slide-right 0.15s 1;
 }
 
-.m-w-hide-common-slide-right-close {
+.m-w-common-slide-right-close {
   animation: -w-hide-common-slide-right-close 0.15s 1;
 }
 
