@@ -1127,7 +1127,7 @@ const w = new function () {
         w[closedom].innerHTML = '';
         w[closedom].style.zIndex = 0;
       }
-    }, 159);
+    }, 157);
   };
 
   this.unpromptMiddle = function () {
@@ -1618,7 +1618,7 @@ w.hideSlider = function (clearText=true) {
       if (!w.lockSliderText && clearText) {
         w.slidedom.innerHTML = '';
       }
-    }, 159);
+    }, 157);
     //w.lockSliderText = false;
   }
 };
