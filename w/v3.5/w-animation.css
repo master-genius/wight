@@ -28,19 +28,19 @@
 
 /* close dom animation */
 .m-w-common-slide-right {
-  animation: -w-hide-common-slide-right 0.168s 1;
+  animation: -w-hide-common-slide-right 0.173s 1;
 }
 
 .m-w-common-slide-right-close {
-  animation: -w-hide-common-slide-right-close 0.168s 1;
+  animation: -w-hide-common-slide-right-close 0.173s 1;
 }
 
 .m-w-prompt-top {
-  animation: -w-prompt-top-close 0.168s 1;
+  animation: -w-prompt-top-close 0.173s 1;
 }
 
 .m-w-prompt-middle {
-  animation: -w-prompt-middle-close 0.168s 1;
+  animation: -w-prompt-middle-close 0.173s 1;
 }
 
 @keyframes -w-common-slide-show {
@@ -102,7 +102,6 @@
   55% {width: 5%;}
   65% {width: 0%;}
   75% {width: 0%;}
-  85% {width: 0%;}
   100% {width: 0%;}
 }
 
@@ -115,7 +114,6 @@
   55% {width: 0%;}
   65% {width: 0%;}
   75% {width: 0%;}
-  85% {width: 0%;}
   100% {width: 0%;}
 }
 
