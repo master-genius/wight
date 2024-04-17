@@ -1,9 +1,9 @@
 .w-common-slide-public {
-  animation: -w-common-slide-show 0.182s 1;
+  animation: -w-common-slide-show 0.168s 1;
 }
 
 .w-common-slide-close-public {
-  animation: -w-common-slide-close 0.182s 1;
+  animation: -w-common-slide-close 0.168s 1;
 }
 
 .w-notify-bottom {
@@ -28,19 +28,19 @@
 
 /* close dom animation */
 .m-w-common-slide-right {
-  animation: -w-hide-common-slide-right 0.159s 1;
+  animation: -w-hide-common-slide-right 0.168s 1;
 }
 
 .m-w-common-slide-right-close {
-  animation: -w-hide-common-slide-right-close 0.159s 1;
+  animation: -w-hide-common-slide-right-close 0.168s 1;
 }
 
 .m-w-prompt-top {
-  animation: -w-prompt-top-close 0.159s 1;
+  animation: -w-prompt-top-close 0.168s 1;
 }
 
 .m-w-prompt-middle {
-  animation: -w-prompt-middle-close 0.159s 1;
+  animation: -w-prompt-middle-close 0.168s 1;
 }
 
 @keyframes -w-common-slide-show {
@@ -95,35 +95,48 @@
 
 @keyframes -w-hide-common-slide-right {
   0% {width: 75%;}
-  25% {width: 65%;}
-  55% {width: 35%;}
-  75% {width: 15%;}
-  90% {width: 5%;}
+  15% {width: 65%;}
+  25% {width: 50%;}
+  35% {width: 35%;}
+  45% {width: 15%;}
+  55% {width: 5%;}
+  65% {width: 0%;}
+  75% {width: 0%;}
+  85% {width: 0%;}
   100% {width: 0%;}
 }
 
 @keyframes -w-hide-common-slide-right-close {
   0% {width: 20%;}
+  15% {width: 18%;}
   25% {width: 15%;}
-  55% {width: 10%;}
-  75% {width: 5%;}
+  35% {width: 10%;}
+  45% {width: 5%;}
+  55% {width: 0%;}
+  65% {width: 0%;}
+  75% {width: 0%;}
+  85% {width: 0%;}
   100% {width: 0%;}
 }
 
 @keyframes -w-prompt-middle-close {
   0% { max-height: 65%; overflow-y: hidden;}
-  25% { max-height: 35%; overflow-y: hidden;}
-  50% { max-height: 20%; overflow-y: hidden;}
-  75% { min-height: 0%;max-height: 15%;height: 15%; overflow-y: hidden;}
-  90% { min-height: 0%;max-height: 10%;height: 10%; overflow-y: hidden;}
-  100% { min-height: 0%;max-height: 2%;height: 2%; overflow-y: hidden;}
+  20% { max-height: 35%; overflow-y: hidden;}
+  35% { max-height: 20%; overflow-y: hidden;}
+  50% { min-height: 0%;max-height: 15%;height: 15%; overflow-y: hidden;}
+  65% { min-height: 0%;max-height: 10%;height: 10%; overflow-y: hidden;}
+  80% { min-height: 0%;max-height: 2%;height: 2%; overflow-y: hidden;}
+  90% { min-height: 0%;max-height: 0%;height: 0%; overflow-y: hidden;}
+  100% { min-height: 0%;max-height: 0%;height: 0%; overflow-y: hidden;}
 }
 
 @keyframes -w-prompt-top-close {
   0% { top: 9%; max-height: 65%; overflow-y: hidden;}
-  25% { top:5%; max-height: 35%; overflow-y: hidden;}
-  50% { top: 0%; max-height: 20%; overflow-y: hidden;}
-  75% { top: 0%; min-height: 0%;max-height: 15%; height:15%; overflow-y: hidden;}
-  90% { top: 0%; min-height: 0%;max-height: 10%;height: 10%; overflow-y: hidden;}
-  100% { top: 0%; min-height: 0%;max-height: 2%;height: 2%;overflow-y: hidden;}
+  20% { top:5%; max-height: 35%; overflow-y: hidden;}
+  35% { top: 0%; max-height: 20%; overflow-y: hidden;}
+  50% { top: 0%; min-height: 0%;max-height: 15%; height:15%; overflow-y: hidden;}
+  75% { top: 0%; min-height: 0%;max-height: 10%;height: 10%; overflow-y: hidden;}
+  80% { top: 0%; min-height: 0%;max-height: 2%;height: 2%;overflow-y: hidden;}
+  90% { top: 0%; min-height: 0%;max-height: 0%;height: 0%;overflow-y: hidden;}
+  100% { top: 0%; min-height: 0%;max-height: 0%;height: 0%;overflow-y: hidden;}
 }
