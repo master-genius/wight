@@ -206,6 +206,8 @@ w.alert = function (info, options){}
 
 - style样式的属性，支持: background, boxShadow, border-radius以及四个分开的属性, transform。
 
+- coverGlass 默认为false，true表示蒙层背景透明。
+
 **返回值**
 
 alert返回值是一个表示当前显示框id的字符串，注意这个值很重要，你需要调用w.cancelAlert(id)取消某一个弹框。

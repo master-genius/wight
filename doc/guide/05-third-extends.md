@@ -45,3 +45,29 @@ let text2 = htmltag.ehtml`<div>${code}</div>`
 console.log(text2)
 
 ```
+
+### querybind
+
+此扩展无需导入。启用后，dom节点具备query和queryAll方法，第一个参数就是css选择器，和querySelector一致，第二个参数是回调函数，对查询到的节点执行此函数。返回值就是querySelector或querySelectorAll的返回值。
+
+### apicall
+
+用于异步请求调用的扩展，封装fetch API，返回值为Promise实例。具备常用请求的静态方法：
+
+```javascript
+async function apicall(url, options)
+```
+
+- apicall.get
+
+- apicall.post
+
+- apicall.put
+
+- apicall.patch
+
+- apicall.delete
+
+默认会在请求失败时提示错误消息，如需要自己处理，不做提示，可以传递fail选项：
+
+apicall.get('/api/xxx', {fail: (ret) => {}})
