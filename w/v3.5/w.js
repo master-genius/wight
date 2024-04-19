@@ -693,6 +693,7 @@ const w = new function () {
     if (options.withCover && w[coverdomname]) {
       astack.coverCount++;
       w[coverdomname].className = 'w-alert-cover-page';
+      options.coverGlass && (w[coverdomname].className += ' w-alert-cover-glass');
     }
 
     return aid;

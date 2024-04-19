@@ -303,6 +303,10 @@
   background: var(--w-cover-bg-color, rgba(22,23,25, 0.13));
 }
 
+.w-alert-cover-glass {
+  background: rgba(235,235,235, 0.001);
+}
+
 .w-global-alert-info {
   z-index:105;
   position:fixed;
