@@ -1,17 +1,17 @@
 .w-common-slide-public {
-  animation: -w-common-slide-show 0.168s 1;
+  animation: -w-common-slide-show 0.158s 1;
 }
 
 .w-common-slide-close-public {
-  animation: -w-common-slide-close 0.168s 1;
+  animation: -w-common-slide-close 0.158s 1;
 }
 
 .w-notify-bottom {
-  animation: -w-notify-from-bottom 0.2s 1;
+  animation: -w-notify-from-bottom 0.158s 1;
 }
 
 .w-notify-top {
-  animation: -w-notify-from-top 0.2s 1;
+  animation: -w-notify-from-top 0.158s 1;
 }
 
 .w-prompt-middle {
