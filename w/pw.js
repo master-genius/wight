@@ -1984,7 +1984,7 @@ class ${className} extends Component {
       style: {
         //type默认就是字符串
         type: 'string',
-        default: 'xxx'
+        default: ''
       },
 
       //用于对外共享数据
