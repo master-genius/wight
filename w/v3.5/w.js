@@ -1819,6 +1819,16 @@ w.goBack = function () {
 }
 
 w.redirectBack = function (n=1) {
+  for (let i = w.historyList.length - 1; i >= 0; i--) {
+    let pgname = w.historyList[i]
+    if (pgname.indexOf('#') !== 0 || pgname === '#' || w.pages[pgname.substring(1)]) {
+      for (let j = w.historyList.length - 1; j > i; j--) {
+        w.historyList.pop()
+      }
+      break
+    }
+  }
+
   if (w.historyList.length < n) {
     return false;
   }
