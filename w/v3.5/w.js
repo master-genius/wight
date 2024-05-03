@@ -392,6 +392,7 @@ class HtmlState_ {
     this.is_script = false
     this.data = ''
     this.cursor = 0
+    this.lastCursor = 0
   }
 
   parse (data) {
