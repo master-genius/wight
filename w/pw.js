@@ -2026,7 +2026,7 @@ class ${className} extends Component {
 
   }
 
-  onattrchange (name, oldValue, newValue) {
+  onattrchange(name, oldValue, newValue) {
     //当改变this上的属性时，会触发此函数。
   }
 
