@@ -1078,6 +1078,16 @@ const w = new function () {
       w[closedom].__unprompt_handle__ = options.unpromptHandle;
     }
 
+    if (options.callback && typeof options.callback === 'function') {
+      queueMicrotask(() => {
+        try {
+          options.callback(w[domname]);
+        } catch (err) {
+          w.debug && console.error(err)
+        }
+      });
+    }
+
     return w[domname];
   };
 
