@@ -22,6 +22,11 @@ let arg = npargv({
     alias: '--not-in-app',
     name: 'min',
     default: false
+  },
+
+  '--test': {
+    name: 'test',
+    default: false
   }
 })
 
@@ -52,6 +57,7 @@ try {
 }
 
 webapp.forceCompress = arg.args.compress;
+webapp.config.test = arg.args.test;
 
 if (arg.list.length == 0) {
   console.error('未指定要打包的应用')
