@@ -1447,6 +1447,43 @@ const w = new function () {
       options.withCover = true;
       return pg.alertDark(info, options);
     };
+
+    pg.prompt = function(info, options={}) {
+      if (!options || typeof options !== 'object') {
+        options = {};
+      }
+  
+      options.target = this;
+      return w.prompt(info, options);
+    }
+  
+    pg.unprompt = function(isbottom=true) {w.unprompt(isbottom);}
+    pg.unpromptMiddle = function(){w.unprompt(false);}
+  
+    pg.promptTop = function(info, options={}) {
+      options.wh = 'top';
+      this.prompt(info, options);
+    }
+  
+    pg.promptMiddle = function(info, options={}) {
+      options.target = this;
+      return w.promptMiddle(info, options);
+    }
+  
+    pg.promptDark = function(info, options={}) {
+      options.target = this;
+      return w.promptDark(info, options);
+    }
+  
+    pg.promptMiddleDark = function(info, options={}) {
+      options.target = this;
+      return w.promptMiddleDark(info, options);
+    }
+  
+    pg.promptTopDark = function(info, options={}) {
+      options.target = this;
+      return w.promptTopDark(info, options);
+    }
   }
 
   this.initPage = function () {
