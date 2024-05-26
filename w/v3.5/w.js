@@ -2808,11 +2808,11 @@ w.eventProxy = function (evt, pg, funcname) {
     value: '',
     getData: function(name, defval=null) {
       if (this.target && this.target.dataset) {
-        if (this.target.dataset[name]) return this.target.dataset[name];
+        if (this.target.dataset[name] !== undefined) return this.target.dataset[name];
       }
 
       if (this.currentTarget && this.currentTarget.dataset) {
-        if (this.currentTarget.dataset[name]) return this.currentTarget.dataset[name];
+        if (this.currentTarget.dataset[name] !== undefined) return this.currentTarget.dataset[name];
       }
 
       return defval;
