@@ -1355,25 +1355,25 @@ const w = new function () {
 
     pg.__dom__ = this.pgcdom.insertBefore(document.createElement('div'),
                                           this.pgcdom.firstChild);
-    pg.initCount = 0;
-    pg.loaded = false;
-    pg.scroll = 0;
-    pg.bottomTime = 0;
-    pg.pageKey = name;
+    pg.__init_count__ = 0;
+    pg.__loaded__ = false;
+    pg.__scroll__ = 0;
+    pg.__bottom_time__ = 0;
+    pg.__page_key__ = name;
     Object.defineProperty(pg, '__name__', {
       enumerable: false,
       configurable: false,
       writable: false,
       value: name
     });
-    pg.name = name;
-    pg.init = false;
+    //pg.name = name;
+    pg.__init__ = false;
     pg.__dom__.onscroll = w.events.scroll;
     pg.__state__ = true;
-    pg.tabsPlace = '';
+    pg.__tabs_place__ = '';
 
     if (w.tabs.list.length > 0) {
-        pg.tabsPlace = '<div style="height:3.8rem;">&nbsp;</div>';
+        pg.__tabs_place__ = '<div style="height:4.2rem;">&nbsp;</div>';
 
         if (w.tabs.pages.indexOf(name) >= 0) {
           pg.__dom__.style.cssText = 'z-index:1;';
@@ -1516,9 +1516,9 @@ const w = new function () {
     
     page.__dom__.innerHTML = '';
     page.__dom__.className = 'w-hide-cur-page';
-    page.init = false;
-    page.loaded = false;
-    page.bottomTime = 0;
+    page.__init__ = false;
+    page.__loaded__ = false;
+    page.__bottom_time__ = 0;
   };
 
   this.stopPage = function (page = null) {
@@ -1753,12 +1753,12 @@ w.loadPage = async function (R) {
   c.orgpath = R.orgpath;
 
   c.goTop = function () {
-    pg.scroll = 0;
+    pg.__scroll__ = 0;
     c.dom.scrollTop = 0;
   };
   
   c.dom = pg.__dom__;
-  c.loaded = pg.loaded;
+  c.loaded = pg.__loaded__;
   c.name = pg.__name__;
   this.going = pg.__name__;
   pg.__ctx__ = c;
@@ -1778,14 +1778,14 @@ w.loadPage = async function (R) {
 
   w.loadPageLock = false;
 
-  if (pg.init === false) {
+  if (pg.__init__ === false) {
     if (!w._htmlcheck(pg.orgHTML)) {
       w.notifyTopError(`页面初始化错误：${pg.__name__}.html`, 15000);
       return false;
     }
-    pg.init = true;
+    pg.__init__ = true;
 
-    pg.__dom__.innerHTML = `${pg.orgHTML}${pg.tabsPlace}`;
+    pg.__dom__.innerHTML = `${pg.orgHTML}${pg.__tabs_place__}`;
 
     w.initPageDomEvents(pg, pg.__dom__);
   }
@@ -1794,8 +1794,8 @@ w.loadPage = async function (R) {
   //这里先解锁hash，允许listenHash执行，避免后续的事件函数执行出现漫长等待。
   w.listenHashLock = false;
 
-  if (pg.onload && typeof pg.onload === 'function' && pg.loaded === false) {
-    pg.loaded = true;
+  if (pg.onload && typeof pg.onload === 'function' && pg.__loaded__ === false) {
+    pg.__loaded__ = true;
     try {
       await pg.onload(c);
     } catch (err) {
@@ -1811,7 +1811,7 @@ w.loadPage = async function (R) {
     }
   }
 
-  pg.__dom__.scrollTop = pg.scroll;
+  pg.__dom__.scrollTop = pg.__scroll__;
 };
 
 w.reload = function (force = true) {
@@ -2525,8 +2525,8 @@ w.runHooks = async function (ctx) {
 w.events = {
   scroll : function () {
     if (w.curpage) {
-      w.curpage.scroll = w.curpage.__dom__.scrollTop;
-      let h = w.curpage.__dom__.clientHeight + w.curpage.scroll;
+      w.curpage.__scroll__ = w.curpage.__dom__.scrollTop;
+      let h = w.curpage.__dom__.clientHeight + w.curpage.__scroll__;
       
       if (typeof w.curpage.onscroll === 'function') {
         try {
@@ -2543,7 +2543,7 @@ w.events = {
         isBottom = (Math.abs(h - w.curpage.__dom__.scrollHeight) < 1.56);
       }
 
-      if (w.curpage.scroll <= 0.0000001) {
+      if (w.curpage.__scroll__ <= 0.0000001) {
         if (typeof w.curpage.ontop === 'function') {
           if (!w.curpage.onTopLock) {
             w.curpage.onTopLock = true;
@@ -2557,8 +2557,8 @@ w.events = {
         if (typeof w.curpage.onbottom === 'function') {
           try {
             let tm = Date.now();
-            if (tm - w.curpage.bottomTime > 900) {
-              w.curpage.bottomTime = tm;
+            if (tm - w.curpage.__bottom_time__ > 900) {
+              w.curpage.__bottom_time__ = tm;
               setTimeout(() => {
                 let t = w.curpage.__dom__.clientHeight + w.curpage.__dom__.scrollTop;
                 if (w.curpage.__dom__.scrollHeight - t < 1.56) {

@@ -387,7 +387,6 @@ let wapp = function (options = {}) {
     } else {
       w.listenHash();
     }
-    
   });
 
   window.jump_page_forward = false;
@@ -455,7 +454,6 @@ let wapp = function (options = {}) {
       op = 'forward';
       window.jump_page_forward = false;
     } else {
-      
       if (ind > 1) {
         if (w.historyList[ind-1] === new_hashstr) {
           op = 'back';
@@ -470,7 +468,6 @@ let wapp = function (options = {}) {
         window.jump_page_forward = false;
         op = 'back';
       }
-
     }
 
     w.historyList.push(new_hashstr);
