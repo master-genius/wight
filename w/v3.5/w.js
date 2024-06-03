@@ -2777,7 +2777,7 @@ w.eventProxy = function (evt, pg, funcname) {
   let wfunc = null;
   
   let wheretext = '';
-  if (pg instanceof Component || (pg.tagName && pg.__attrs__)) {
+  if ((pg instanceof Component) || (pg.tagName && pg.__attrs__)) {
     wheretext = `<div style="line-height:1.1;">${pg.tagName.toLowerCase()}:</div>`;
   } else {
     wheretext = `<div style="line-height:1.1;">${pg.__name__}:</div>`
