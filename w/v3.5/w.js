@@ -2777,10 +2777,10 @@ w.eventProxy = function (evt, pg, funcname) {
   let wfunc = null;
   
   let wheretext = '';
-  if (pg.tagName) {
+  if (pg instanceof Component || (pg.tagName && pg.__attrs__)) {
     wheretext = `<div style="line-height:1.1;">${pg.tagName.toLowerCase()}:</div>`;
   } else {
-    wheretext = `<div style="line-height:1.1;">${pg.name}:</div>`
+    wheretext = `<div style="line-height:1.1;">${pg.__name__}:</div>`
   }
 
   if (wind === 0) {
@@ -3451,7 +3451,7 @@ class Component extends HTMLElement {
     }
   }
 
-  _propValue (obj, val) {
+  _propValue(obj, val) {
     if (!obj || typeof obj !== 'object') return val;
 
     if (!obj.type) return val;
@@ -3528,7 +3528,7 @@ class Component extends HTMLElement {
     return val;
   }
 
-  checkLoopRef (d) {
+  checkLoopRef(d) {
     let lname = `<${this.tagName.toLowerCase()}`;
     
     let tagname = lname + '>';
