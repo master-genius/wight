@@ -1,31 +1,36 @@
+module.exports = function (options={}) {
 
-let fmtbits = (n) => {
-  return n < 10 ? `0${n}` : n;
+  if (!options || typeof options !== 'object') {
+    options = {}
+  }
+  let t = options.time || null
+  let m = options.mode || 'long'
+  let ds = options.ds || ' '
+  let time_ds = options.time_ds || ':'
+
+  if (!t)
+    t = new Date();
+  else if (!isNaN(t)) {
+    t = new Date(typeof t === 'string' ? parseInt(t) : t);
+  }
+
+  let year = t.getFullYear();
+  let month = t.getMonth()+1;
+  let day = t.getDate();
+  let hour = t.getHours();
+  let min = t.getMinutes();
+  let sec = t.getSeconds();
+
+  let mt = `${year}-${month > 9 ? '' : '0'}${month}-${day > 9 ? '' : '0'}${day}`;
+
+  if (m === 'short') {
+    return mt;
+  }
+
+  let md = `${mt}${ds}${hour > 9 ? '' : '0'}${hour}${time_ds}${min > 9 ? '' : '0'}${min}`;
+  if (m === 'middle') {
+    return md;
+  }
+
+  return `${md}${time_ds}${sec > 9 ? '' : '0'}${sec}`;
 }
-
-module.exports = function (mode='long', t=null) {
-  if (typeof mode === 'number' || mode && mode instanceof Date) {
-    t = mode;
-    mode = 'long';
-  }
-
-  if (t === null) {
-    t = Date.now();
-  } else if (typeof t === 'string') {
-    t = parseInt(t);
-  }
-
-  let tm = typeof t === 'number' ? new Date(t) : t;
-
-  let tmstr = `${tm.getFullYear()}-${fmtbits(tm.getMonth()+1)}-${fmtbits(tm.getDate())}`;
-
-  if (mode === 'short') {
-    return tmstr; 
-  }
-
-  if (mode === 'middle') {
-    return tmstr + '_' + `${fmtbits(tm.getHours())}-${fmtbits(tm.getMinutes())}`;
-  }
-  
-  return tmstr + `_${fmtbits(tm.getHours())}-${fmtbits(tm.getMinutes())}-${fmtbits(tm.getSeconds())}`;
-};

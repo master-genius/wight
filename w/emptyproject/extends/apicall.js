@@ -16,7 +16,9 @@ let _methods = [
   'GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'TRACE', 'PATCH'
 ];
 
-function makeResponse (err = null) {
+let requestLock = {}
+
+function makeResponse(err = null) {
   let res = {
     ok: false,
     status: 0,
@@ -113,6 +115,27 @@ exports.apicall = async function (api, options = {}, deep = 0) {
     if (_methods.indexOf(options.method) < 0) {
       return makeResponse(new Error('未知请求方法'))
     }
+  }
+
+  let req_key = `${options.method} ${api}`
+  let min_time = w.config.minRequestTimeSlice && !isNaN(w.config.minRequestTimeSlice)
+                  ? w.config.minRequestTimeSlice
+                  : 50
+
+  if (min_time < 1) min_time = 10
+
+  if (requestLock[req_key]) {
+    let rtime = requestLock[req_key].time
+
+    if (Date.now() - rtime < min_time) {
+      let err_res = makeResponse(new Error(`请求太频繁`))
+      err_res.status = -429
+      err_res.data = '请求太频繁'
+    }
+  }
+
+  requestLock[req_key] = {
+    time: Date.now()
   }
 
   if (options.method && options.body) {
@@ -212,6 +235,12 @@ exports.apicall = async function (api, options = {}, deep = 0) {
   }
 
   if (!ret.ok) {
+    if (ret.status == 401) {
+      if (await token.refresh(true)) {
+        return exports.apicall(api, options, options.retry)
+      }
+    }
+
     if (deep > 0 && options.retry > 0
       && deep < options.retry
       && [401, 403].indexOf(ret.status) < 0)
@@ -220,9 +249,13 @@ exports.apicall = async function (api, options = {}, deep = 0) {
         await new Promise((rv, rj) => {
           setTimeout(rv, options.retryDelay)
         })
+      } else if (min_time > 0) {
+        await new Promise((rv, rj) => {
+          setTimeout(rv, min_time)
+        })
       }
 
-      return await exports.apicall(api, options, deep + 1)
+      return exports.apicall(api, options, deep + 1)
     }
   }
 

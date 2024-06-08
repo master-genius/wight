@@ -25,7 +25,7 @@ Object.defineProperty(Object.prototype, 'renders', {
     
     let htmls = [];
     for (let k in this) {
-      htmls.push(callback(k, this[k]) || '');
+      htmls.push(callback(this[k], k) || '');
     }
   
     return `${firstText}${htmls.join('')}${endText}`;
