@@ -152,7 +152,6 @@ class initapp {
   }
 
   removeCache (keypre, cacheobj) {
-    
     if (!cacheobj || typeof cacheobj !== 'object') {
       return
     }
