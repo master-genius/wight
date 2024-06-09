@@ -151,7 +151,7 @@ class initapp {
 
   }
 
-  removeCache (keypre, cacheobj) {
+  removeCache(keypre, cacheobj) {
     if (!cacheobj || typeof cacheobj !== 'object') {
       return
     }
@@ -163,7 +163,7 @@ class initapp {
     }
   }
 
-  unloadApp (app, appname) {
+  unloadApp(app, appname) {
     delete app.service.apps[appname]
     let keypre = `${appname}-`
 
@@ -174,11 +174,11 @@ class initapp {
 
   }
 
-  has (app, appname) {
+  has(app, appname) {
     return app.service.apps[appname] ? true : false
   }
 
-  async reloadApp (app, appname) {
+  async reloadApp(app, appname) {
     this.unloadApp(app, appname);
     return this.makeApp(app, appname)
               .then(r => {
@@ -197,7 +197,7 @@ class initapp {
               });
   }
 
-  delayReload (app, appname) {
+  delayReload(app, appname) {
     if (this.reloadTimer) return;
     
     this.reloadTimer = setTimeout(() => {
@@ -207,7 +207,7 @@ class initapp {
 
   }
 
-  watch (pd, app, appname) {
+  watch(pd, app, appname) {
     fs.watch(pd, (evt,name) => {
       fs.access(pd, err => {
         !err && this.delayReload(app, appname);
@@ -252,7 +252,7 @@ class initapp {
 
   }
 
-  async makeApp (app, appname) {
+  async makeApp(app, appname) {
     let appdata;
     let pagedir = `${this.appPath}/${this.prefix}/${appname}`;
 
@@ -303,8 +303,7 @@ class initapp {
 
   }
 
-  appRouter (app) {
-
+  appRouter(app) {
     app.service.appNotFound = this.notFound
 
     app.get('/:name', async c => {
@@ -433,8 +432,7 @@ class initapp {
 
   }
   
-  init (app) {
-
+  init(app) {
     app.service.apps = {}
     app.service.prefix = this.prefix
     app.service.appPath = this.appPath
@@ -444,7 +442,6 @@ class initapp {
     }
 
     this.appRouter(app)
-
   }
 
 }
