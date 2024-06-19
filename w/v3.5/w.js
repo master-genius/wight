@@ -3066,6 +3066,10 @@ w.registerShareNotice = function (options) {
       w.notifyError('同一个key注册通知函数不能超过111个。');
       return false;
     }
+    //如果选项已经存在或回调函数是同一个则直接返回。
+    for (let n of kn.list) {
+      if (n === options || n.callback === options.callback) return n.id;
+    }
     kn.list.push(options);
   }
 
