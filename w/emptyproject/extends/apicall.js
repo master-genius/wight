@@ -17,6 +17,20 @@ let _methods = [
 ];
 
 let requestLock = {}
+if (!window.__request_lock_timer__) {
+  window.__request_lock_timer__ = setInterval(() => {
+    for (let k in requestLock) {
+      let r = requestLock[k]
+
+      let tm = Date.now()
+      if (tm - r.time > r.minTime) {
+        if ((tm - r.logTime) >= (r.minTime * 50)) {
+          delete requestLock[k]
+        }
+      }
+    }
+  }, 5000)
+}
 
 function makeResponse(err = null) {
   let res = {
@@ -118,28 +132,37 @@ exports.apicall = async function (api, options = {}, deep = 0) {
   }
 
   let req_key = `${options.method} ${api}`
-  let min_time = w.config.minRequestTimeSlice && !isNaN(w.config.minRequestTimeSlice)
-                  ? w.config.minRequestTimeSlice
+  let min_time = w.config.requestTimeSlice && !isNaN(w.config.requestTimeSlice)
+                  ? w.config.requestTimeSlice
                   : 50
 
-  if (min_time < 1) min_time = 10
+  min_time < 1 && (min_time = 10);
+  min_time > 600_000 && (min_time = 600_000);
+
+  let cur_time = Date.now()
 
   if (requestLock[req_key]) {
     let rtime = requestLock[req_key].time
 
-    if (Date.now() - rtime < min_time) {
+    if (cur_time - rtime < min_time) {
       let err_res = makeResponse(new Error(`请求太频繁`))
       err_res.status = -429
       err_res.data = '请求太频繁'
+      return err_res
     }
+
+    requestLock[req_key].time = cur_time
+    //100个周期之后会删除缓存，此处用于缓解高频请求的频繁删除引发的抖动
+    requestLock[req_key].logTime += 5
   }
 
   requestLock[req_key] = {
-    time: Date.now()
+    time: cur_time,
+    minTime: min_time,
+    logTime: cur_time
   }
 
   if (options.method && options.body) {
-
     let bodyType = typeof options.body;
 
     if (!options.headers['content-type']) {
