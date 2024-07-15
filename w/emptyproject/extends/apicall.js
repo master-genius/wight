@@ -260,6 +260,9 @@ exports.apicall = async function (api, options = {}, deep = 0) {
   if (!ret.ok) {
     if (ret.status == 401) {
       if (await token.refresh(true)) {
+        if (options.headers && options.headers.authorization)
+          delete options.headers.authorization
+
         return exports.apicall(api, options, options.retry)
       }
     }
