@@ -1816,7 +1816,7 @@ wapp.prototype.build = async function (appdir, appname = '') {
 
 wapp.prototype.newPage = function (name, pagedir) {
   
-  let html = `'use strict';\n\nclass page {
+  let html = `'use strict';\n\nclass Page {
 
   constructor() {
 
@@ -1854,7 +1854,7 @@ wapp.prototype.newPage = function (name, pagedir) {
 
   }
 
-}\n\ndefinePage(page);\n`;
+}\n\ndefinePage(Page);\n`;
 
   try {
     fs.accessSync(`${pagedir}/pages`)
