@@ -1016,21 +1016,21 @@ const w = new function () {
 
   //wh = 'bottom', noclose = false, glass = false
   this.prompt = function (info, options = {}) {
-    if (!options || typeof options !== 'object') options = {};
-    let wh = options.wh || 'bottom';
-    let noclose = options.noclose || false;
-    let glass = options.glass || false;
+      if (!options || typeof options !== 'object') options = {};
+      let wh = options.wh || 'bottom';
+      let noclose = options.noclose || false;
+      let glass = options.glass || false;
 
-    if (!w._htmlcheck(info)) return false;
+      if (!w._htmlcheck(info)) return false;
 
-    let domname = 'promptdom';
-    let closedom = 'promptclosedom';
-    if (wh !== 'bottom') {
-      domname = 'promptmiddledom';
-      closedom = 'promptmiddleclosedom';
-    }
+      let domname = 'promptdom';
+      let closedom = 'promptclosedom';
+      if (wh !== 'bottom') {
+        domname = 'promptmiddledom';
+        closedom = 'promptmiddleclosedom';
+      }
 
-    if (!w[domname]) return false;
+      if (!w[domname]) return false;
 
       w[domname].className = `w-prompt-box w-prompt-${wh} w-prompt-display`;
       let pcolor = '#424242';
@@ -1043,6 +1043,12 @@ const w = new function () {
       }
 
       if (options.color) pcolor = options.color;
+
+      if (options.target && options.target.tagName) {
+        info = w.replaceSrc(info, true, options.target.tagName.toLowerCase());
+      } else {
+        info = w.replaceSrc(info);
+      }
 
       if (noclose) {
         w[domname].innerHTML = `<p style="color:${pcolor};">${info}</p>`;
@@ -1066,29 +1072,23 @@ const w = new function () {
         w[domname].innerHTML = `<div style="overflow:auto;word-wrap:break-word;color:${pcolor}">${info}</div>`;
       }
 
-      if (options.target && options.target.tagName) {
-        info = w.replaceSrc(info, true, options.target.tagName.toLowerCase());
-      } else {
-        info = w.replaceSrc(info);
-      }
-
       w.initPageDomEvents(options.target || w.curpage, w[domname], false);
 
-    if (options.unpromptHandle && typeof options.unpromptHandle === 'function') {
-      w[closedom].__unprompt_handle__ = options.unpromptHandle;
-    }
+      if (options.unpromptHandle && typeof options.unpromptHandle === 'function') {
+        w[closedom].__unprompt_handle__ = options.unpromptHandle;
+      }
 
-    if (options.callback && typeof options.callback === 'function') {
-      queueMicrotask(() => {
-        try {
-          options.callback(w[domname]);
-        } catch (err) {
-          w.debug && console.error(err)
-        }
-      });
-    }
+      if (options.callback && typeof options.callback === 'function') {
+        queueMicrotask(() => {
+          try {
+            options.callback(w[domname]);
+          } catch (err) {
+            w.debug && console.error(err)
+          }
+        });
+      }
 
-    return w[domname];
+      return w[domname];
   };
 
   this.promptBlock = function (info, options = {}) {
@@ -2177,7 +2177,7 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
   if (w.__replace_src_regex__ && (w.__replace_src_regex__ instanceof RegExp)) {
     codetext = codetext.replace(w.__replace_src_regex__, match_replace);
   }
- 
+
   return codetext;
 };
 
