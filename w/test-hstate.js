@@ -5,8 +5,17 @@ const htmlstate = require('./htmlstate')
 const hstate = new htmlstate()
 
 let testdata = [
+  `<x-image
+    src="a.png"></x-image>`,
+
   `<input type="text" value="\\"a\\"">`,
+
   `<input type="text" value="==>">`,
+
+  `<x-a cn='""'></x-a>`,
+
+  `<x-a cn=\\'OK\\'></x-a>`,
+
   `<div container row>
   <div md-0-5 lg-0-5></div>
   <div sm-12 md-11 lg-11 style="margin-top:0.25rem; height: 29vh;background: #f1f2f3;"></div>
@@ -50,6 +59,7 @@ let testdata = [
 ]
 
 testdata.forEach(x => {
-  console.log(x)
-  console.log(hstate.parse(x))
+  if (!hstate.parse(x)) {
+    console.log(x, hstate.lastErrorMsg)
+  }
 })

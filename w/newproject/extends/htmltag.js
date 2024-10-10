@@ -1,4 +1,4 @@
-const hstate = new HtmlState_()
+const hstate = new HtmlSyntaxState()
 
 function fmtcode(data, encodehtml=true) {
   if (data.indexOf('<') >= 0 || data.indexOf('>') >= 0) {

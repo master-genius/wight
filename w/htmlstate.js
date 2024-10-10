@@ -21,7 +21,7 @@ class htmlstate {
    * TAG_CLOSE_NAME ----> TAG_CLOSE_END
    */
 
-  constructor () {
+  constructor() {
     this.STATE = {
       CHAR: 'c',
       TAG_ATTR_PRE: '_',
@@ -66,7 +66,7 @@ class htmlstate {
     this.is_script = false
   }
 
-  diffCloseTag () {
+  diffCloseTag() {
     let tagname = ''
     let endIndex = this.curTagEndIndex
 
@@ -74,7 +74,7 @@ class htmlstate {
       endIndex += 1
     }
 
-    tagname = this.data.substring(this.curTagEndIndex, endIndex)
+    tagname = this.data.substring(this.curTagEndIndex, endIndex).trim()
 
     if (tagname.toLowerCase() !== this.tagStack.pop()) {
       return false
@@ -83,8 +83,7 @@ class htmlstate {
     return true
   }
 
-  pushTag () {
-    
+  pushTag() {
     let tagname = ''
     let endIndex = this.curTagIndex
 
@@ -92,13 +91,12 @@ class htmlstate {
       endIndex += 1
     }
 
-    tagname = this.data.substring(this.curTagIndex, endIndex).toLowerCase()
+    tagname = this.data.substring(this.curTagIndex, endIndex).toLowerCase().trim()
 
     this.singleTags.indexOf(tagname) < 0 && this.tagStack.push(tagname)
 
     if (tagname === 'script')
       this.is_script = true
-
   }
 
   /**
@@ -106,7 +104,7 @@ class htmlstate {
    * 在属性值中，如果出现了单引号或双引号的冲突则为非法格式。
    */
 
-  checkSpace (next_char) {
+  checkSpace(next_char) {
     if (this.STATE.TAG_START === this.curState || this.STATE.TAG_CLOSE === this.curState) {
       return false
     }
@@ -146,7 +144,7 @@ class htmlstate {
     return true
   }
 
-  checkTagStart (next_char) {
+  checkTagStart(next_char) {
     if (this.curState === this.STATE.TAG_ATTR_VALUE) {
       if (this.attrType !== '') {
         return false
@@ -184,7 +182,7 @@ class htmlstate {
     return false
   }
 
-  checkTagEnd (cur_char, next_char) {
+  checkTagEnd(cur_char, next_char) {
     if (this.curState === this.STATE.TAG_CLOSE_NAME) {
       this.curState = this.STATE.TAG_CLOSE_END
       if (!this.diffCloseTag()) {
@@ -217,7 +215,7 @@ class htmlstate {
     return false
   }
 
-  checkAttrQuote (cur_char, next_char) {
+  checkAttrQuote(cur_char, next_char) {
     if (this.curState === this.STATE.NONE 
       || this.curState === this.STATE.CHAR 
       || this.curState === this.STATE.TAG_CLOSE_END
@@ -268,7 +266,7 @@ class htmlstate {
     return false
   }
 
-  checkAttrSetValue (next_char) {
+  checkAttrSetValue(next_char) {
     if (this.curState === this.STATE.NONE) {
       this.curState = this.STATE.CHAR
       return true
@@ -301,6 +299,12 @@ class htmlstate {
   }
 
   checkChar(cur_char, next_char) {
+    if (next_char === '\n') {
+      if (this.curState === this.STATE.TAG_NAME) {
+        this.curState = this.STATE.TAG_ATTR_PRE
+        return true
+      }
+    }
 
     /**
      * 在这种情况下，如果当前状态是标签名、属性名、属性值或属性结束则转换为TAG_CLOSE_END.
@@ -325,10 +329,9 @@ class htmlstate {
     }
 
     if (this.curState === this.STATE.TAG_ATTR_SET_VALUE) {
-
       if (cur_char === '\\') {
-        this.cursor += 2
-        return true
+        this.cursor += 1
+        //return true
       }
 
       this.attrType = ''
@@ -342,7 +345,15 @@ class htmlstate {
     }
 
     if (this.curState === this.STATE.TAG_ATTR_VALUE_START) {
+      if (cur_char === '\\') {
+        this.cursor++
+      }
       this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (cur_char === '\\' && this.curState === this.STATE.TAG_ATTR_VALUE) {
+      this.cursor++
       return true
     }
 
@@ -365,15 +376,15 @@ class htmlstate {
    * @param {char} next_char 
    */
 
-  checkState (cur_char, next_char) {
+  checkState(cur_char, next_char) {
     //console.log(cur_char, next_char)
 
-    if (cur_char !== this.attrType && this.attrType !== '') {
+    /* if (cur_char !== this.attrType && this.attrType !== '') {
       if (this.curState === this.STATE.TAG_ATTR_VALUE)
       {
         return true
       }
-    }
+    } */
 
     if (this.is_script) {
       let script_ind = this.data.indexOf('</script>', this.cursor)
@@ -409,7 +420,7 @@ class htmlstate {
 
   }
 
-  diffStack () {
+  diffStack() {
     if (this.tagStack.length !== this.tagCloseStack.length) {
       return false
     }
@@ -417,7 +428,7 @@ class htmlstate {
     return true
   }
 
-  init () {
+  init() {
     this.curState = this.STATE.NONE
     this.attrType = ''
     this.curTagIndex = this.curTagEndIndex = 0
@@ -429,14 +440,15 @@ class htmlstate {
     this.cursor = 0
   }
 
-  parse (data) {
-    
+  parse(data) {    
     this.init()
 
     this.data = data.replace(/<!doctype html>/i, '')
                   .replace(/<SCRIPT>/ig, '<script>')
                   .replace(/<\/SCRIPT>/ig, '</script>')
-                  .replace(/<!--(.|[\r\n])*?-->/mg, '');
+                  .replace(/<!--(.|[\r\n])*?-->/mg, '')
+                  .replace(/\r\n/g, '\n')
+                  .replace(/\r/g, '\n')
 
     if (this.data.length === 0) {
       return true
@@ -471,7 +483,7 @@ class htmlstate {
         return false
       }
 
-      this.cursor += 1
+      this.cursor++
     }
 
     //console.log(this.cursor, data[this.cursor], this.curState)

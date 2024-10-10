@@ -1,6 +1,6 @@
 'use strict';
 
-class HtmlState_ {
+class HtmlSyntaxState {
 
   constructor () {
     this.STATE = {
@@ -49,7 +49,7 @@ class HtmlState_ {
     this.html_comment_reg = new RegExp('<!--(.|[\r\n])*?-->','mg')
   }
 
-  diffCloseTag () {
+  diffCloseTag() {
     let tagname = ''
     let endIndex = this.curTagEndIndex
 
@@ -57,7 +57,7 @@ class HtmlState_ {
       endIndex += 1
     }
 
-    tagname = this.data.substring(this.curTagEndIndex, endIndex)
+    tagname = this.data.substring(this.curTagEndIndex, endIndex).trim()
 
     if (tagname.toLowerCase() !== this.tagStack.pop()) {
       return false
@@ -66,8 +66,7 @@ class HtmlState_ {
     return true
   }
 
-  pushTag () {
-    
+  pushTag() {
     let tagname = ''
     let endIndex = this.curTagIndex
 
@@ -75,13 +74,12 @@ class HtmlState_ {
       endIndex += 1
     }
 
-    tagname = this.data.substring(this.curTagIndex, endIndex).toLowerCase()
+    tagname = this.data.substring(this.curTagIndex, endIndex).toLowerCase().trim()
 
     this.singleTags.indexOf(tagname) < 0 && this.tagStack.push(tagname)
 
     if (tagname === 'script')
       this.is_script = true
-
   }
 
   /**
@@ -89,7 +87,7 @@ class HtmlState_ {
    * 在属性值中，如果出现了单引号或双引号的冲突则为非法格式。
    */
 
-  checkSpace (next_char) {
+  checkSpace(next_char) {
     if (this.STATE.TAG_START === this.curState || this.STATE.TAG_CLOSE === this.curState) {
       return false
     }
@@ -126,7 +124,7 @@ class HtmlState_ {
     return true
   }
 
-  checkTagStart (next_char) {
+  checkTagStart(next_char) {
     if (this.curState === this.STATE.TAG_ATTR_VALUE) {
       if (this.attrType !== '') {
         return false
@@ -164,7 +162,7 @@ class HtmlState_ {
     return false
   }
 
-  checkTagEnd (cur_char, next_char) {
+  checkTagEnd(cur_char, next_char) {
     if (this.curState === this.STATE.TAG_CLOSE_NAME) {
       this.curState = this.STATE.TAG_CLOSE_END
       if (!this.diffCloseTag()) {
@@ -197,7 +195,7 @@ class HtmlState_ {
     return false
   }
 
-  checkAttrQuote (cur_char, next_char) {
+  checkAttrQuote(cur_char, next_char) {
     if (this.curState === this.STATE.NONE 
       || this.curState === this.STATE.CHAR 
       || this.curState === this.STATE.TAG_CLOSE_END
@@ -247,7 +245,7 @@ class HtmlState_ {
     return false
   }
 
-  checkAttrSetValue (next_char) {
+  checkAttrSetValue(next_char) {
     if (this.curState === this.STATE.NONE) {
       this.curState = this.STATE.CHAR
       return true
@@ -280,6 +278,13 @@ class HtmlState_ {
   }
 
   checkChar(cur_char, next_char) {
+    if (next_char === '\n') {
+      if (this.curState === this.STATE.TAG_NAME) {
+        this.curState = this.STATE.TAG_ATTR_PRE
+        return true
+      }
+    }
+
     if (cur_char === '/' && next_char && next_char === '>') {
       if ( (this.attrType === '' && this.curState === this.STATE.TAG_ATTR_VALUE)
         || this.STATE.TAG_NAME === this.curState
@@ -299,14 +304,17 @@ class HtmlState_ {
     }
 
     if (this.curState === this.STATE.TAG_ATTR_SET_VALUE) {
-
       if (cur_char === '\\') {
-        this.cursor += 2
-        return true
+        this.cursor++
       }
 
       this.attrType = ''
       this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (cur_char === '\\' && this.curState === this.STATE.TAG_ATTR_VALUE) {
+      this.cursor++
       return true
     }
 
@@ -316,9 +324,14 @@ class HtmlState_ {
     }
 
     if (this.curState === this.STATE.TAG_ATTR_VALUE_START) {
+      if (cur_char === '\\') {
+        this.cursor++
+      }
+
       this.curState = this.STATE.TAG_ATTR_VALUE
       return true
     }
+
 
     if (this.curState === this.STATE.TAG_START) {
       this.curState = this.STATE.TAG_NAME
@@ -334,12 +347,12 @@ class HtmlState_ {
   }
 
   checkState (cur_char, next_char) {
-    if (cur_char !== this.attrType && this.attrType !== '') {
+    /* if (cur_char !== this.attrType && this.attrType !== '') {
       if (this.curState === this.STATE.TAG_ATTR_VALUE)
       {
         return true
       }
-    }
+    } */
 
     if (this.is_script) {
       let script_ind = this.data.indexOf('<\/script>', this.cursor);
@@ -375,7 +388,7 @@ class HtmlState_ {
 
   }
 
-  diffStack () {
+  diffStack() {
     if (this.tagStack.length !== this.tagCloseStack.length) {
       return false
     }
@@ -383,7 +396,7 @@ class HtmlState_ {
     return true
   }
 
-  init () {
+  init() {
     this.curState = this.STATE.NONE
     this.attrType = ''
     this.curTagIndex = this.curTagEndIndex = 0
@@ -395,7 +408,7 @@ class HtmlState_ {
     this.lastCursor = 0
   }
 
-  parse (data) {
+  parse(data) {
     this.init();
 
     if ( !(typeof data === 'string' || (data instanceof String)) ) {
@@ -409,7 +422,9 @@ class HtmlState_ {
 
     this.data = data.replace(this.script_reg, '<script>')
                     .replace(this.script_end_reg, '<\/script>')
-                    .replace(this.html_comment_reg, '');
+                    .replace(this.html_comment_reg, '')
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\r/g, '\n')
 
     if (this.data.length === 0) {
       return true
@@ -1592,7 +1607,7 @@ const w = new function () {
 };
 
 //因为JS的主线程以事件循环的方式运转，目前的浏览器模式不必考虑多线程竞争问题。
-w._htmlparse = new HtmlState_();
+w._htmlparse = new HtmlSyntaxState();
 w._htmlcheck = function (data) {
   if (!w._htmlparse.parse(data)) {
     w.notify(w._htmlparse.lastErrorMsg, {tmout: 10000, ntype: 'top-error'});
