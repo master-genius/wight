@@ -346,7 +346,7 @@ class HtmlSyntaxState {
     return true
   }
 
-  checkState (cur_char, next_char) {
+  checkState(cur_char, next_char) {
     /* if (cur_char !== this.attrType && this.attrType !== '') {
       if (this.curState === this.STATE.TAG_ATTR_VALUE)
       {
@@ -464,7 +464,7 @@ class HtmlSyntaxState {
         return false;
       }
 
-      this.cursor += 1
+      this.cursor++
     }
 
     //console.log(this.cursor, data[this.cursor], this.curState)

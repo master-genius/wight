@@ -331,11 +331,15 @@ class htmlstate {
     if (this.curState === this.STATE.TAG_ATTR_SET_VALUE) {
       if (cur_char === '\\') {
         this.cursor += 1
-        //return true
       }
 
       this.attrType = ''
       this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (cur_char === '\\' && this.curState === this.STATE.TAG_ATTR_VALUE) {
+      this.cursor++
       return true
     }
 
@@ -348,15 +352,11 @@ class htmlstate {
       if (cur_char === '\\') {
         this.cursor++
       }
+
       this.curState = this.STATE.TAG_ATTR_VALUE
       return true
     }
-
-    if (cur_char === '\\' && this.curState === this.STATE.TAG_ATTR_VALUE) {
-      this.cursor++
-      return true
-    }
-
+    
     if (this.curState === this.STATE.TAG_START) {
       this.curState = this.STATE.TAG_NAME
       return true
