@@ -330,7 +330,7 @@ class htmlstate {
 
     if (this.curState === this.STATE.TAG_ATTR_SET_VALUE) {
       if (cur_char === '\\') {
-        this.cursor += 1
+        this.cursor++
       }
 
       this.attrType = ''
