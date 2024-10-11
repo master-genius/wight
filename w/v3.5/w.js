@@ -457,7 +457,7 @@ class HtmlSyntaxState {
       if (!st) {
         let errt = this.data.substring(this.lastCursor, this.cursor + 10);
         
-        this.lastErrorMsg = `位置： ${this.lastCursor} ~ ${this.cursor}, 错误的语法：<p style="color:#df6878;">...`
+        this.lastErrorMsg = `${this.lastCursor} ~ ${this.cursor}, 错误的语法：<p style="color:#df6878;">...`
           +`${errt.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}...</p>`;
 
         console.error(this.data);

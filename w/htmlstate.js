@@ -377,8 +377,6 @@ class htmlstate {
    */
 
   checkState(cur_char, next_char) {
-    //console.log(cur_char, next_char)
-
     /* if (cur_char !== this.attrType && this.attrType !== '') {
       if (this.curState === this.STATE.TAG_ATTR_VALUE)
       {
