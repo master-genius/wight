@@ -1149,10 +1149,9 @@ for (let k in window) !global[k] && (global[k] = window[k]);
 for (let k in window.globalThis) !global[k] && (global[k] = window.globalThis[k]);
 
 /** -------------  */
-
 'use strict';
 
-class HtmlState_ {
+class HtmlSyntaxState {
 
   constructor () {
     this.STATE = {
@@ -1201,7 +1200,7 @@ class HtmlState_ {
     this.html_comment_reg = new RegExp('<!--(.|[\r\n])*?-->','mg')
   }
 
-  diffCloseTag () {
+  diffCloseTag() {
     let tagname = ''
     let endIndex = this.curTagEndIndex
 
@@ -1209,7 +1208,7 @@ class HtmlState_ {
       endIndex += 1
     }
 
-    tagname = this.data.substring(this.curTagEndIndex, endIndex)
+    tagname = this.data.substring(this.curTagEndIndex, endIndex).trim()
 
     if (tagname.toLowerCase() !== this.tagStack.pop()) {
       return false
@@ -1218,8 +1217,7 @@ class HtmlState_ {
     return true
   }
 
-  pushTag () {
-    
+  pushTag() {
     let tagname = ''
     let endIndex = this.curTagIndex
 
@@ -1227,13 +1225,12 @@ class HtmlState_ {
       endIndex += 1
     }
 
-    tagname = this.data.substring(this.curTagIndex, endIndex).toLowerCase()
+    tagname = this.data.substring(this.curTagIndex, endIndex).toLowerCase().trim()
 
     this.singleTags.indexOf(tagname) < 0 && this.tagStack.push(tagname)
 
     if (tagname === 'script')
       this.is_script = true
-
   }
 
   /**
@@ -1241,7 +1238,7 @@ class HtmlState_ {
    * 在属性值中，如果出现了单引号或双引号的冲突则为非法格式。
    */
 
-  checkSpace (next_char) {
+  checkSpace(next_char) {
     if (this.STATE.TAG_START === this.curState || this.STATE.TAG_CLOSE === this.curState) {
       return false
     }
@@ -1262,6 +1259,10 @@ class HtmlState_ {
     }
 
     if (this.STATE.TAG_NAME === this.curState || this.curState === this.STATE.TAG_ATTR) {
+      if (next_char === '=' && this.curState === this.STATE.TAG_ATTR) {
+        return true
+      }
+      
       this.curState = this.STATE.TAG_ATTR_PRE
     }
     else if (this.STATE.NONE === this.curState) {
@@ -1274,8 +1275,7 @@ class HtmlState_ {
     return true
   }
 
-  checkTagStart (next_char) {
-
+  checkTagStart(next_char) {
     if (this.curState === this.STATE.TAG_ATTR_VALUE) {
       if (this.attrType !== '') {
         return false
@@ -1300,11 +1300,20 @@ class HtmlState_ {
       return true
     }
 
+    //<input value="<<<">
+    if (this.curState === this.STATE.TAG_ATTR_VALUE_START && this.attrType !== '') {
+      this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (this.curState === this.STATE.TAG_ATTR_VALUE && this.attrType !== '') {
+      return true
+    }
+
     return false
   }
 
-  checkTagEnd (cur_char, next_char) {
-    
+  checkTagEnd(cur_char, next_char) {
     if (this.curState === this.STATE.TAG_CLOSE_NAME) {
       this.curState = this.STATE.TAG_CLOSE_END
       if (!this.diffCloseTag()) {
@@ -1324,10 +1333,20 @@ class HtmlState_ {
       return true
     }
 
+    //<input value=">>>">
+    if (this.curState === this.STATE.TAG_ATTR_VALUE_START && this.attrType !== '') {
+      this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (this.curState === this.STATE.TAG_ATTR_VALUE && this.attrType !== '') {
+      return true
+    }
+
     return false
   }
 
-  checkAttrQuote (cur_char, next_char) {
+  checkAttrQuote(cur_char, next_char) {
     if (this.curState === this.STATE.NONE 
       || this.curState === this.STATE.CHAR 
       || this.curState === this.STATE.TAG_CLOSE_END
@@ -1377,8 +1396,7 @@ class HtmlState_ {
     return false
   }
 
-  checkAttrSetValue (next_char) {
-
+  checkAttrSetValue(next_char) {
     if (this.curState === this.STATE.NONE) {
       this.curState = this.STATE.CHAR
       return true
@@ -1397,15 +1415,33 @@ class HtmlState_ {
       return true
     }
 
+    //=“==”这种方式，仍然是等号，但是属于属性值部分。
+    if (this.curState === this.STATE.TAG_ATTR_VALUE_START) {
+      this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (this.curState === this.STATE.TAG_ATTR_VALUE) {
+      return true
+    }
+
     return false
   }
 
   checkChar(cur_char, next_char) {
+    if (next_char === '\n') {
+      if (this.curState === this.STATE.TAG_NAME) {
+        this.curState = this.STATE.TAG_ATTR_PRE
+        return true
+      }
+    }
+
     if (cur_char === '/' && next_char && next_char === '>') {
       if ( (this.attrType === '' && this.curState === this.STATE.TAG_ATTR_VALUE)
         || this.STATE.TAG_NAME === this.curState
         || this.STATE.TAG_ATTR === this.curState
         || this.STATE.TAG_ATTR_PRE === this.curState
+        || this.STATE.TAG_ATTR_VALUE_END === this.curState
       ) {
         this.cursor += 1
         this.curState = this.STATE.TAG_CLOSE_END
@@ -1419,14 +1455,17 @@ class HtmlState_ {
     }
 
     if (this.curState === this.STATE.TAG_ATTR_SET_VALUE) {
-
       if (cur_char === '\\') {
-        this.cursor += 2
-        return true
+        this.cursor++
       }
 
       this.attrType = ''
       this.curState = this.STATE.TAG_ATTR_VALUE
+      return true
+    }
+
+    if (cur_char === '\\' && this.curState === this.STATE.TAG_ATTR_VALUE) {
+      this.cursor++
       return true
     }
 
@@ -1436,9 +1475,14 @@ class HtmlState_ {
     }
 
     if (this.curState === this.STATE.TAG_ATTR_VALUE_START) {
+      if (cur_char === '\\') {
+        this.cursor++
+      }
+
       this.curState = this.STATE.TAG_ATTR_VALUE
       return true
     }
+
 
     if (this.curState === this.STATE.TAG_START) {
       this.curState = this.STATE.TAG_NAME
@@ -1453,15 +1497,7 @@ class HtmlState_ {
     return true
   }
 
-  checkState (cur_char, next_char) {
-
-    if (cur_char !== this.attrType && this.attrType !== '') {
-      if (this.curState === this.STATE.TAG_ATTR_VALUE)
-      {
-        return true
-      }
-    }
-
+  checkState(cur_char, next_char) {
     if (this.is_script) {
       let script_ind = this.data.indexOf('<\/script>', this.cursor);
       if (script_ind < 0) {
@@ -1496,7 +1532,7 @@ class HtmlState_ {
 
   }
 
-  diffStack () {
+  diffStack() {
     if (this.tagStack.length !== this.tagCloseStack.length) {
       return false
     }
@@ -1504,18 +1540,19 @@ class HtmlState_ {
     return true
   }
 
-  init () {
+  init() {
     this.curState = this.STATE.NONE
     this.attrType = ''
     this.curTagIndex = this.curTagEndIndex = 0
     this.tagStack = []
+    this.tagCloseStack = []
     this.is_script = false
     this.data = ''
     this.cursor = 0
+    this.lastCursor = 0
   }
 
-  parse (data) {
-    
+  parse(data) {
     this.init();
 
     if ( !(typeof data === 'string' || (data instanceof String)) ) {
@@ -1529,7 +1566,9 @@ class HtmlState_ {
 
     this.data = data.replace(this.script_reg, '<script>')
                     .replace(this.script_end_reg, '<\/script>')
-                    .replace(this.html_comment_reg, '');
+                    .replace(this.html_comment_reg, '')
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\r/g, '\n')
 
     if (this.data.length === 0) {
       return true
@@ -1562,28 +1601,29 @@ class HtmlState_ {
       if (!st) {
         let errt = this.data.substring(this.lastCursor, this.cursor + 10);
         
-        this.lastErrorMsg = `index ${this.lastCursor} ~ ${this.cursor}, 错误的语法。<p style="color:#df6878;">...`
+        this.lastErrorMsg = `${this.lastCursor} ~ ${this.cursor}, 错误的语法：<p style="color:#df6878;">...`
           +`${errt.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}...</p>`;
 
         console.error(this.data);
         return false;
       }
 
-      this.cursor += 1
+      this.cursor++
     }
 
-    //console.log(this.cursor, data[this.cursor], this.curState)
     //最后的结束状态只能是字符或者标签结束
     if (this.curState !== this.STATE.CHAR 
       && this.curState !== this.STATE.TAG_END 
       && this.curState !== this.STATE.TAG_CLOSE_END)
     {
-      this.lastErrorMsg = '标签结束状态错误，请检查模板字符串的语法格式。'
+      let codeHintText = this.data.substring(this.lastCursor, this.cursor+1);
+      this.lastErrorMsg = '标签结束状态错误，请检查模板字符串的语法格式，以及属性的闭合引号。<br>'
+          + `...${codeHintText.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}...`;
       return false
     }
 
     if (!this.diffStack()) {
-      this.lastErrorMsg = '模板标签包含嵌套不一致。'
+      this.lastErrorMsg = `模板标签包含嵌套不一致：&lt;${this.tagStack.join('&gt;...&lt;')}&gt;...`
       return false
     }
 
@@ -1593,9 +1633,21 @@ class HtmlState_ {
 }
 
 const w = new function () {
-  this.alertlog = {a:[], s:[]};
-  this.notifylog = '';
-  this.notifylogcount = 0;
+  Object.defineProperty(this, 'notifylog', {
+    value: {
+      bottom: {
+        count: 0,
+        dmap: Object.create(null)
+      },
+      top: {
+        count: 0,
+        dmap: Object.create(null)
+      }
+    },
+    enumerable: true,
+    configurable: false,
+    writable: false
+  });
 
   Object.defineProperty(this, 'config', {
     value: {},
@@ -1631,6 +1683,13 @@ const w = new function () {
       return this.curTitle;
     }
   });
+  
+  Object.defineProperty(this, 'randid', {
+    value: (pre='') => {
+      return `${pre}${Date.now().toString(16)}.${Math.random().toString(16).substring(2)}`;
+    },
+    writable: false
+  });
 
   this.attachTitle = (t) => {
     this.title = `${this.__title__}${t}`;
@@ -1643,22 +1702,37 @@ const w = new function () {
   this.ua = navigator.userAgent;
 
   this.isFirefox = false;
-  if (navigator.userAgent.indexOf('Firefox') > 0) {
-    this.isFirefox = true;
+  if (navigator.userAgentData) {
+    let brands = navigator.userAgentData.brands;
+    this.isFirefox = Array.isArray(brands) && brands[0] && brands[0].brand.indexOf('Firefox') >= 0
+  } else {
+    navigator.userAgent.indexOf('Firefox') > 0 && (this.isFirefox = true);
   }
 
-  this.alertStack = {
-    max: 10,
-    zindex: 105,
-    dmap: {},
-    count: 0,
-    coverCount:0,
-    maxZIndex: 9999,
-    curZIndex: 105
-  };
+  Object.defineProperty(this, 'alertStack', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: {
+      max: 28,
+      zindex: 105,
+      dmap: {},
+      closemap: {},
+      count: 0,
+      coverCount:0,
+      maxZIndex: 9999,
+      curZIndex: 105
+    }
+  });
+
+  this.alertStyles = ['left', 'right', 'bottom', 'transform', 'color', 'background', 'boxShadow', 'border-radius', 'border-top-left-radius', 'border-top-right-radius', 'border-bottom-left-radius', 'border-bottom-right-radius'];
 
   //replace=false, notClose=false, withCover = false
   this.alert = function (info, options = {}) {
+    if (!this.alertStack.max || typeof this.alertStack.max !== 'number' || this.alertStack.max > 49 || this.alertStack.max < 1) this.alertStack.max = 10;
+
+    if (!options || typeof options !== 'object') options = {};
+
     let domname = 'alertdom';
     let coverdomname = 'alertcoverdom';
     let astack = this.alertStack;
@@ -1669,13 +1743,22 @@ const w = new function () {
     w.checkhtml && (check_stat = w._htmlcheck(info));
 
     if (!check_stat) {
-      w.notifyTopError(w._htmlcheck.lastErrorMsg);
+      w.notifyTopError(w._htmlcheck.lastErrorMsg, 10000);
       return false;
     }
 
     if (Object.keys(astack.dmap).length >= astack.max) {
-      console.error('alert弹框超出最大限制')
-      return false;
+      if (options.onmax && typeof options.onmax === 'function') {
+        try {
+          options.onmax();
+        } catch (err) {
+          w.debug && console.error(err);
+        }
+        if (Object.keys(astack.dmap).length >= astack.max) return false;
+      } else {
+        w.debug && console.error('alert弹框超出最大限制');
+        return false;
+      }
     }
 
     if (options.context && options.context.tagName) {
@@ -1684,50 +1767,85 @@ const w = new function () {
       info = w.replaceSrc(info);
     }
 
+    let total = Object.keys(astack.dmap).length;
     let dom = document.createElement('div');
     
     dom.className = 'w-global-alert-info';
     if (options.transparent) dom.className += ' w-global-alert-trans';
     dom.style.zIndex = astack.curZIndex;
-    if (options.top) {
-      dom.style.top = options.top;
-    } else {
-      let realTop = 9 + 0.07 * Object.keys(astack.dmap).length;
+
+    let realTop = parseInt(10 + 0.07 * total);
+    dom.style.top = `${realTop}%`;
+
+    if (options.autoOffset && total > 1) {
+      let p_num = parseInt((this.alertStack.max-1) / 2 * Math.random() + 3);
+      let factor = 1.25;
+      let ox = parseInt(49 + (total % p_num) * factor);
+      if (total >= p_num) {
+        ox = parseInt(49 + total*factor - total);
+      }
+
+      realTop = parseInt(10 + (total % p_num) * factor);
+      if (total >= p_num) {
+        realTop = parseInt(10 + total*factor - total);
+      }
+      dom.style.transform = `translateX(-${ox}%)`;
       dom.style.top = `${realTop}%`;
+      dom.style.boxShadow = `2px 2px 2px #e0e0e0`;
     }
 
-    if (options.color) {
-      dom.style.color = options.color;
-    }
-
-    if (options.background) {
-      dom.style.background = options.background;
-    }
-
-    if (options.withShadow) {
-      let shadowPx = Object.keys(astack.dmap).length % 7;
-      dom.style.boxShadow = `${shadowPx}px -${shadowPx}px 2.3px #e3e3e3`;
-    }
+    w.alertStyles.forEach(x => {
+      options[x] && (dom.style[x] = options[x]);
+    });
 
     astack.curZIndex <= astack.maxZIndex && astack.curZIndex++;
 
-    let aid = `a_${Date.now().toString(16)}${Math.random().toString(16).substring(2)}`;
+    let aid = w.randid('a_');
 
     astack.dmap[aid] = dom;
     astack.count++;
 
-    let closeText = '<div style="text-align:right;">'
+    let width = 0;
+    if (options.width && typeof options.width === 'number' && options.width > 1 && options.width <= 100) {
+      width = options.width;
+    }
+
+    width && width > 0 && (dom.style.width = `${width}%`);
+
+    if (!options.notClose) {
+      let closedom = document.createElement('div');
+      astack.closemap[aid] = closedom;
+      closedom.className = 'w-global-alert-info-close';
+      closedom.style.position = 'fixed';
+      closedom.style.transform = 'translateX(-50%)';
+      closedom.style.left = '50%';
+      if (dom.style.transform) closedom.style.transform = dom.style.transform;
+      if (dom.style.left) closedom.style.left = dom.style.left;
+
+      width && width > 0 && (closedom.style.width = `${width}%`);
+
+      closedom.style.boxShadow = dom.style.boxShadow;
+      closedom.style.bottom = `${100 - realTop - 0.09}%`;
+      //closedom.style.bottom = `${100 - parseInt(dom.style.top) - 0.09}%`;
+      closedom.style.zIndex = dom.style.zIndex;
+      closedom.style.background = options.closeBackground 
+                                  || options.background
+                                  || 'var(--w-alert-close-bg-color, #f5f6f7)';
+      if (options.closeBorderBottom) closedom.style.borderBottom = options.closeBorderBottom;
+      closedom.innerHTML = `<div style="text-align:right;padding:0.085%;">`
         +`<a data-onclick="w.cancelAlert" data-aid="${aid}" `
-        +'style="color:#959595;font-size:105%;text-decoration:none;" click>'
+        +'style="color:#989595;font-size:111%;text-decoration:none;user-select:none;" click>'
         +'&nbsp;X&nbsp;</a>'
         +'</div>';
 
-    if (options.notClose) closeText = '';
+      w[domname].appendChild(closedom);
+      w.initPageDomEvents(options.context || w.curpage, closedom, false);
+    }
 
-    if (typeof info === 'object') {
-      dom.innerHTML = `${closeText}${info.innerHTML}`;
+    if (typeof info === 'object' && info.innerHTML) {
+      dom.innerHTML = info.innerHTML;
     } else {
-      dom.innerHTML = `${closeText}${info}`;
+      dom.innerHTML = info;
     }
 
     w.initPageDomEvents(options.context || w.curpage, dom);
@@ -1737,26 +1855,39 @@ const w = new function () {
     if (options.withCover && w[coverdomname]) {
       astack.coverCount++;
       w[coverdomname].className = 'w-alert-cover-page';
+      options.coverGlass && (w[coverdomname].className += ' w-alert-cover-glass');
     }
 
     return aid;
   };
 
   this.cancelAlert = function (ctx) {
-    if (!ctx) return false;
+    if (!ctx) {
+      ctx = this.getLastAlert();
+      if (!ctx) return false;
+    }
 
-    let aid = typeof ctx === 'string' ? ctx : ctx.target.dataset.aid;
+    let aid = typeof ctx === 'string' ? ctx : (ctx.target.dataset.aid || this.getLastAlert());
+    if (!aid) return false;
+
     let domname = 'alertdom';
     let dom = this.alertStack.dmap[aid];
-    if (!dom) return false;
+    if (!dom) {
+      w.debug && console.error(aid, 'not found');
+      return false;
+    }
 
     let d_zindex = dom.style.zIndex;
     if (this.alertStack.curZIndex - 1 === d_zindex) {
       this.alertStack.curZIndex--;
     }
 
+    let closedom = this.alertStack.closemap[aid];
+    if (closedom) closedom.remove();
     dom.remove();
+
     delete this.alertStack.dmap[aid];
+    delete this.alertStack.closemap[aid];
     this.alertStack.count--;
 
     if (Object.keys(this.alertStack.dmap).length === 0) {
@@ -1770,18 +1901,16 @@ const w = new function () {
   };
 
   this.alertDark = function (info, options=null) {
-    if (!options) options = {};
-    if (!options.background) {
-      options.background = '#4a4a4a';
-    }
-
+    if (!options || typeof options !== 'object') options = {};
+    if (!options.background) options.background = '#4f4f4f';
+    if (!options.closeBackground) options.closeBackground = '#4a4a4a';
     if (!options.color) options.color = '#f0f0f1';
-
+    if (!options.boxShadow) options.boxShadow = '2px 2px 3px #828282';
     return this.alert(info, options);
   };
 
   this.coverDark = function (info, options=null) {
-    if (!options) options = {};
+    if (!options || typeof options !== 'object') options = {};
     options.withCover = true;
     options.notClose = true;
     return this.alertDark(info, options);
@@ -1790,20 +1919,25 @@ const w = new function () {
   this.unalert = this.cancelAlert;
 
   this.cover = function (info, options=null) {
-    if (!options) options = {};
+    if (!options || typeof options !== 'object') options = {};
     options.withCover = true;
     options.notClose = true;
 
     return this.alert(info, options);
   };
 
+  this.getLastAlert = function() {
+    let idlist = Object.keys(this.alertStack.dmap);
+    if (idlist.length === 0) return false;
+    return idlist.pop();
+  };
+
   this.uncover = function (aid='last') {
-    if (!aid) return false;
-    if (aid === 'last') {
-      let idlist = Object.keys(this.alertStack.dmap);
-      if (idlist.length === 0) return false;
-      aid = idlist.pop();
+    if (aid === 'last' || !aid) {
+      aid = this.getLastAlert();
     }
+
+    if (!aid) return false;
 
     this.cancelAlert(aid);
     if (this.alertStack.coverCount > 0) {
@@ -1817,7 +1951,7 @@ const w = new function () {
     return true;
   };
 
-  this.alertError = function (info, tmout = 0) {
+  this.alertError = function (info, tmout=0) {
     info = `<span style="color:#e73949;">${info}</span>`;
     let aid = w.alert(info);
     if (tmout > 0) {
@@ -1825,59 +1959,72 @@ const w = new function () {
     }
   };
 
-  this.notifyError = function (info, tmout = 2500) {
-    w.notify(info, {tmout: tmout, ntype: 'error'});
+  this.notifyError = function (info, tmout=5000) {
+    if (typeof tmout === 'object') {
+      tmout.ntype = 'error';
+      return w.notify(info, tmout);
+    }
+    return w.notify(info, {timeout: tmout, ntype: 'error'});
   };
 
-  this.notifyLight = function (info, tmout = 2500) {
-    w.notify(info, {tmout: tmout, ntype: 'light'});
+  this.notifyTop = function (info, tmout=3500) {
+    if (typeof tmout === 'object') {
+      tmout.ntype = 'top';
+      return w.notify(info, tmout);
+    }
+    return w.notify(info, {timeout:tmout, ntype: 'top'});
   };
 
-  this.notifyTop = function (info, tmout = 2500) {
-    w.notify(info, {tmout:tmout, ntype: 'top'});
+  this.notifyTopError = function (info, tmout=5000) {
+    if (typeof tmout === 'object') {
+      tmout.ntype = 'top-error';
+      return w.notify(info, tmout);
+    }
+    return w.notify(info, {timeout: tmout, ntype: 'top-error'});
   };
 
-  this.notifyTopError = function (info, tmout = 2500) {
-    w.notify(info, {tmout: tmout, ntype: 'top-error'});
+  this.notifyOnly = function (info, tmout=3500) {
+    if (typeof tmout === 'object') {
+      tmout.ntype = 'only';
+      return w.notify(info, tmout);
+    }
+    return w.notify(info, {timeout: tmout, ntype: 'only'});
   };
 
-  this.notifyOnly = function (info, tmout = 2500) {
-    w.notify(info, {tmout: tmout, ntype: 'only'});
-  };
-
-  this.notifyTimer = null;
+  this.notifyStyles = [
+    'boxShadow', 'margin', 'marginBottom', 'border', 'borderBottom', 'borderLeft',
+    'borderRight', 'borderTop', 'background', 'color', 'fontSize', 'padding',
+    'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom'
+  ];
 
   this.notify = function (info, options = {}) {
-    let tmout = options.timeout || options.tmout;
+    if (!options) options = {};
+    if (typeof options === 'number') options = {timeout: options};
 
-    tmout = tmout !== undefined && !isNaN(tmout)
-                  ? tmout : 3500;
+    let tmout = (options.timeout && !isNaN(options.timeout) && options.timeout > 0)
+                ? options.timeout : 3500;
+
+    let check_stat = true;
+    w.checkhtml && (check_stat = w._htmlcheck(info));
+    if (!check_stat) return false;
 
     let ntype = options.ntype || 'notify';
 
-    if (tmout < 0) {
-      w.notifyTimer && clearTimeout(w.notifyTimer);
-      w.notifyTimer = null;
-      w.unnotify();
-    }
-
-    let check_stat = true;
-
-    w.checkhtml && (check_stat = w._htmlcheck(info));
-
-    if (!check_stat) {
-      return w.notifydom;
-    }
-
-    info = w.replaceSrc(info);
-
-    if (ntype.indexOf('error') >= 0) {
-      info = `<span style="color:#f96567;font-size:95%;">${info}</span>`;
-    }
-
+    let posi = 'bottom';
+    let domname = 'notifydom';
     let where_is = 'w-notify-bottom';
     if (ntype.indexOf('top') >= 0) {
+      domname = 'notifytopdom';
       where_is = 'w-notify-top';
+      posi = 'top';
+    }
+
+    let nstack = this.notifylog[posi];
+
+    info = w.replaceSrc(info);
+    
+    if (ntype.indexOf('error') >= 0) {
+      info = `<span style="color:#f96567;font-size:95%;">${info}</span>`;
     }
 
     let colorText = '#e5e5e9';
@@ -1888,56 +2035,99 @@ const w = new function () {
     }
 
     if (ntype.indexOf('only') >= 0) {
-      w.notifylogcount = 6;
-      if (w.notifydom.className.length > 0) {
-        w.unnotify();
-      }
+      for (let k in nstack.dmap) {w.cancelNotify(k);}
     }
 
-    if (w.notifydom) {
-      w.notifylogcount += 1;
-      if (w.notifylogcount > 5) {
-        w.notifylog = '';
-        w.notifylogcount = 1;
-      }
-      
-      w.notifylog = `${info}<br>${w.notifylog}`;
-
-      w.notifydom.className = `w-global-notify-box ${where_is} w-global-notify-info`;
-
-      if (ntype.indexOf('noclose') >= 0) {
-        w.notifydom.innerHTML = `<p style="color:${colorText};">${w.notifylog}</p>`;
-      } else {
-        w.notifydom.innerHTML = `<div style="text-align:right;">`
-          +`<a href="javascript:w.unnotify();" `
-          +`style="color:#dfdfdf;font-size:109%;text-decoration:none;" click>&nbsp;X&nbsp;</a>`
-          +`</div><div style="color:${colorText};">${w.notifylog}</div>`;
-      }
-      w.initPageDomEvents(w.curpage, w.notifydom);
+    if (nstack.count > 111) {
+      w.debug && console.error('超出消息通知最大限制：111。');
+      return false;
     }
 
-    if (tmout >= 0) {
-      w.notifyTimer && clearTimeout(w.notifyTimer);
-      w.notifyTimer = setTimeout(() => {
-        w.unnotify();
-      }, tmout);
+    let ndom = document.createElement('div');
+    let nid = w.randid(posi[0]+'_');
+    
+    ndom.style.boxSizing = 'border-box';
+    ndom.style.lineHeight = '1.5';
+    this.notifyStyles.forEach(x => {
+      if ((x === 'borderBottom' || x === 'marginBottom') && nstack.count <= 0)return;
+      options[x] && (ndom.style[x] = options[x]);
+    });
+
+    if (nstack.count > 0) {
+      if (!options.marginBottom) ndom.style.marginBottom = '1.5rem';
     }
 
-    return w.notifydom;
+    if (ntype.indexOf('noclose') < 0) {
+      ndom.style.display = 'flex';
+      ndom.style.flexFlow = 'row wrap';
+      ndom.innerHTML = `<div style="width:95%;">${info}</div>
+        <div data-onclick="w.cancelNotify" data-nid="${nid}" style="display: grid;place-items: center;color:#df4567;cursor:pointer;user-select:none;">X</div>`
+    } else {
+      ndom.innerHTML = info;
+    }
+
+    nstack.dmap[nid] = {
+      nid: nid,
+      dom: ndom,
+      position: posi,
+      timer: setTimeout(() => {
+        w.cancelNotify(nid, false);
+      }, tmout)
+    };
+
+    nstack.count++;
+
+    let real_dom = w[domname];
+    real_dom.insertBefore(ndom, real_dom.firstChild|| null);
+    real_dom.className = `w-global-notify-box ${where_is} w-global-notify-info`;
+    
+    w.initPageDomEvents(options.context || w.curpage, ndom);
+    return nid;
+  };
+
+  this.cancelNotify = function (ctx, clearTimer=true) {
+    if (!ctx) return false;
+
+    let nid = typeof ctx === 'string' ? ctx : ctx.target.dataset.nid;
+    if (!nid) return false;
+
+    let nstack, realdom;
+    
+    if (nid[0] === 'b') {
+      nstack = w.notifylog.bottom;
+      realdom = w.notifydom;
+    } else {
+      nstack = w.notifylog.top;
+      realdom = w.notifytopdom;
+    }
+
+    let nt = nstack.dmap[nid];
+    if (!nt) return false;
+
+    nstack.count--;
+    nt.dom.remove();
+    delete nstack.dmap[nid];
+    if (nstack.count <= 0) {
+      realdom.className = '';
+      realdom.innerHTML = '';
+      nstack.count = 0;
+    }
+
+    clearTimer && nt.timer && clearTimeout(nt.timer);
+
+    return true;
   };
 
   this.unnotify = function () {
-    if (w.notifydom) {
-      w.notifylog = '';
-      w.notifylogcount = 0;
-      w.notifydom.className = '';
-      w.notifydom.innerHTML = '';
-      w.notifyTimer = null;
-    }
-  };
+    w.notifylog.bottom.dmap = {};
+    w.notifylog.top.dmap = {};
+    w.notifylog.bottom.count = 0;
+    w.notifylog.top.count = 0;
 
-  this.notice = function (info) {
-    w.notify(info, {tmout: -1});
+    w.notifydom.className = '';
+    w.notifydom.innerHTML = '';
+    w.notifytopdom.className = '';
+    w.notifytopdom.innerHTML = '';
   };
 
   this.promptMiddle = function (info, options = {}) {
@@ -1987,37 +2177,33 @@ const w = new function () {
 
   //wh = 'bottom', noclose = false, glass = false
   this.prompt = function (info, options = {}) {
+      if (!options || typeof options !== 'object') options = {};
+      let wh = options.wh || 'bottom';
+      let noclose = options.noclose || false;
+      let glass = options.glass || false;
 
-    let wh = options.wh || 'bottom';
-    let noclose = options.noclose || false;
-    let glass = options.glass || false;
+      if (!w._htmlcheck(info)) return false;
 
-    if (w.promptdom) {
-      w.promptdom.className = `w-prompt-box w-prompt-${wh} w-prompt-display`;
+      let domname = 'promptdom';
+      let closedom = 'promptclosedom';
+      if (wh !== 'bottom') {
+        domname = 'promptmiddledom';
+        closedom = 'promptmiddleclosedom';
+      }
+
+      if (!w[domname]) return false;
+
+      w[domname].className = `w-prompt-box w-prompt-${wh} w-prompt-display`;
       let pcolor = '#424242';
 
       if (glass === true || glass === 'glass') {
-        w.promptdom.className += ' w-prompt-glass';
+        w[domname].className += ' w-prompt-glass';
       } else if (glass === 'dark') {
-        w.promptdom.className += ' w-prompt-dark';
+        w[domname].className += ' w-prompt-dark';
         pcolor = '#efefef';
       }
 
       if (options.color) pcolor = options.color;
-
-      if (noclose) {
-        w.promptdom.innerHTML = `<p style="color:${pcolor};">${info}</p>`;
-      } else {
-        w.promptclosedom.className = 'w-prompt-close';
-        if (glass === true || glass === 'glass')
-          w.promptclosedom.className += ' w-prompt-close-glass';
-        w.promptclosedom.onclick = evt => {
-          w.unprompt();
-        };
-
-        w.promptdom.innerHTML = `<div style="overflow:auto;word-wrap:break-word;">`
-          + `<p style="color:${pcolor};">${info}</p></div>`;
-      }
 
       if (options.target && options.target.tagName) {
         info = w.replaceSrc(info, true, options.target.tagName.toLowerCase());
@@ -2025,35 +2211,103 @@ const w = new function () {
         info = w.replaceSrc(info);
       }
 
-      w.initPageDomEvents(options.target || w.curpage, w.promptdom);
-    }
+      if (noclose) {
+        w[domname].innerHTML = `<p style="color:${pcolor};">${info}</p>`;
+      } else {
+        w[closedom].className = 'w-prompt-close';
+        if (glass === true || glass === 'glass')
+          w[closedom].className += ' w-prompt-close-glass';
 
-    return w.promptdom;
+        if (wh !== 'bottom') {
+          w[closedom].style.zIndex = 102;
+          w[closedom].onclick = evt => {
+            w.unprompt(false);
+          };
+        } else {
+          w[closedom].style.zIndex = 100;
+          w[closedom].onclick = evt => {
+            w.unprompt();
+          };
+        }
+
+        w[domname].innerHTML = `<div style="overflow:auto;word-wrap:break-word;color:${pcolor}">${info}</div>`;
+      }
+
+      w.initPageDomEvents(options.target || w.curpage, w[domname], false);
+
+      if (options.unpromptHandle && typeof options.unpromptHandle === 'function') {
+        w[closedom].__unprompt_handle__ = options.unpromptHandle;
+      }
+
+      if (options.callback && typeof options.callback === 'function') {
+        queueMicrotask(() => {
+          try {
+            options.callback(w[domname]);
+          } catch (err) {
+            w.debug && console.error(err)
+          }
+        });
+      }
+
+      return w[domname];
   };
 
   this.promptBlock = function (info, options = {}) {
+    if (!w._htmlcheck(info)) return false;
     if (w.promptdom) {
       w.promptdom.className = 'w-prompt-box w-prompt-block';
       w.promptdom.innerHTML = `<div style="color:#4a4a4f;padding:0.8rem;margin-top:5%;">`
           + `${info}`
           + `</div>`;
     }
-    w.initPageDomEvents(options.target || w.curpage, w.promptdom);
+    w.initPageDomEvents(options.target || w.curpage, w.promptdom, false);
     return w.promptdom;
   };
 
-  this.unprompt = function () {
-    if (w.promptdom) {
-      w.promptdom.className = '';
-      w.promptdom.innerHTML = '';
+  //有些时候prompt需要一个监听操作，当某些数据改变，取消弹框的时候需要询问用户是否继续。
+  this.unprompt = async function (isbottom=true) {
+    let domname = isbottom ? 'promptdom' : 'promptmiddledom';
+    let closedom = isbottom ? 'promptclosedom' : 'promptmiddleclosedom';
+
+    if (w[closedom].__unprompt_handle__) {
+      try {
+        if (!(await w[closedom].__unprompt_handle__())) return false;
+      } catch (err) {
+        w.debug && console.error(err);
+      }
+      w[closedom].__unprompt_handle__ = null;
     }
 
-    if (w.promptclosedom) {
-      w.promptclosedom.className = '';
-      w.promptclosedom.innerHTML = '';
+    if (!isbottom) {
+      let attach_class = ''
+      if (w[domname].className.indexOf('prompt-middle') > 0) {
+        attach_class = ' m-w-prompt-middle'
+      } else {
+        attach_class = ' m-w-prompt-top'
+      }
+      
+      w[domname].className += attach_class
     }
 
+    setTimeout(() => {
+      if (w[domname]) {
+        w[domname].className = '';
+        w[domname].innerHTML = '';
+      }
+  
+      if (w[closedom]) {
+        w[closedom].className = '';
+        w[closedom].innerHTML = '';
+        w[closedom].style.zIndex = 0;
+      }
+    }, 157);
   };
+
+  this.unpromptMiddle = function () {
+    return this.unprompt(false);
+  };
+
+  this.unpromptTop = this.unpromptMiddle;
 
   this.parseHashUrl = function (h) {
     let url = {
@@ -2258,52 +2512,139 @@ const w = new function () {
       pg = this.pages[name] = obj || {};
     }
 
-    if (pg.__state__) {
-      return false;
-    }
+    if (pg.__state__) return false;
 
     pg.__dom__ = this.pgcdom.insertBefore(document.createElement('div'),
                                           this.pgcdom.firstChild);
-    pg.initCount = 0;
-    pg.loaded = false;
-    pg.scroll = 0;
-    pg.bottomTime = 0;
-    pg.pageKey = name;
+    pg.__init_count__ = 0;
+    pg.__loaded__ = false;
+    pg.__scroll__ = 0;
+    pg.__bottom_time__ = 0;
+    pg.__page_key__ = name;
     Object.defineProperty(pg, '__name__', {
       enumerable: false,
       configurable: false,
       writable: false,
       value: name
     });
-    pg.name = name;
-    pg.init = false;
+    //pg.name = name;
+    pg.__init__ = false;
     pg.__dom__.onscroll = w.events.scroll;
     pg.__state__ = true;
-    pg.tabsPlace = '';
+    pg.__tabs_place__ = '';
 
     if (w.tabs.list.length > 0) {
-        pg.tabsPlace = '<div style="height:3.8rem;">&nbsp;</div>';
+        pg.__tabs_place__ = '<div style="height:4.2rem;">&nbsp;</div>';
 
         if (w.tabs.pages.indexOf(name) >= 0) {
           pg.__dom__.style.cssText = 'z-index:1;';
         }
     }
 
-    pg.view = function (data) {return w.view(name, data);};
+    pg.view = function (data, obj=null) {
+      if (typeof data === 'string') {
+        let rd = {};
+        rd[data] = obj;
+        w.view(name, rd);
+      } else {
+        w.view(name, data);
+      }
+      return this;
+    };
+    
     pg.resetView = function (data) {return w.resetView(name, data);};
     pg.setScroll = function(scr) {
         if (scr < 0) { w.pages[name].__dom__.scrollTop += scr; }
         else { w.pages[name].__dom__.scrollTop = scr; }
     };
     pg.destroy = function () {w.destroyPage(w.pages[name]);};
-    pg.query = function(qstr) {return w.pages[name].__dom__.querySelector(qstr);};
-    pg.queryAll = function(qstr) {return w.pages[name].__dom__.querySelectorAll(qstr);};
+    pg.query = function(qstr,callback=null) {
+      let nod = w.pages[name].__dom__.querySelector(qstr);
+      if (!nod) return null;
+      if (callback && typeof callback === 'function') callback(nod);
+      return nod;
+    };
+    pg.queryAll = function(qstr, callback=null) {
+      let nds = w.pages[name].__dom__.querySelectorAll(qstr);
+      if (callback && typeof callback === 'function') nds.forEach(callback);
+      return nds;
+    };
+    pg.bindEvent = function (dom, bindSelf=true) {
+      w.initPageDomEvents(pg, dom, bindSelf);
+    };
     pg.setAttr = function (data) {w.setAttr(name, data);};
-    if (!w.pages[name].data || typeof w.pages[name].data !== 'object') {
-        w.pages[name].data = {};
+    pg.setStyle = function(data) {
+      let obj;
+      for(let k in data) {
+        obj = {};
+        obj[k] = {style: data[k]};
+        w.setAttr(name, obj);
+      }
+    };
+
+    pg.alert = function (info, options=null) {
+      if (!options || typeof options !== 'object') options = {};
+      options.context = this;
+      return w.alert(info, options);
+    };
+  
+    pg.alertDark = function (info, options={}) {
+      if (!options || typeof options !== 'object') options = {};
+      options.context = this;
+      return w.alertDark(info, options);
+    };
+  
+    pg.cover = function (info, options=null) {
+      if (!options || typeof options !== 'object') options = {};
+      options.notClose = true;
+      options.withCover = true;
+      return pg.alert(info, options);
+    };
+    pg.uncover = function(cid='last') {w.uncover(cid);}
+  
+    pg.coverDark = function (info, options=null) {
+      if (!options || typeof options !== 'object') options = {};
+      options.notClose = true;
+      options.withCover = true;
+      return pg.alertDark(info, options);
+    };
+
+    pg.prompt = function(info, options={}) {
+      if (!options || typeof options !== 'object') {
+        options = {};
+      }
+  
+      options.target = this;
+      return w.prompt(info, options);
     }
-    w._make_page_bind(name);
-    w._page_style_bind(name);
+  
+    pg.unprompt = function(isbottom=true) {w.unprompt(isbottom);}
+    pg.unpromptMiddle = function(){w.unprompt(false);}
+  
+    pg.promptTop = function(info, options={}) {
+      options.wh = 'top';
+      this.prompt(info, options);
+    }
+  
+    pg.promptMiddle = function(info, options={}) {
+      options.target = this;
+      return w.promptMiddle(info, options);
+    }
+  
+    pg.promptDark = function(info, options={}) {
+      options.target = this;
+      return w.promptDark(info, options);
+    }
+  
+    pg.promptMiddleDark = function(info, options={}) {
+      options.target = this;
+      return w.promptMiddleDark(info, options);
+    }
+  
+    pg.promptTopDark = function(info, options={}) {
+      options.target = this;
+      return w.promptTopDark(info, options);
+    }
   }
 
   this.initPage = function () {
@@ -2336,9 +2677,9 @@ const w = new function () {
     
     page.__dom__.innerHTML = '';
     page.__dom__.className = 'w-hide-cur-page';
-    page.init = false;
-    page.loaded = false;
-    page.bottomTime = 0;
+    page.__init__ = false;
+    page.__loaded__ = false;
+    page.__bottom_time__ = 0;
   };
 
   this.stopPage = function (page = null) {
@@ -2411,8 +2752,8 @@ const w = new function () {
 
 };
 
-w._htmlparse = new HtmlState_();
-
+//因为JS的主线程以事件循环的方式运转，目前的浏览器模式不必考虑多线程竞争问题。
+w._htmlparse = new HtmlSyntaxState();
 w._htmlcheck = function (data) {
   if (!w._htmlparse.parse(data)) {
     w.notify(w._htmlparse.lastErrorMsg, {tmout: 10000, ntype: 'top-error'});
@@ -2426,26 +2767,50 @@ w.setCoverText = (text = '', style = '') => {
   w.alertcoverdom.style.cssText = style;
 };
 
-w.sliderPage = function(html = null, append = true, obj=null) {
+w.sliderPageLeft = function (html=null, append=true, obj=null) {
+  return w.sliderPage(html, append, obj, 'left');
+};
+
+w.sliderPage = function(html=null, append=true, obj=null, pos='right') {
   if (w.slidedom) {
-    w.slidedom.className = 'w-common-slide-right';
-    w.slidexdom.className = 'w-common-slide-right-close';
-    w.slidexdom.onclick = w.hideSliderPage;
+    let cname = 'w-common-slide-public';
+    let close_name = 'w-common-slide-close-public';
+    if (pos === 'left') {
+      cname += ' w-common-slide-left';
+      close_name += ' w-common-slide-left-close';
+    } else {
+      cname += ' w-common-slide-right';
+      close_name += ' w-common-slide-right-close';
+    }
+
+    w.slidedom.className = cname;
+    w.slidexdom.className = close_name;
+    w.slidexdom.onclick = w.hideSlider;
+
+    //直接显示
+    if (html === null) {
+      return w.slidedom;
+    }
+
+    let html_type = typeof html;
 
     if (html !== null) {
-      if (typeof html === 'string') {
+      if (html_type === 'string') {
         let check_stat = true;
         w.checkhtml && (check_stat = w._htmlcheck(html));
         check_stat && (w.slidedom.innerHTML = html);
-      } else {
+      } else if (html_type === 'object') {
         if (append) {
           w.slidedom.innerHTML = '';
           w.slidedom.appendChild(html);
         } else {
           w.slidedom.innerHTML = html.innerHTML;
         }
+      } else if (html_type === 'number' || html_type === 'boolean') {
+        w.slidedom.innerHTML = html.toString();
       }
-      w.initPageDomEvents(obj || w.curpage, w.slidedom);
+      
+      w.initPageDomEvents(obj || w.curpage, w.slidedom, false);
     }
   }
 
@@ -2453,15 +2818,20 @@ w.sliderPage = function(html = null, append = true, obj=null) {
 };
 
 w.lockSliderText = false;
-w.hideSliderPage = function () {
+w.hideSlider = function (clearText=true) {
   if (w.slidedom) {
-    w.slidedom.className = 'w-hide-common-slide-right';
-    w.slidexdom.className = 'w-hide-common-slide-right-close';
-    w.slidedom.innerHTML = '';
+    w.slidedom.className += ' m-w-common-slide-right';
+    w.slidexdom.className += ' m-w-common-slide-right-close';
+    setTimeout(() => {
+      w.slidedom.className = '';
+      w.slidexdom.className = '';
+      if (!w.lockSliderText && clearText) {
+        w.slidedom.innerHTML = '';
+      }
+    }, 157);
+    //w.lockSliderText = false;
   }
 };
-
-w.hideSlider = w.hideSliderPage;
 
 w.scrollTop = function (bh='smooth') {
   w.scroll({
@@ -2497,7 +2867,6 @@ w.handleNotFound = function () {
 };
 
 w.going = null;
-
 w.routeInfo = function() {
   return w.curpage ? (w.curpage.__ctx__ || null) : null;
 };
@@ -2508,7 +2877,6 @@ w.loadPage = async function (R) {
   }
 
   w.loadPageLock = true;
-
   let route = R.path;
   if (route == '' || route == '/') {
     route = this.homepage;
@@ -2531,7 +2899,6 @@ w.loadPage = async function (R) {
       //经过这个延迟，页面有可能已经准备好。
       await new Promise(rv => {setTimeout(rv, 1101)});
     }
-  
   }
 
   if (this.pages[route] === undefined) {
@@ -2547,16 +2914,14 @@ w.loadPage = async function (R) {
   c.orgpath = R.orgpath;
 
   c.goTop = function () {
-    pg.scroll = 0;
+    pg.__scroll__ = 0;
     c.dom.scrollTop = 0;
   };
   
   c.dom = pg.__dom__;
-  c.loaded = pg.loaded;
-
+  c.loaded = pg.__loaded__;
   c.name = pg.__name__;
   this.going = pg.__name__;
-
   pg.__ctx__ = c;
 
   //loadPage是一个异步函数，如果此时在runHook中的函数执行了重定向操作会导致页面显示失败。
@@ -2574,14 +2939,14 @@ w.loadPage = async function (R) {
 
   w.loadPageLock = false;
 
-  if (pg.init === false) {
+  if (pg.__init__ === false) {
     if (!w._htmlcheck(pg.orgHTML)) {
-      w.notifyTopError(`页面初始化错误：${pg.__name__}.html`, 10000);
+      w.notifyTopError(`页面初始化错误：${pg.__name__}.html`, 15000);
       return false;
     }
-    pg.init = true;
+    pg.__init__ = true;
 
-    pg.__dom__.innerHTML = `${pg.orgHTML}${pg.tabsPlace}`;
+    pg.__dom__.innerHTML = `${pg.orgHTML}${pg.__tabs_place__}`;
 
     w.initPageDomEvents(pg, pg.__dom__);
   }
@@ -2590,8 +2955,8 @@ w.loadPage = async function (R) {
   //这里先解锁hash，允许listenHash执行，避免后续的事件函数执行出现漫长等待。
   w.listenHashLock = false;
 
-  if (pg.onload && typeof pg.onload === 'function' && pg.loaded === false) {
-    pg.loaded = true;
+  if (pg.onload && typeof pg.onload === 'function' && pg.__loaded__ === false) {
+    pg.__loaded__ = true;
     try {
       await pg.onload(c);
     } catch (err) {
@@ -2607,7 +2972,7 @@ w.loadPage = async function (R) {
     }
   }
 
-  pg.__dom__.scrollTop = pg.scroll;
+  pg.__dom__.scrollTop = pg.__scroll__;
 };
 
 w.reload = function (force = true) {
@@ -2663,6 +3028,16 @@ w.goBack = function () {
 }
 
 w.redirectBack = function (n=1) {
+  for (let i = w.historyList.length - 1; i >= 0; i--) {
+    let pgname = w.historyList[i]
+    if (pgname.indexOf('#') !== 0 || pgname === '#' || w.pages[pgname.substring(1)]) {
+      for (let j = w.historyList.length - 1; j > i; j--) {
+        w.historyList.pop()
+      }
+      break
+    }
+  }
+
   if (w.historyList.length < n) {
     return false;
   }
@@ -2728,27 +3103,19 @@ w.setAttr = function (pagename, data) {
   let pgdom = pg.__dom__;
 
   let qcss, nds, attr;
-
+  
   for (let k in data) {
     qcss = `[data-name=${k}]`;
 
-    if (k[0] === '#') {
+    if (k[0] === '&') {
+      qcss = k.substring(1);
+    } else if ([':', '.', '#'].indexOf(k[0]) >= 0) {
       qcss = k;
-    } else if (k[0] === '@') {
-      qcss = `[name=${k.substring(1)}]`;
-    } else if (k[0] === '.') {
-      qcss = `[class=${k.substring(1)}]`;
     } else if (k.indexOf('[') >= 0) {
       qcss = k;
-    } else if (k[0] === ':') {
-      qcss = `[data-bind=${k.substring(1)}]`;
     }
 
     nds = pgdom.querySelectorAll(qcss);
-
-    if (nds.length === 0) {
-      nds = w._queryGlobal(qcss);
-    }
 
     attr = data[k];
 
@@ -2756,6 +3123,7 @@ w.setAttr = function (pagename, data) {
       for (let a in attr) {
         switch (a) {
           case 'class':
+          case 'className':
             d.className = attr[a];
             break;
 
@@ -2780,29 +3148,6 @@ w.setAttr = function (pagename, data) {
 
 };
 
-w._globaldoms = [
-  'alertdom', 'slidedom', 'promptdom', 'navibtndom', 'notifydom', 
-];
-
-w._queryGlobal = function (qstr) {
-  let nds = [];
-  let t = [];
-  
-  for (let a of w._globaldoms) {
-    if (!w[a]) {
-      continue;
-    }
-    
-    t = w[a].querySelectorAll(qstr);
-
-    for (let n of t) {
-      nds.push(n);
-    }
-
-  }
-
-  return nds;
-};
 
 w.errorHandle = null;
 
@@ -2857,10 +3202,6 @@ w.view = function (pagename, data) {
 
     nds = pgdom.querySelectorAll(qcss);
 
-    if (nds.length === 0) {
-      nds = w._queryGlobal(qcss);
-    }
-
     if (data[k] === null) {
       w._resetData(pagename, pg, nds);
       continue;
@@ -2894,13 +3235,15 @@ w.resetView = function(pagename, qss) {
 };
 
 w._resetData = function (pagename, pg, nds) {
+  let tagname = '';
   for (let d of nds) {
-    if (d.tagName === 'IMG') {
+    tagname = d.tagName.toLowerCase();
+    if (tagname === 'img') {
       d.src = '';
       continue;
     }
     
-    if (d.tagName === 'INPUT') {
+    if (tagname === 'input') {
       if (['checkbox', 'radio'].indexOf(d.type) >= 0) {
         d.checked = false;
         continue;
@@ -2908,7 +3251,7 @@ w._resetData = function (pagename, pg, nds) {
     }
 
     if (d.value !== undefined) {
-      ;(d.tagName !== 'SELECT') && (d.value = '');
+      ;(tagname !== 'select') && (d.value = '');
     } else {
       d.innerHTML = '';
     }
@@ -2916,7 +3259,6 @@ w._resetData = function (pagename, pg, nds) {
 };
 
 //w.replaceRegex = /\{\:[A-Za-z0-9\-\_]{1,100}\:\}/;
-
 /**
  *
  * @param {string} codetext 
@@ -2977,66 +3319,82 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
   }
 
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+"[^"]+"[^>]*>/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src\s+=\s+"[^"]+"[^>]*>/ig, 
     fix_src_space);
 
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src\s+=\s+'[^']+'[^>]*>/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src\s+=\s+'[^']+'[^>]*>/ig, 
     fix_src_space);
 
   //audio embed iframe img input source track video
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src="[^"]+"[^>]*>/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src="[^"]+"[^>]*>/ig, 
     match_replace);
 
   codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video)[^>]* src='[^']+'[^>]*>/ig, 
+    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src='[^']+'[^>]*>/ig, 
     match_replace);
+
+  if (w.__replace_src_regex__ && (w.__replace_src_regex__ instanceof RegExp)) {
+    codetext = codetext.replace(w.__replace_src_regex__, match_replace);
+  }
 
   return codetext;
 };
 
 w._setData = function (pagename, pg, nds, data) {
   let dtemp = '';
-  let dataType = typeof data;
+  let dataType = data!==null ? typeof data : 'null';
+  let tagname = '';
 
   for (let i = 0; i < nds.length; i++) {
-    
     if (nds[i].dataset.map && typeof pg[nds[i].dataset.map] === 'function') {
       dtemp = pg[nds[i].dataset.map]({
         data: data,
         target: nds[i],
         type: 'map',
         dataType}) || '';
-
-    } else if (nds[i].dataset.list && typeof pg[nds[i].dataset.list] === 'function') {
-      if (Array.isArray(data)) {
-        data.forEach((a, ind) => {
-          dtemp += pg[nds[i].dataset.list]({
-            data: a, 
-            index: ind, 
-            key: ind, 
-            target: nds[i], 
-            type: 'list', 
-            dataType: (typeof a)}) || '';
-        });
-      } else if (data && typeof data === 'object') {
-        for (let k in data) {
-          dtemp += pg[nds[i].dataset.list]({
-            data: data[k], key: k, target: nds[i], type: 'list', dataType: (typeof data[k])
-          }) || '';
-        }
-      } else {
-        dtemp = pg[nds[i].dataset.list]({data: data, target: nds[i], type: 'list', dataType}) || '';
-      }
     } else {
-      if (pg.display && typeof pg.display === 'object' 
-        && pg.display[nds[i].dataset.name]
-        && typeof pg.display[nds[i].dataset.name] === 'function')
+      if (pg.display && typeof pg.display === 'object' && nds[i].dataset.name
+        && pg.display[nds[i].dataset.name])
       {
-        dtemp = pg.display[nds[i].dataset.name]({
-          data: data, target: nds[i], type: 'display', dataType
-        }) || (typeof data === 'object' ? JSON.stringify(data) : data);
+        let vds = pg.display[nds[i].dataset.name];
+        let vfunc;
+        let dataOk = true;
+        if (typeof vds === 'function') {
+          vfunc = vds;
+        } else if (typeof vds === 'object') {
+          vfunc = (vds.cb && typeof vds.cb === 'function') 
+                    ? vds.cb
+                    : ((vds.callback && typeof vds.callback === 'function')
+                      ? vds.callback
+                      : null
+                    );
+          if (vds.dataType) {
+            if (!((vds.dataType === 'array' && Array.isArray(data)) 
+              || vds.dataType.indexOf(dataType) >= 0))
+            {
+              dataOk = false;
+            }
+          }
+
+          if (vds.dataLimit && typeof vds.dataLimit === 'function') {
+            if (!vds.dataLimit(data)) dataOk = false;
+          }
+        }
+
+        if (!dataOk) {
+          w.debug && console.error(data);
+          w.debug && console.error('数据类型不符合要求，无法渲染页面。');
+          continue;
+        } else if (vfunc) {
+          dtemp = vfunc({
+            data: data,
+            target: nds[i],
+            type: 'display',
+            dataType
+          }) || (typeof data === 'object' ? JSON.stringify(data) : data);
+        }
       } else if (typeof data === 'object') {
         dtemp = JSON.stringify(data);
       } else {
@@ -3044,7 +3402,9 @@ w._setData = function (pagename, pg, nds, data) {
       }
     }
 
-    if (nds[i].tagName === 'IMG') {
+    tagname = nds[i].tagName.toLowerCase();
+
+    if (tagname === 'img') {
       nds[i].src = dtemp;
       continue;
     }
@@ -3053,20 +3413,17 @@ w._setData = function (pagename, pg, nds, data) {
       nds[i].dataset.insert = 'replace';
     }
 
-    if (nds[i].tagName === 'SELECT') {
-
+    if (tagname === 'select') {
       if (!((/<option .*option>/i).test(dtemp)) ) {
-
         for (let o of nds[i].options) {
           if (o.value == dtemp) {
             o.selected = true;
             break;
           }
         }
-
         continue;
       }
-    } else if (nds[i].tagName === 'INPUT') {
+    } else if (tagname === 'input') {
       if (['checkbox', 'radio'].indexOf(nds[i].type) >= 0) {
           if (typeof dtemp === 'boolean') {
             nds[i].checked = dtemp;
@@ -3075,7 +3432,7 @@ w._setData = function (pagename, pg, nds, data) {
       }
     }
 
-    if (nds[i].value !== undefined && nds[i].tagName !== 'SELECT') {
+    if (nds[i].value !== undefined && tagname !== 'select') {
       switch (nds[i].dataset.insert) {
         case 'before':
           nds[i].value = `${dtemp}${nds[i].value}`;
@@ -3097,6 +3454,7 @@ w._setData = function (pagename, pg, nds, data) {
       if (pagename) {
         dtemp = w.replaceSrc(dtemp);
       } else {
+        //组件
         dtemp = w.replaceSrc(dtemp, true, pg.tagName.toLowerCase());
       }
 
@@ -3110,134 +3468,18 @@ w._setData = function (pagename, pg, nds, data) {
         default:
           nds[i].innerHTML = dtemp;
       }
+      //初始化和上一层的操作已经让nds[i]绑定了事件。
       if (pagename)
-        w.initPageDomEvents(pg, nds[i]);
+        w.initPageDomEvents(pg, nds[i], false);
       else if (pagename === 0) {
         //如果在组件里，使用view，则需要执行initPageDomEvents，目前使用pagename为0表示组件内调用。
-        w.initPageDomEvents(pg, nds[i]);
+        w.initPageDomEvents(pg, nds[i], false);
       }
     }
 
     dtemp = '';
   }
 
-};
-
-w.data = {};
-
-w.bind = new Proxy(w.data, {
-  set: (obj, k, data) => {
-    obj[k] = data;
-
-    let qstr = `[data-bind=${k}]`;
-    let nds = w._queryGlobal(qstr);
-
-    for (let n of nds) {
-      n.innerHTML = data;
-    }
-
-    return true;
-  },
-
-  deleteProperty : (obj, k) => {
-    delete obj[k];
-
-    let qstr = `[data-bind=${k}]`;
-    let nds = w._queryGlobal(qstr);
-    
-    for (let d of nds) {
-      d.innerHTML = '';
-    }
-    return true;
-  }
-});
-
-w._make_page_bind = function (pagename) {
-  let pxy = new Proxy(w.pages[pagename].data, {
-    set: (obj, k, data) => {
-      obj[k] = data;
-
-      let qstr = `[data-bind=${k}]`;
-      let nds = w.pages[pagename].queryAll(qstr);
-
-      if (nds.length === 0) {
-        nds = w._queryGlobal(qstr);
-      }
-
-      try {
-        w._setData(pagename, w.pages[pagename], nds, data);
-      } catch (err) {
-        if (w.debug) {
-          w.notifyError(err.message, 3500);
-          console.error(err);
-        } else {
-          w.__cacheError(err);
-        }
-      }
-
-      return true;
-    },
-
-    deleteProperty : (obj, k) => {
-      delete obj[k];
-
-      let qstr = `[data-bind=${k}]`;
-      let nds = w.pages[pagename].queryAll(qstr);
-
-      if (nds.length === 0) {
-        nds = w._queryGlobal(qstr);
-      }
-      
-      for (let d of nds) {
-        d.innerHTML = '';
-      }
-
-      return true;
-    }
-  });
-  
-  Object.defineProperty(w.pages[pagename], 'bind', {
-    value: pxy,
-    writable: false
-  });
-};
-
-w._page_style_bind = function (pname) {
-  w.pages[pname].__style__ = {};
-
-  let pxy = new Proxy(w.pages[pname].__style__, {
-    set: (obj, k, data) => {
-      obj[k] = data;
-
-      let styleData = {}
-      
-      styleData[k] = {
-        style: data
-      };
-
-      w.setAttr(pname, styleData);
-
-      return true;
-    },
-
-    get: (obj, k) => {
-      if (obj[k]) return obj[k];
-      return null;
-    },
-
-    deleteProperty: (obj, k) => {
-      if (obj[k]) {
-        delete obj[k];
-      }
-
-      return true;
-    }
-  });
-
-  Object.defineProperty(w.pages[pname], 'style', {
-    value: pxy,
-    writable: false
-  });
 };
 
 w.parseform = function (fd) {
@@ -3380,7 +3622,7 @@ w.addHook = function (callback, name='') {
     }
   }
 
-  if (!opts.name) opts.name = (Math.random().toString(16).substring(2));
+  if (!opts.name) opts.name = w.randid();
 
   if (!w.hookFunc[opts.name]) {
     w.hookFunc[opts.name] = {func: callback, options: opts};
@@ -3444,8 +3686,8 @@ w.runHooks = async function (ctx) {
 w.events = {
   scroll : function () {
     if (w.curpage) {
-      w.curpage.scroll = w.curpage.__dom__.scrollTop;
-      let h = w.curpage.__dom__.clientHeight + w.curpage.scroll;
+      w.curpage.__scroll__ = w.curpage.__dom__.scrollTop;
+      let h = w.curpage.__dom__.clientHeight + w.curpage.__scroll__;
       
       if (typeof w.curpage.onscroll === 'function') {
         try {
@@ -3462,7 +3704,7 @@ w.events = {
         isBottom = (Math.abs(h - w.curpage.__dom__.scrollHeight) < 1.56);
       }
 
-      if (w.curpage.scroll <= 0.0000001) {
+      if (w.curpage.__scroll__ <= 0.0000001) {
         if (typeof w.curpage.ontop === 'function') {
           if (!w.curpage.onTopLock) {
             w.curpage.onTopLock = true;
@@ -3476,8 +3718,8 @@ w.events = {
         if (typeof w.curpage.onbottom === 'function') {
           try {
             let tm = Date.now();
-            if (tm - w.curpage.bottomTime > 900) {
-              w.curpage.bottomTime = tm;
+            if (tm - w.curpage.__bottom_time__ > 900) {
+              w.curpage.__bottom_time__ = tm;
               setTimeout(() => {
                 let t = w.curpage.__dom__.clientHeight + w.curpage.__dom__.scrollTop;
                 if (w.curpage.__dom__.scrollHeight - t < 1.56) {
@@ -3580,7 +3822,7 @@ w.navi = function (htext, opts = {}) {
   setTimeout(() => {
     w.navibtndom.className = classtext;
     w.navibtndom.innerHTML = htext;
-    w.initPageDomEvents(opts.context || w.curpage, w.navibtndom);
+    w.initPageDomEvents(opts.context || w.curpage, w.navibtndom, false);
   }, 5);
   
 };
@@ -3599,20 +3841,22 @@ Object.defineProperty(w, '_devents', {
   writable: false,
   configurable: false,
   value: [
-    'animationcancel', 'animationend', 'animationiteration', 'animationstart',
-    'blur', 'click', 'copy', 'cut', 'compositionend', 'compositionstart', 'compositionupdate',
-    'change', 'contextmenu', 'dblclick', 'drag', 'dragend', 'dragleave', 'dragstart', 'dragover', 
-    'auxclick', 'securitypolicyviolation', 'beforematch',
-    'dragenter', 'drop', 'error', 'fullscreenchange', 'fullscreenerror', 'focus', 'focusin',
-    'focusout', 'input', 'keyup', 'keydown', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 
-    'mouseout', 'mouseover', 'mouseup', 'pointercancel', 'pointerdown', 'pointerenter', 
-    'pointerleave', 'pointermove', 'pointerout', 'pointerover', 'pointerup', 'paste', 
-    'submit', 'scroll', 'scrollend', 'select', 'transitioncancel', 'transitionend', 'transitionrun',
-    'transitionstart', 'touchcancel', 'touchend', 'touchmove', 'touchstart',  'wheel'
+    "animationcancel", "animationend", "animationiteration", "animationstart", "auxclick",
+    "beforematch", "blur", "canplay", "change", "click", "close", "compositionend",
+    "compositionstart", "compositionupdate", "contextmenu", "copy", "cut", "dblclick",
+    "drag", "dragend", "dragenter", "dragleave", "dragover", "dragstart", "drop",
+    "ended", "error", "focus", "focusin", "focusout", "fullscreenchange",
+    "fullscreenerror", "input", "invalid", "keydown", "keyup", "load", "mousedown",
+    "mouseenter", "mouseleave", "mousemove", "mouseout", "mouseover", "mouseup",
+    "paste", "play", "playing", "pointercancel", "pointerdown", "pointerenter",
+    "pointerleave", "pointermove", "pointerout", "pointerover", "pointerup", "reset",
+    "resize", "scroll", "scrollend", "securitypolicyviolation", "seeked", "seeking",
+    "select", "submit", "touchcancel", "touchend", "touchmove", "touchstart",
+    "transitioncancel", "transitionend", "transitionrun", "transitionstart", "wheel"
   ]
 });
 
-w.initDomEvent = function (pg, dom, evtname) {
+w.initDomEvent = function (pg, dom, evtname, bindSelf=true) {
   if (!dom || !dom.querySelectorAll) return false;
   
   let nds = dom.querySelectorAll('form');
@@ -3627,29 +3871,85 @@ w.initDomEvent = function (pg, dom, evtname) {
 
   nds = dom.querySelectorAll(`[data-on${evtname}]`);
 
-  for (let d of nds) {
-    d.addEventListener(evtname, 
-      w.genEventProxy(pg, d.dataset[`on${evtname}`])
-    );
-  }
+  let bind_event = (d) => {
+    let evtlist = d.dataset[`on${evtname}`].trim().split(' ').filter(x => x.length > 0);
+    if (!d.__events_map__) {
+      Object.defineProperty(d, '__events_map__', {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: {}
+      });
+    }
 
+    let ek = '';
+    evtlist.forEach(ehandle => {
+      let ind = ehandle.indexOf(':');
+      let options = false;
+      if (ind > 0) {
+        let real_ehandle = ehandle.substring(0, ind);
+        let optstr = ehandle.substring(ind+1);
+        ehandle = real_ehandle;
+
+        if (optstr.length > 0) {
+          options = {};
+          for (let i = 0; i < optstr.length; i++) {
+            switch (optstr[i]) {
+              case 'c':
+                options.capture = true;
+                break;
+              case 'o':
+                options.once = true;
+                break;
+              case 'p':
+                options.passive = true;
+                break;
+              case 's':
+                options.signal = true;
+                break;
+            }
+          }
+        }
+      }
+      ek = evtname + ':' + ehandle;
+      if (d.__events_map__[ek]) return;
+      d.__events_map__[ek] = ek;
+      d.addEventListener(evtname, w.genEventProxy(pg, ehandle), options);
+    });
+  };
+
+  bindSelf && dom.dataset && dom.dataset[`on${evtname}`] && bind_event(dom);
+
+  if (bindSelf === 'self') return;
+
+  for (let d of nds) {
+    bind_event(d);
+  }
 };
 
-w.initPageDomEvents = function (pg, dom) {
+w.initPageDomEvents = function (pg, dom, bindSelf=true) {
   for (let e of w._devents) {
-    w.initDomEvent(pg, dom, e);
+    w.initDomEvent(pg, dom, e, bindSelf);
   }
 };
 
 w.eventProxy = function (evt, pg, funcname) {
   let wind = funcname.trim().indexOf('w.');
   let wfunc = null;
+  
+  let wheretext = '';
+  if ((pg instanceof Component) || (pg.tagName && pg.__attrs__)) {
+    wheretext = `<div style="line-height:1.1;">${pg.tagName.toLowerCase()}:</div>`;
+  } else {
+    wheretext = `<div style="line-height:1.1;">${pg.__name__}:</div>`
+  }
 
   if (wind === 0) {
     let wf = w.getFunc(funcname.trim());
     if (!wf) {
       if (evt.target && evt.target.dataset.noterror) return false;
-      w.notifyError(`${funcname} is not a function.`);
+      
+      w.notifyError(`${wheretext}<div>${funcname} is not a function.</div>`);
       return false;
     }
 
@@ -3657,7 +3957,7 @@ w.eventProxy = function (evt, pg, funcname) {
   }
   else if (!pg || !pg[funcname] || !(typeof pg[funcname] === 'function')) {
     if (evt.target && evt.target.dataset.noterror) return false;
-    w.notifyError(`${funcname} is not a function.`);
+    w.notifyError(`${wheretext}<div>${funcname} is not a function.</div>`);
     return false;
   }
 
@@ -3667,6 +3967,17 @@ w.eventProxy = function (evt, pg, funcname) {
     event: evt,
     type: evt.type,
     value: '',
+    getData: function(name, defval=null) {
+      if (this.target && this.target.dataset) {
+        if (this.target.dataset[name] !== undefined) return this.target.dataset[name];
+      }
+
+      if (this.currentTarget && this.currentTarget.dataset) {
+        if (this.currentTarget.dataset[name] !== undefined) return this.currentTarget.dataset[name];
+      }
+
+      return defval;
+    }
   }
 
   let tag = evt.target.tagName.toLowerCase();
@@ -3767,7 +4078,6 @@ w.ext = new Proxy(w.__ext__, {
     else {
       console.error(`${k}: 扩展名重复，请检查。`);
     }
-    
   },
 
   get: (obj, k) => {
@@ -3775,7 +4085,7 @@ w.ext = new Proxy(w.__ext__, {
     console.error(`${k}: 没有此扩展。`);
   },
 
-  deleteProperty : (obj, k) => {
+  deleteProperty: (obj, k) => {
     if (obj[k]) delete obj[k];
 
     return true;
@@ -3792,6 +4102,21 @@ Object.defineProperty(w, '__require_loop__', {
 window.require = async function (name) {
   try {
     if (w.__ext__[name]) return w.__ext__[name];
+
+    let nleng = name.length;
+    if (name[nleng - 1] === '/') {
+      let mobj = {};
+      await new Promise((rv) => {
+        setTimeout(() => { rv(); }, 10);
+      });
+      for (let k in w.__ext__) {
+        if (k.indexOf(name) === 0) {
+          mobj[k.substring(nleng)] = w.__ext__[k];
+        }
+      }
+
+      return mobj;
+    }
     
     let loop = w.__require_loop__;
 
@@ -3819,7 +4144,8 @@ Object.defineProperties(w, {
     writable: false,
     value: {
       length: 0,
-      funcmap: {}
+      funcmap: {},
+      idmap: {}
     }
   }
 });
@@ -3829,100 +4155,175 @@ Object.defineProperties(w, {
  * @param {object} options callback, type, mode
  */
 w.registerShareNotice = function (options) {
+  if (!options || typeof options !== 'object') {
+    w.notifyError('options不是object类型。');
+    return false;
+  }
 
   if (w.shareNoticeList.length >= 10101) {
     w.notifyError('注册通知函数已达上限，不能超过10101个。');
     return false;
   }
 
-  if (!options.type) options.type = 'set';
-  if (!options.mode) options.mode = 'always';
   if (!options.key) {
     w.notifyError('注册通知函数必须明确指定key，若要全部监听，则使用*作为key值。');
     return false;
   }
-
-  options.count = 0;
 
   if (!options.callback || typeof options.callback !== 'function') {
     w.notifyError('没有callback函数用于通知回调。');
     return false;
   }
 
-  options.id = `${options.key}.${Math.random().toString(16).substring(2)}${Date.now()}`;
+  if (!options.type) options.type = ['set'];
+  else if (options.type !== 'all' && !Array.isArray(options.type)) {
+    options.type = [options.type];
+  }
+
+  if (!options.mode) options.mode = 'always';
+
+  options.count = 0;
+
+  options.id = w.randid(`${options.key}::`);
 
   if (!w.shareNoticeList.funcmap[ options.key ]) {
-    w.shareNoticeList.funcmap[ options.key ] = [ options ];
+      let okey = options.key;
+      let key_match = (k) => {
+        return okey === '*' ? true : (k === okey);
+      };
+      let keypre = '';
+      let ktype = 's';
+      //支持key*模式，表示前缀为key,后续为任何值的模式，同时支持正则表达式
+      if (options.key instanceof RegExp) {
+        ktype = 'r';
+        key_match = (k) => {
+          return okey.test(k);
+        };
+      } else if (options.key !== '*' && options.key[options.key.length - 1] === '*') {
+        ktype = 'p';
+        keypre = options.key.substring(0, options.key.length - 1);
+        key_match = (k) => {
+          return k.indexOf(keypre) === 0;
+        };
+      }
+
+      w.shareNoticeList.funcmap[ options.key ] = {
+        type: ktype,
+        match: key_match,
+        list: [options]
+      };
   } else {
-    if (options.only) return false;
-    let kn = w.shareNoticeList.funcmap[ options.key ];
-    if (kn.length >= 111) {
+    if (options.only && !options.reuse) return false;
+    let kn = w.shareNoticeList.funcmap[options.key];
+    //原始的模式也是only reuse
+    if (options.only && options.reuse && kn.list[0] && kn.list[0].only && kn.list[0].reuse) {
+      options.id = kn.list[0].id;
+      kn.list = [ options ];
+      w.shareNoticeList.idmap[options.id] = options;
+      return options.id;
+    }
+
+    if (kn.list.length >= 111) {
       w.notifyError('同一个key注册通知函数不能超过111个。');
       return false;
     }
-    kn.push(options);
+    //如果选项已经存在或回调函数是同一个则直接返回。
+    for (let n of kn.list) {
+      if (n === options || n.callback === options.callback) return n.id;
+    }
+    kn.list.push(options);
   }
 
   w.shareNoticeList.length += 1;
-
+  w.shareNoticeList.idmap[options.id] = options;
   return options.id;
 };
 
 w.removeShareNotice = function (id) {
-  let dotind = id.indexOf('.');
+  if (!id) return false;
+  if (!w.shareNoticeList.idmap[id]) return false;
 
-  let km;
-  if (dotind < 0) km = id;
-  else km = id.substring(0, dotind);
-
-  if (!km || !w.shareNoticeList.funcmap[km]) return false;
-
-  if (km === id) {
-    w.shareNoticeList.funcmap[km] = null;
-    return true;
+  let opts = w.shareNoticeList.idmap[id];
+  
+  if (!w.shareNoticeList.funcmap[opts.key]) {
+    delete w.shareNoticeList.idmap[id];
+    return opts;
   }
 
-  let kmap = w.shareNoticeList.funcmap[km];
+  let kmap = w.shareNoticeList.funcmap[opts.key].list;
   let ind = 0;
 
   for (let a of kmap) {
     if (a.id === id) {
       kmap.splice(ind, 1);
       w.shareNoticeList.length -= 1;
+      if (kmap.length === 0) delete w.shareNoticeList.funcmap[opts.key];
       return a;
     }
     ind += 1;
   }
+
+  return opts;
 };
 
 w.runShareNotice = function (type, obj, k, data = null) {
-  let kmlist = w.shareNoticeList.funcmap[k];
-  let gkmlist = w.shareNoticeList.funcmap['*'];
+  let kmlist = [];
+  let gkmlist = null;
+  if (w.shareNoticeList.funcmap['*']) {
+    gkmlist = w.shareNoticeList.funcmap['*'].list;
+  }
 
-  if (!kmlist && !gkmlist) return;
+  if (k !== '*' && w.shareNoticeList.funcmap[k]) {
+    kmlist = kmlist.concat(w.shareNoticeList.funcmap[k].list);
+  }
 
-  if (!kmlist) kmlist = [];
-  if (!gkmlist) gkmlist = [];
+  let rtmp;
+  for (let sk in w.shareNoticeList.funcmap) {
+    if (sk === '*' || sk === k) continue;
 
-  let rlist = kmlist.concat(gkmlist);
+    rtmp = w.shareNoticeList.funcmap[sk];
+    if (rtmp.type !== 's' && rtmp.match(k)) kmlist = kmlist.concat(rtmp.list);
+  }
+
+  if (kmlist.length == 0 && !gkmlist) return;
+
+  gkmlist && (kmlist = kmlist.concat(gkmlist));
 
   let delids = [];
+  let results = [];
+  let ret_tmp = '';
 
-  for (let a of rlist) {
-    if (a.type !== 'all' && a.type !== type) continue;
+  for (let a of kmlist) {
+    if (a.type !== 'all' && a.type.indexOf(type) < 0) continue;
     if (a.mode === 'once' && a.count > 0) {
       delids.push(a.id);
       continue;
     }
 
-    a.count < 10000000 && (a.count += 1);
+    a.count < 200000000 && (a.count += 1);
+    ;(a.mode === 'once') && delids.push(a.id);
     try {
-      a.callback({
+      //如果是指定了动作模式，则会格式化数据。
+      let real_data = data
+      if (a.action) {
+        let typ = typeof data;
+        if (!data || typ !== 'object') {
+          real_data = {
+            data: data,
+            action: typ === 'string' ? data : ''
+          }
+        } else if (data.action === undefined) {
+          data.action = ''
+        }
+      }
+
+      ret_tmp = a.callback({
         type,
         obj,
         key: k,
-        data: data
+        data: real_data
       });
+      if (ret_tmp !== undefined) results.push(ret_tmp);
     } catch (err) {
       w.notifyError(err.message);
     }
@@ -3934,7 +4335,10 @@ w.runShareNotice = function (type, obj, k, data = null) {
     }
   }
 
-};
+  if (results.length > 0) {
+    return results.length === 1 ? results[0] : results;
+  }
+}
 
 Object.defineProperty(w, 'share', {
   writable: false,
@@ -3946,11 +4350,10 @@ Object.defineProperty(w, 'share', {
     },
   
     get: (obj, k) => {
-      w.runShareNotice('get', obj, k);
-      return obj[k] || null;
+      return w.runShareNotice('get', obj, k) || obj[k] || null;
     },
   
-    deleteProperty : (obj, k) => {
+    deleteProperty: (obj, k) => {
       if (obj[k] !== undefined) {
         w.runShareNotice('delete', obj, k);
         delete obj[k];
@@ -4024,7 +4427,7 @@ Object.defineProperty(w, '__module__', {
     let oo = {}
     Object.defineProperty(oo, 'exports', {
       set: (val) => {
-        if (w.__ext__[name]) delete w.__ext__[name];
+        //if (w.__ext__[name]) delete w.__ext__[name];
         w.ext[name] = val;
       },
       get: () => {
@@ -4088,7 +4491,13 @@ w.runFunc = function (str, ...args) {
 }
 
 //--------Component---------------
-w.__comps_loop__ = {};
+//w.__comps_loop__ = {};
+Object.defineProperty(w, '__comps_loop__', {
+  enumerable: false,
+  configurable: true,
+  writable: false,
+  value: {}
+});
 
 class Component extends HTMLElement {
   constructor () {
@@ -4106,6 +4515,13 @@ class Component extends HTMLElement {
 
     Object.defineProperty(this, '__init__', {
       value: false,
+      configurable: false,
+      writable: true,
+      enumerable: false
+    });
+
+    Object.defineProperty(this, '__channel_id__', {
+      value: null,
       configurable: false,
       writable: true,
       enumerable: false
@@ -4214,12 +4630,19 @@ class Component extends HTMLElement {
     }
   }
 
-  _propValue (obj, val) {
+  _propValue(obj, val) {
     if (!obj || typeof obj !== 'object') return val;
 
     if (!obj.type) return val;
 
     switch (obj.type) {
+      case 'string':
+        if (typeof val === 'string') {
+          if (obj.match && obj.match instanceof RegExp) {
+            !obj.match.test(val) && (val = obj.default || '');
+          }
+        } else { val = `${val}`; }
+        break;
       case 'number':
       case 'int':
         val = parseInt(val);
@@ -4236,21 +4659,43 @@ class Component extends HTMLElement {
         }
         break;
 
+      case 'urijson':
+      case 'encodejson':
+      case 'uri-json':
+        if (typeof val === 'string') {
+          try {
+            let jval = decodeURIComponent(val);
+            val = JSON.parse(jval);
+          } catch (err) {
+            val = obj.default || {};
+          }
+        } else {val = obj.default || {}}
+        break;
+
       case 'json':
         if (typeof val === 'string') {
           try {
             val = JSON.parse(val);
           } catch (err) {
-            val = {};
+            //可能是encodeURIComponent编码的
+            try {
+              if (val.indexOf('%22') > 0 || val.indexOf('%5B') >= 0 || val.indexOf('%7B') >= 0) {
+                val = JSON.parse(decodeURIComponent(val));
+              }
+            } catch (err) {
+              val = obj.default || {};
+            }
           }
-        } else {val = {}}
+        } else {val = obj.default || {}}
         break;
     }
 
-    if (typeof val !== 'object' && obj.limit !== undefined && Array.isArray(obj.limit)) {
+    let val_type = typeof val;
+
+    if (val_type !== 'object' && obj.limit !== undefined && Array.isArray(obj.limit)) {
       if (obj.limit.indexOf(val) < 0)
         return (obj.default !== undefined ? obj.default : obj.limit[0]);
-    } else if (typeof val === 'number') {
+    } else if (val_type === 'number') {
       let valState = 0;
       if (obj.min !== undefined && val < obj.min) valState = -1;
       if (obj.max !== undefined && val > obj.max) valState = 1;
@@ -4262,7 +4707,7 @@ class Component extends HTMLElement {
     return val;
   }
 
-  checkLoopRef (d) {
+  checkLoopRef(d) {
     let lname = `<${this.tagName.toLowerCase()}`;
     
     let tagname = lname + '>';
@@ -4322,7 +4767,7 @@ class Component extends HTMLElement {
     return st;
   }
 
-  notifyLoopRefError (st) {
+  notifyLoopRefError(st) {
     let outerText = st.outername.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     w.notifyError(`${this.tagName} [${outerText}]存在循环引用${st.ref ? ' &lt;--&gt; ' : ''}${st.ref || ''}`, 20000);
     return '';
@@ -4359,7 +4804,7 @@ class Component extends HTMLElement {
    * @param {string} id 
    * @param {object} data 
    */
-  plate (id = null, data = {}) {
+  plate(id = null, data = {}) {
     if (typeof id === 'object' && id) {
       data = id;
       id = null;
@@ -4380,23 +4825,26 @@ class Component extends HTMLElement {
     if (!nd) return false;
 
     let init_style = true;
+    let cssmap_key;
     if (w.__components_css__ && w.__components_css__[tempid]) {
       let csslist = w.__components_css__[tempid];
       if (csslist && Array.isArray(csslist) && csslist.length > 0) {
         let sty = '';
         let ctext= '';
-        if (nd.content.firstChild && nd.content.firstChild.id === csslist[0]) {
+        cssmap_key = csslist[0].indexOf('./') === 0 ? (tempid + '/' + csslist[0]) : csslist[0];
+        if (nd.content.firstChild && nd.content.firstChild.id === cssmap_key) {
           init_style = false;
         }
 
         if (init_style) {
             for (let i = csslist.length - 1; i>=0; i--) {
-              if (!w.__css_code_map__ || !w.__css_code_map__[csslist[i]]) continue;
+              cssmap_key = csslist[i].indexOf('./') === 0 ? (tempid + '/' + csslist[i]) : csslist[i];
+              if (!w.__css_code_map__ || !w.__css_code_map__[cssmap_key]) continue;
               try {
                 sty = document.createElement('style');
-                sty.id = csslist[i];
+                sty.id = cssmap_key;
                 //ctext = decodeURIComponent(w.__css_code_map__[csslist[i]]);
-                ctext = w.__css_code_map__[csslist[i]];
+                ctext = w.__css_code_map__[cssmap_key];
                 sty.appendChild(document.createTextNode(ctext));
                 nd.content.insertBefore(sty, nd.content.firstChild);
               } catch (err) {
@@ -4423,7 +4871,7 @@ class Component extends HTMLElement {
     return d;
   }
 
-  _fmtquery (k) {
+  _fmtquery(k) {
     let qcss = `[data-name=${k}]`;
     if (k[0] === '&') {
       qcss = k.substring(1);
@@ -4436,9 +4884,15 @@ class Component extends HTMLElement {
     return qcss;
   }
 
-  view (data) {
+  view(data, obj=null) {
     if (!this.__init__) {
       this.initPlateTemplate(null, null);
+    }
+
+    if (typeof data === 'string') {
+      let orgdata = data;
+      data = {};
+      data[orgdata] = obj;
     }
 
     let qcss = '';
@@ -4463,6 +4917,8 @@ class Component extends HTMLElement {
         }
       }
     }
+
+    return this;
   }
 
   resetView(qss) {
@@ -4476,7 +4932,7 @@ class Component extends HTMLElement {
     this.view(data);
   }
 
-  setAttr (data) {
+  setAttr(data) {
     if (!data || typeof data !== 'object') {
       return;
     }
@@ -4494,6 +4950,7 @@ class Component extends HTMLElement {
         for (let a in attr) {
           switch (a) {
             case 'class':
+            case 'className':
               d.className = attr[a];
               break;
 
@@ -4516,23 +4973,59 @@ class Component extends HTMLElement {
     }//end for data
   }
 
-  queryAll (qss) {
-    return this.shadow.querySelectorAll(qss);
+  setStyle(data) {
+    let obj;
+    for (let k in data) {
+      obj = {};
+      obj[k] = {style: data[k]};
+      this.setAttr(obj);
+    }
   }
 
-  query (qss) {
-    return this.shadow.querySelector(qss);
+  queryAll(qss, callback=null) {
+    let nds = this.shadow.querySelectorAll(qss);
+    if (callback && typeof callback === 'function') nds.forEach(callback);
+    return nds;
   }
 
-  connectedCallback () {
+  query(qss,callback=null) {
+    let nod = this.shadow.querySelector(qss);
+    if (!nod) return null;
+    if (callback && typeof callback === 'function') callback(nod);
+    return nod;
+  }
+
+  connectedCallback() {
     if (this.onload && typeof this.onload === 'function') {
+      //注册通道函数
+      if (this.attrs.channel) {
+        this.__channel_id__ = w.registerShareNotice({
+          mode: 'always',
+          type: ['set', 'get'],
+          only: !!this.attrs.channelOnly,
+          callback: ctx => {
+            if (ctx.type === 'set') {
+              this.channelInput
+                && (typeof this.channelInput === 'function')
+                && this.channelInput(ctx);
+            } else {
+              if (this.channelOutput && (typeof this.channelOutput === 'function'))
+                return this.channelOutput(ctx);
+            }
+          }
+        })
+      }
       this.onload();
     }
   }
 
   //remove from page
-  disconnectedCallback () {
+  disconnectedCallback() {
     if (this.onremove && typeof this.onremove === 'function') {
+      if (this.__channel_id__) {
+        w.removeShareNotice(this.__channel_id__)
+        this.__channel_id__ = null
+      }
       this.onremove();
     }
   }
@@ -4554,34 +5047,45 @@ class Component extends HTMLElement {
     w.navi(text, { context: this, position: pr, background: 'glass', up });
   }
 
-  naviHide () { w.naviHide(); }
+  naviHide() { w.naviHide(); }
 
-  cover (info, options = {notClose: false, transparent: false}) {
-    let notclose = !!options.notClose;
+  alert(info, options=null) {
+    if (!options || typeof options !== 'object') options = {};
+    options.context = this;
+    return w.alert(info, options);
+  }
 
-    if (!notclose) {
-      info = `<div style="text-align:right;">`
-            + `<span style="user-select:none;padding:0.15rem;text-decoration:none;cursor:pointer;" data-onclick=uncover>X</span>`
-            + `</div>${info}`;
-    }
+  alertDark(info, options={}) {
+    if (!options || typeof options !== 'object') options = {};
+    options.context = this;
+    return w.alertDark(info, options);
+  }
 
-    return w.alert(info, {
-      context: this,
-      notClose: true,
-      withCover: true,
-      transparent: !!options.transparent
-    });
-  };
+  cancelAlert(aid='') {return w.cancelAlert(aid);}
 
-  uncover (aid='last') { return w.uncover(aid); }
+  cover(info, options=null) {
+    if (!options || typeof options !== 'object') options = {};
+    options.notClose = true;
+    options.withCover = true;
+    return this.alert(info, options);
+  }
 
-  loadScript (src) {
+  coverDark(info, options=null) {
+    if (!options || typeof options !== 'object') options = {};
+    options.notClose = true;
+    options.withCover = true;
+    return this.alertDark(info, options);
+  }
+
+  uncover(aid='last') { return w.uncover(aid); }
+
+  loadScript(src) {
     return w.loadScript(src, this.tagName.toLowerCase());
   }
 
   sliderPage(text, append=false) { w.sliderPage(text, append, this); }
 
-  hideSliderPage() { w.hideSliderPage(); }
+  hideSlider(clearText=true) { w.hideSlider(clearText); }
 
   prompt(info, options={}) {
     if (!options || typeof options !== 'object') {
@@ -4592,7 +5096,8 @@ class Component extends HTMLElement {
     w.prompt(info, options);
   }
 
-  unprompt() {w.unprompt();}
+  unprompt(isbottom=true) {w.unprompt(isbottom);}
+  unpromptMiddle(){w.unprompt(false);}
 
   promptTop(info, options={}) {
     options.wh = 'top';
@@ -4619,6 +5124,10 @@ class Component extends HTMLElement {
     w.promptTopDark(info, options);
   }
 
+  bindEvent(dom, bindSelf=true) {
+    w.initPageDomEvents(this, dom, bindSelf);
+  }
+
   findMethod(name, wh=['config', 'ext']) {
     if (typeof wh === 'string') wh = [wh];
 
@@ -4633,6 +5142,60 @@ class Component extends HTMLElement {
     }
 
     return null;
+  }
+}
+
+/* Model */
+w.Model = class Model {
+  constructor() {
+    this.prepath = ''
+    this.apitable = {}
+    Object.defineProperty(this, '__api_table__', {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: {}
+    })
+
+    queueMicrotask(() => {
+      for (let k in this.apitable) {
+        this.__api_table__[k] = (this.prepath + this.apitable[k]).split('/').filter(p => p.length > 0)
+      }
+    })
+  }
+
+  fmtParam(url, obj={}) {
+    let nurl;
+    if (typeof url === 'string') {
+      if (url.indexOf('/') < 0 && this.__api_table__[url]) {
+        url = this.__api_table__[url]
+      }
+    }
+
+    if (!obj || typeof obj !== 'object') {
+      obj = {id: obj}
+    }
+
+    if (Array.isArray(url)) {
+      nurl = []
+      url.forEach(x => {
+        let k = x.substring(1)
+        if (x[0] === ':' && obj[k] !== undefined) {
+          nurl.push(encodeURIComponent(obj[k]))
+        } else {
+          nurl.push(x)
+        }
+      })
+
+      return '/' + nurl.join('/')
+    }
+
+    nurl = url;
+    for (let k in obj) {
+      nurl = nurl.replace(`:${k}`, encodeURIComponent(obj[k]))
+    }
+
+    return nurl
   }
 }
 
