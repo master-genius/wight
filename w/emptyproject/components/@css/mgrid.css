@@ -227,6 +227,11 @@
     box-sizing: border-box;
   }
 
+  .sm-0-5, [sm-0-5] {
+    width: 4.1666%;
+    box-sizing: border-box;
+  }
+
   .sm-1-5, [sm-1-5] {
     width: 12.49999%;
     box-sizing: border-box;
@@ -352,6 +357,11 @@
   
   .md-12, [md-12] {
     width: 100%;
+    box-sizing: border-box;
+  }
+
+  .md-0-5, [md-0-5] {
+    width: 4.1666%;
     box-sizing: border-box;
   }
 
@@ -485,6 +495,11 @@
   
   .lg-12, [lg-12] {
     width: 100%;
+    box-sizing: border-box;
+  }
+
+  .lg-0-5, [lg-0-5] {
+    width: 4.1666%;
     box-sizing: border-box;
   }
 

@@ -89,11 +89,6 @@ input:not([type=submit]):focus {
   color: #424345;
 }
 
-.btn-gray,[btn-gray] {
-  background: #d1d2d5;
-  color: #424345;
-}
-
 .btn-light-gray,[btn-light-gray] {
   background: #dfdfe1;
   color: #424345;
@@ -110,8 +105,8 @@ input:not([type=submit]):focus {
 }
 
 .btn-blue,[btn-blue] {
-  background: #4268df;
-  color: #38373d;
+  background: #6183e9;
+  color: #38383b;
 }
 
 .btn-red,[btn-red] {
@@ -137,17 +132,17 @@ input[ok] {
   background: #d9dde0;
 }
 
-.set-btn {
+.btn-red,[btn-red] {
   background: #e44a82;
   color: #424345;
 }
 
-.search-btn {
+.btn-pblue, [btn-pblue] {
   background: #5e5ef5;
   color: #2f2f30;
 }
 
-.alert-btn {
+.btn-gray, [btn-gray] {
   background: #787980;
   color: #fafafa;
 }
@@ -165,18 +160,6 @@ input[ok] {
   user-select: none;
 }
 
-.spana-middle,[spana-middle] {
-  font-size: 92%;
-}
-
-.spana-small,[spana-small] {
-  font-size: 86%;
-}
-
-.spana-tiny,[spana-tiny] {
-  font-size: 80%;
-}
-
 .align-center,[align-center] {
   text-align: center;
 }
@@ -190,7 +173,23 @@ input[ok] {
 }
 
 .alert-text, [alert-text] {
-  color: #d93516;
+  color: #d73616;
+}
+
+.bold, [bold] {
+  font-weight: bold;
+}
+
+.very-large,[ver-large] {
+  font-size: 235%;
+}
+
+.large,[large] {
+  font-size: 169%;
+}
+
+.big,[big] {
+  font-size: 128%;
 }
 
 .middle,[middle] {
@@ -201,8 +200,16 @@ input[ok] {
   font-size: 85%;
 }
 
+.small2,[small2] {
+  font-size: 80%;
+}
+
 .tiny,[tiny] {
-  font-size: 78%;
+  font-size: 73%;
+}
+
+.vtiny,[vtiny] {
+  font-size: 69%;
 }
 
 .helper, [helper] {
@@ -264,15 +271,11 @@ input[ok] {
 }
 
 .ok,[ok] {
-  color: #2a4eee;
+  color: #1da678;
 }
 
-.loadinfo-worker {
-  border: 1px solid #4556d5;
-}
-
-.loadinfo-master {
-  border: 1px solid #676869;
+.success,[success],[done] {
+  color: #1a7965;
 }
 
 .image,[image] {
@@ -294,7 +297,7 @@ input[ok] {
 }
 
 .inset-shadow,[inset-shadow] {
-  box-shadow: 0px 0.1rem 1.2rem 0.1rem rgba(15, 15, 15, 0.1),inset 0px -0.1rem 0px 0px rgba(15,15,15,0.1);
+  box-shadow: 0px 0.1rem 1.2rem 0.125rem rgba(15, 15, 15, 0.1),inset 0px -0.1rem 0px 0px rgba(15,15,15,0.1);
 }
 
 .text-shadow, [text-shadow] {
@@ -305,8 +308,18 @@ input[ok] {
   margin: 0.38rem auto;
 }
 
+.icon-tiny, [icon-tiny] {
+  width: 0.9rem;
+  height: auto;
+}
+
 .icon-small, [icon-small] {
   width: 1.1rem;
+  height: auto;
+}
+
+.icon-middle, [icon-middle] {
+  width: 1.23rem;
   height: auto;
 }
 
@@ -348,6 +361,10 @@ table {
   width: 100%;
 }
 
+.lh188,[lh188] {
+  line-height: 188%;
+}
+
 .lh158,[lh158] {
   line-height: 158%;
 }
@@ -356,18 +373,26 @@ table {
   line-height: 200%;
 }
 
+.lh2-5,[lh2-5] {
+  line-height: 250%;
+}
+
 .line,[line] {
   height: 0.25rem;
   margin-bottom: 0.58rem;
-  border-bottom: solid #cdcdcf 0.08rem;
+  border-bottom: solid 1.1px #cdcdcf;
 }
 
-.blue-dark, [blue-dark] {
-  color: #1573b6;
+.blue-dark, [blue-dark],[dark-blue] {
+  color: #1566b6;
 }
 
 .blue,[blue] {
   color: #2298ed;
+}
+
+.dark-green, [dark-green] {
+  color: #1a615a;
 }
 
 .dark,[dark] {
@@ -383,14 +408,14 @@ table {
 }
 
 .pink-red,[pink-red] {
-  color:#db3186;
+  color:#d2315c;
 }
 
 .red-light,[red-light] {
   color: #dc3c3c;
 }
 
-.red-dark,[red-dark] {
+.red-dark,[red-dark],[dark-red] {
   color: #b73333;
 }
 
@@ -404,6 +429,23 @@ table {
 
 .gray,[gray] {
   color: #666666;
+}
+
+.gray-dark,[gray-dark],[dark-gray] {
+  color: #505050;
+}
+
+.gp-red,[gp-red] {
+  color:#ab5862;
+}
+
+.black-blue, [black-blue] {
+  /* color: #181d27; */
+  color: #1e2431;
+}
+
+.gray-blue, [gray-blue] {
+  color: #36415c;
 }
 
 .hide,[hide] {
@@ -423,19 +465,19 @@ a:hover,.click:hover,[click]:hover {
 
 a:active,.click:active,[click]:active {
   font-size: 98.9%;
-  transform: scale(0.95);
+  transform: scale(0.958);
 }
 
 .click-middle:active,[click-middle]:active {
   font-size: 91%;
   text-decoration: none;
-  transform: scale(0.95);
+  transform: scale(0.958);
 }
 
 .click-small:active,[click-small]:active {
   font-size: 83.5%;
   text-decoration: none;
-  transform: scale(0.95);
+  transform: scale(0.958);
 }
 
 .select-none,[select-none] {
@@ -449,6 +491,24 @@ a:active,.click:active,[click]:active {
 
 .circle-image,[circle-image] {
   border-radius: 50%;
+}
+
+.overflow-hidden, [overflow-hidden] {
+  overflow: hidden;
+}
+
+.overflow-hidden-x, [overflow-hidden-x] {
+  overflow-x: hidden;
+}
+
+.overflow-hidden-y, [overflow-hidden-y] {
+  overflow-y: hidden;
+}
+
+.text-ellipsis,[text-ellipsis] {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 动画 */
