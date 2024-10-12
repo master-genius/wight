@@ -202,8 +202,13 @@ exports.apicall = async function (api, options = {}, deep = 0) {
   let ret = makeResponse();
 
   let orgtext = '';
+  let cover_id = null
+  let cover_text = options.coverText || w.config.requestCoverText || ''
+  if (cover_text) {
+    cover_id = w.cover(cover_text)
+  }
 
-  await fetch (api, options)
+  await fetch(api, options)
           .then(res => {
             ret.ok = res.ok;
             ret.status = res.status;
@@ -237,7 +242,15 @@ exports.apicall = async function (api, options = {}, deep = 0) {
           })
           .catch(err => {
             ret.error = err;
-          });
+          })
+          .finally(() => {
+            if (cover_id) {
+              setTimeout(() => {
+                w.uncover(cover_id)
+              }, 150)
+              w.config.requestCoverText = ''
+            }
+          })
 
   if (!ret.ok && (!options.retry || deep >= options.retry) )
   {
