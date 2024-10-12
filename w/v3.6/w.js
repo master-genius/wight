@@ -347,13 +347,6 @@ class HtmlSyntaxState {
   }
 
   checkState(cur_char, next_char) {
-    /* if (cur_char !== this.attrType && this.attrType !== '') {
-      if (this.curState === this.STATE.TAG_ATTR_VALUE)
-      {
-        return true
-      }
-    } */
-
     if (this.is_script) {
       let script_ind = this.data.indexOf('<\/script>', this.cursor);
       if (script_ind < 0) {
@@ -467,7 +460,6 @@ class HtmlSyntaxState {
       this.cursor++
     }
 
-    //console.log(this.cursor, data[this.cursor], this.curState)
     //最后的结束状态只能是字符或者标签结束
     if (this.curState !== this.STATE.CHAR 
       && this.curState !== this.STATE.TAG_END 
@@ -559,8 +551,11 @@ const w = new function () {
   this.ua = navigator.userAgent;
 
   this.isFirefox = false;
-  if (navigator.userAgent.indexOf('Firefox') > 0) {
-    this.isFirefox = true;
+  if (navigator.userAgentData) {
+    let brands = navigator.userAgentData.brands;
+    this.isFirefox = Array.isArray(brands) && brands[0] && brands[0].brand.indexOf('Firefox') >= 0
+  } else {
+    navigator.userAgent.indexOf('Firefox') > 0 && (this.isFirefox = true);
   }
 
   Object.defineProperty(this, 'alertStack', {

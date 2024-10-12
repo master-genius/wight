@@ -12,7 +12,7 @@ const fsp = fs.promises;
 
 const htmlparser = new htmlstate();
 
-function delayOutError (err, info, delay = 1280) {
+function delayOutError(err, info, delay = 1280) {
   setTimeout(() => {
     let errText = '';
 
@@ -1961,7 +1961,7 @@ function parseDependency(arr) {
   return obj
 }
 
-function renderCompsClass (cname) {
+function renderCompsClass(cname) {
   let className = fmtCompsClassName(cname);
 
   return `'use strict';\n
@@ -1984,18 +1984,17 @@ class ${className} extends Component {
         default: ''
       },
 
-      //用于对外共享数据
-      sharekey: {
+      channel: {
         type: 'string',
-        default: '${cname}-message'
+        //chan::开头表示这是通道类型，这在w.share中表示消息的方式是不同的。
+        default: 'chan::${cname}'
       },
 
-      //用于接收事件通知
-      noticekey: {
-        type: 'string',
-        default: '${cname}-notice'
+      channelOnly: {
+        type: 'boolean',
+        default: false
       }
-    };
+    }
   }
 
   //在render之前执行，此时已经创建好shadow DOM。
