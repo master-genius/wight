@@ -3866,27 +3866,27 @@ class Component extends HTMLElement {
   }
 
   connectedCallback() {
-    if (this.onload && typeof this.onload === 'function') {
-      //注册通道函数
-      if (this.attrs.channel) {
-        this.__channel_id__ = w.registerShareNotice({
-          mode: 'always',
-          type: ['set', 'get'],
-          only: !!this.attrs['channel-only'],
-          action: !!this.attrs['channel-action'],
-          callback: ctx => {
-            if (ctx.type === 'set') {
-              this.channelInput
-                && (typeof this.channelInput === 'function')
-                && this.channelInput(ctx);
-            } else {
-              if (this.channelOutput && (typeof this.channelOutput === 'function'))
-                return this.channelOutput(ctx);
-            }
+    //注册通道函数
+    if (this.attrs.channel) {
+      this.__channel_id__ = w.registerShareNotice({
+        mode: 'always',
+        type: ['set', 'get'],
+        only: !!this.attrs['channel-only'],
+        action: !!this.attrs['channel-action'],
+        callback: ctx => {
+          if (ctx.type === 'set') {
+            this.channelInput
+              && (typeof this.channelInput === 'function')
+              && this.channelInput(ctx);
+          } else {
+            if (this.channelOutput && (typeof this.channelOutput === 'function'))
+              return this.channelOutput(ctx);
           }
-        })
-      }
-
+        }
+      })
+    }
+    
+    if (this.onload && typeof this.onload === 'function') {
       this.onload();
     }
   }
