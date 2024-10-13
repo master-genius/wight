@@ -3213,7 +3213,7 @@ Object.defineProperty(w, 'share', {
   })
 });
 
-w.sendShare = function (key, data) {
+w.setShare = function (key, data) {
   if (!key) {
     this.debug && console.error(`共享数据的 key 必须是字符串。`);
     return false;
@@ -3899,7 +3899,7 @@ class Component extends HTMLElement {
   }
 
   sendChannel(key, data, sp=null) {
-    return w.sendShare(this.spaceKey(key, sp), data)
+    return w.setShare(this.spaceKey(key, sp), data)
   }
 
   getChannel(key, sp=null) {
