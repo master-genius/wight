@@ -488,3 +488,139 @@ w.share是框架层面提供的全局共享数据的机制。并且利用 `w.reg
 具体参考全局API部分。
 
 <br>
+
+## channel
+
+从v3.6版本开始，支持channel功能，channel其实就是利用w.share的机制进行扩展的。
+
+默认创建组件会自动具备channel属性，其格式为：'chan::组件名字'，以下是示例代码：
+
+当channel有数据过来，则会触发channelInput事件函数，当有其他模块读取channel，则会触发channelOutput事件函数。
+
+```javascript
+'use strict';
+
+class XTimeTest extends Component {
+
+  constructor() {
+    super(); //必须写在最开始。
+
+    //通过this.attrs访问所有属性。this.attributes是浏览器原始提供的属性对象。
+    //this.attrs是为了方便而做的映射。
+
+    //this.shadow可以访问shadow DOM，注意这是shadowRoot。
+    //直接通过this访问组件节点自己。
+    
+    //属性声明示例：用于声明支持的属性和类型限制，若不需要请去掉properties的定义。
+    this.properties = {
+      style: {
+        //type默认就是字符串
+        type: 'string',
+        default: ''
+      },
+
+      channel: {
+        type: 'string',
+        //chan::开头表示这是通道类型。
+        default: 'chan::x-time-test'
+      },
+
+      //是否唯一，不允许重复注册。
+      'channel-only': {
+        type: 'boolean',
+        default: false
+      },
+
+      //是否采用action模式
+      'channel-action': {
+        type: 'boolean',
+        default: false
+      },
+    }
+  }
+
+  //在render之前执行，此时已经创建好shadow DOM。
+  init() {
+
+  }
+
+  //返回字符串或DOM节点。
+  render() {
+    // 也可以返回字符串，比如： return 'x-time-test组件';
+    return this.plate();
+  }
+
+  //渲染完成后执行
+  afterRender() {
+    
+  }
+
+  onload() {
+
+  }
+
+  //从DOM树中移除时触发。
+  onremove() {
+
+  }
+
+  //通道获取了数据时触发。
+  channelInput(ctx) {
+    this.view('text', ctx.data)
+  }
+
+  //有其他模块获取通道数据时触发。
+  channelOutput(ctx) {
+    return (new Date).toLocaleString().replaceAll('/', '-')
+  }
+
+  onattrchange(name, oldValue, newValue) {
+    //当改变this上的属性时，会触发此函数。
+  }
+
+  //被移动到新文档时触发。
+  onadopted() {
+
+  }
+
+  static get observedAttributes() {
+    //如果你要监控某些属性的变化，你需要在onattrchange中处理。
+    //要在属性变化时触发onattrchange函数，你需要在此函数中返回对应的属性。
+    //return ['class', 'name'];
+  }
+
+}
+```
+
+### channel的所在空间
+
+一个组件经常需要复用到多个地方，如果为了避免channel的冲突，就要改channel属性的名字，这种方式是在所难免的。但是为了更方便开发，框架层面提供了space的功能：
+
+- 通过data-space属性来限制channel的所在空间。
+
+- 利用data-space的目的在于使用data-*自定义属性是web规范，保证最大的兼容性和维护性。
+
+- 不仅自定义组件可用，标准的标签也可以使用。
+
+组件初始化会自动找到父级的所在空间，直到页面顶层或遇到data-space属性。
+
+```javascript
+
+<div data-space="space1">
+  <x-time-test></x-time-test>
+</div>
+
+<div data-space="space2">
+  <x-time-test></x-time-test>
+  <x-time-test data-space="space3"></x-time-test>
+</div>
+
+```
+
+以上3个组件：
+
+- 第1个组件的channel为：'space1@chan::x-time-test'
+
+- 第2个组件的channel为：'space2@chan::x-time-test'
+
+- 第3个组件的channel为：'space3@chan::x-time-test'
