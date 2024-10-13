@@ -3214,11 +3214,15 @@ Object.defineProperty(w, 'share', {
 
 w.sendShare = function (key, data) {
   if (!key) {
-    this.debug && console.error(`共享数据的 key 必须是字符串。`)
-    return false
+    this.debug && console.error(`共享数据的 key 必须是字符串。`);
+    return false;
   }
 
-  w.share[key] = data
+  w.share[key] = data;
+}
+
+w.getShare = function (key, data=null) {
+  return w.share[key] || data;
 }
 
 w.loadScript = async function (src, cname = '') {
@@ -3855,6 +3859,10 @@ class Component extends HTMLElement {
 
   sendChannel(key, data) {
     return w.sendShare(key, data)
+  }
+
+  getChannel(key, data=null) {
+    return w.getShare(key, data)
   }
 
   connectedCallback() {

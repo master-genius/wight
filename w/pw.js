@@ -2029,6 +2029,16 @@ class ${className} extends Component {
 
   }
 
+  //通道获取了数据时触发。
+  channelInput(ctx) {
+  
+  }
+
+  //有其他模块获取通道数据时触发。
+  channelOutput(ctx) {
+
+  }
+
   onattrchange(name, oldValue, newValue) {
     //当改变this上的属性时，会触发此函数。
   }
