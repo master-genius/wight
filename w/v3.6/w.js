@@ -1363,8 +1363,9 @@ const w = new function () {
 
     if (pg.__state__) return false;
 
-    pg.__dom__ = this.pgcdom.insertBefore(document.createElement('div'),
-                                          this.pgcdom.firstChild);
+    pg.__dom__ = this.pgcdom.appendChild(document.createElement('div'));
+    pg.__dom__.dataset.container = '__wight_page__';
+    //pg.__dom__ = this.pgcdom.insertBefore(document.createElement('div'), this.pgcdom.firstChild);
     pg.__init_count__ = 0;
     pg.__loaded__ = false;
     pg.__scroll__ = 0;
@@ -3113,7 +3114,7 @@ w.removeShareNotice = function (id) {
   }
 
   return opts;
-};
+}
 
 w.runShareNotice = function (type, obj, k, data = null) {
   let kmlist = [];
@@ -3221,8 +3222,8 @@ w.sendShare = function (key, data) {
   w.share[key] = data;
 }
 
-w.getShare = function (key, data=null) {
-  return w.share[key] || data;
+w.getShare = function (key) {
+  return w.share[key];
 }
 
 w.loadScript = async function (src, cname = '') {
@@ -3389,6 +3390,8 @@ class Component extends HTMLElement {
       enumerable: false
     });
 
+    this.__space__ = '';
+
     this.allAttrs = () => {return this.__attrs__;};
 
     this.attrs = new Proxy(this.__attrs__, {
@@ -3481,6 +3484,8 @@ class Component extends HTMLElement {
         w.debug && w.notifyTopError(err.message);
       }
     }
+    
+    this.findSpace();
 
     if (this.render && typeof this.render === 'function') {
       let d = this.render() || '';
@@ -3633,6 +3638,31 @@ class Component extends HTMLElement {
     let outerText = st.outername.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     w.notifyError(`${this.tagName} [${outerText}]存在循环引用${st.ref ? ' &lt;--&gt; ' : ''}${st.ref || ''}`, 20000);
     return '';
+  }
+
+  //找到自己的父级空间
+  findSpace() {
+    if (this.dataset && this.dataset.space) {
+      this.__space__ = this.dataset.space
+      return this.__space__
+    }
+
+    let pn = this.parentNode;
+    let n;
+    while (pn) {
+      n = (pn instanceof ShadowRoot) ? pn.host : pn;
+
+      if (!n || !n.dataset || n.dataset.container === '__wight_page__') break;
+
+      if (n.dataset.space) {
+        this.__space__ = n.dataset.space
+        return this.__space__
+      }
+
+      pn = n.parentNode;
+    }
+
+    return ''
   }
   
   //不会重复初始化基础结构。
@@ -3857,38 +3887,47 @@ class Component extends HTMLElement {
     return nod;
   }
 
-  sendChannel(key, data) {
-    return w.sendShare(key, data)
+  sendChannel(key, data, sp=null) {
+    return w.sendShare(this.spaceKey(key, sp), data)
   }
 
-  getChannel(key, data=null) {
-    return w.getShare(key, data)
+  getChannel(key, sp=null) {
+    return w.getShare(this.spaceKey(key, sp), data)
+  }
+
+  spaceKey(key, sp=null) {
+    if (sp !== null && typeof sp === 'string') return `${sp ? sp + '@' : ''}${key}`
+
+    return `${this.__space__ ? this.__space__ + '@' : ''}${key}`
   }
 
   connectedCallback() {
     //注册通道函数
-    if (this.attrs.channel) {
-      this.__channel_id__ = w.registerShareNotice({
-        mode: 'always',
-        type: ['set', 'get'],
-        only: !!this.attrs['channel-only'],
-        action: !!this.attrs['channel-action'],
-        callback: ctx => {
-          if (ctx.type === 'set') {
-            this.channelInput
-              && (typeof this.channelInput === 'function')
-              && this.channelInput(ctx);
-          } else {
-            if (this.channelOutput && (typeof this.channelOutput === 'function'))
-              return this.channelOutput(ctx);
+    queueMicrotask(() => {
+      if (this.attrs.channel) {
+        this.__channel_id__ = w.registerShareNotice({
+          key: this.spaceKey(this.attrs.channel),
+          mode: 'always',
+          type: ['set', 'get'],
+          only: !!this.attrs['channel-only'],
+          action: !!this.attrs['channel-action'],
+          callback: ctx => {
+            if (ctx.type === 'set') {
+              this.channelInput
+                && (typeof this.channelInput === 'function')
+                && this.channelInput(ctx);
+            } else {
+              if (this.channelOutput && (typeof this.channelOutput === 'function'))
+                return this.channelOutput(ctx);
+            }
           }
-        }
-      })
-    }
-    
-    if (this.onload && typeof this.onload === 'function') {
-      this.onload();
-    }
+        })
+      }
+
+      if (this.onload && typeof this.onload === 'function') {
+        this.onload();
+      }
+    })
   }
 
   //remove from page
@@ -3915,7 +3954,7 @@ class Component extends HTMLElement {
     }
   }
 
-  naviGlass (text, pr = 'left', up = false) {
+  naviGlass(text, pr = 'left', up = false) {
     w.navi(text, { context: this, position: pr, background: 'glass', up });
   }
 
