@@ -3212,6 +3212,15 @@ Object.defineProperty(w, 'share', {
   })
 });
 
+w.sendShare = function (key, data) {
+  if (!key) {
+    this.debug && console.error(`共享数据的 key 必须是字符串。`)
+    return false
+  }
+
+  w.share[key] = data
+}
+
 w.loadScript = async function (src, cname = '') {
 
   if (!w._http_preg.test(src)) {
@@ -3844,6 +3853,10 @@ class Component extends HTMLElement {
     return nod;
   }
 
+  sendChannel(key, data) {
+    return w.sendShare(key, data)
+  }
+
   connectedCallback() {
     if (this.onload && typeof this.onload === 'function') {
       //注册通道函数
@@ -3851,7 +3864,8 @@ class Component extends HTMLElement {
         this.__channel_id__ = w.registerShareNotice({
           mode: 'always',
           type: ['set', 'get'],
-          only: !!this.attrs.channelOnly,
+          only: !!this.attrs['channel-only'],
+          action: !!this.attrs['channel-action'],
           callback: ctx => {
             if (ctx.type === 'set') {
               this.channelInput
@@ -3864,6 +3878,7 @@ class Component extends HTMLElement {
           }
         })
       }
+
       this.onload();
     }
   }

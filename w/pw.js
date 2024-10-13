@@ -1986,14 +1986,21 @@ class ${className} extends Component {
 
       channel: {
         type: 'string',
-        //chan::开头表示这是通道类型，这在w.share中表示消息的方式是不同的。
+        //chan::开头表示这是通道类型。
         default: 'chan::${cname}'
       },
 
-      channelOnly: {
+      //是否唯一，不允许重复注册。
+      'channel-only': {
         type: 'boolean',
         default: false
-      }
+      },
+
+      //是否采用action模式
+      'channel-action': {
+        type: 'boolean',
+        default: false
+      },
     }
   }
 
