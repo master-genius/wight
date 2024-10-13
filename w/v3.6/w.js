@@ -3390,7 +3390,18 @@ class Component extends HTMLElement {
       enumerable: false
     });
 
-    this.__space__ = '';
+    Object.defineProperty(this, '__space__', {
+      value: '',
+      configurable: false,
+      writable: true,
+      enumerable: false
+    });
+
+    Object.defineProperty(this, 'space', {
+      get: () => {
+        return this.__space__;
+      }
+    });
 
     this.allAttrs = () => {return this.__attrs__;};
 
