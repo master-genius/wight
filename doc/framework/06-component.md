@@ -489,7 +489,7 @@ w.share是框架层面提供的全局共享数据的机制。并且利用 `w.reg
 
 <br>
 
-## channel
+## channel：数据通道
 
 从v3.6版本开始，支持channel功能，channel其实就是利用w.share的机制进行扩展的。
 
@@ -619,8 +619,19 @@ class XTimeTest extends Component {
 
 以上3个组件：
 
-- 第1个组件的channel为：'space1@chan::x-time-test'
+- 第1个组件的channel为 'space1@chan::x-time-test'
 
-- 第2个组件的channel为：'space2@chan::x-time-test'
+- 第2个组件的channel为 'space2@chan::x-time-test'
 
-- 第3个组件的channel为：'space3@chan::x-time-test'
+- 第3个组件的channel为 'space3@chan::x-time-test'
+
+
+### 通道函数
+
+- this.sendChannel(key, data, sp=null)
+
+发送数据到通道，key是channel属性的标识符，data为数据，sp为所在空间，默认为null表示组件自己的所在空间。
+
+- this.getChannel(key, sp=null)
+
+获取通道数据，key是channel属性的标识符，sp为所在空间，默认为null表示组件自己的所在空间。
