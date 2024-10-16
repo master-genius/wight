@@ -3916,28 +3916,31 @@ class Component extends HTMLElement {
     //注册通道函数
     queueMicrotask(() => {
       if (this.attrs.channel) {
-        this.__channel_id__ = w.registerShareNotice({
-          key: this.spaceKey(this.attrs.channel),
-          mode: 'always',
-          type: ['set', 'get'],
-          only: !!this.attrs['channel-only'],
-          action: !!this.attrs['channel-action'],
-          callback: ctx => {
-            if (ctx.type === 'set') {
-              this.channelInput
-                && (typeof this.channelInput === 'function')
-                && this.channelInput(ctx);
-            } else {
-              if (this.channelOutput && (typeof this.channelOutput === 'function'))
-                return this.channelOutput(ctx);
+        if (this.attrs.channel.indexOf('chan::') === 0) {
+          this.__channel_id__ = w.registerShareNotice({
+            key: this.spaceKey(this.attrs.channel),
+            mode: 'always',
+            type: ['set', 'get'],
+            only: !!this.attrs['channel-only'],
+            action: !!this.attrs['channel-action'],
+            callback: ctx => {
+              if (ctx.type === 'set') {
+                this.channelInput
+                  && (typeof this.channelInput === 'function')
+                  && this.channelInput(ctx);
+              } else {
+                this.channelOutput
+                  && (typeof this.channelOutput === 'function')
+                  && this.channelOutput(ctx);
+              }
             }
-          }
-        })
+          })
+        } else {
+          console.error(this.tagName.toLocaleLowerCase(),'=> channel 属性必须以 chan:: 开头');
+        }
       }
 
-      if (this.onload && typeof this.onload === 'function') {
-        this.onload();
-      }
+      this.onload && (typeof this.onload === 'function') && this.onload();
     })
   }
 
