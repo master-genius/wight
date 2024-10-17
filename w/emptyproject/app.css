@@ -3,8 +3,8 @@
   src: url(/static/font/JetBrainsMono-Regular.ttf);
 }
 
-[container] {
-  max-width: 2048px;
+[container],[fullbox] {
+  max-width: 2560px;
 }
 
 :root {
@@ -83,11 +83,6 @@ input:not([type=submit]):focus {
   color: #424345;
 }
 
-/* .btn-gray,[btn-gray] {
-  background: #d1d2d5;
-  color: #424345;
-}
- */
 
 .btn-light-gray,[btn-light-gray] {
   background: #dfdfe1;
@@ -125,7 +120,6 @@ input:not([type=submit]):focus {
 }
 
 input[type=submit] {
-  /* background: #a84e70; */
   background:#248ad3;
   border-radius: 0.08rem;
 }
@@ -399,7 +393,6 @@ table {
 }
 
 .black-blue, [black-blue] {
-  /* color: #181d27; */
   color: #1e2431;
 }
 
@@ -482,6 +475,10 @@ a:active,.click:active,[click]:active {
 
 .circle-image,[circle-image] {
   border-radius: 50%;
+}
+
+.overflow,[overflow] {
+  overflow: auto;
 }
 
 .overflow-hidden, [overflow-hidden] {
