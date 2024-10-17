@@ -1903,7 +1903,7 @@ wapp.prototype.newPage = function (name, pagedir) {
   
 };
 
-function checkCompsName (cname) {
+function checkCompsName(cname) {
   cname = cname.trim();
   if (cname.length < 3) return false;
 
@@ -1914,7 +1914,7 @@ function checkCompsName (cname) {
   return true;
 }
 
-function fmtCompsClassName (name) {
+function fmtCompsClassName(name) {
   let namearr = []
 
   let cname = name.trim().replace(/[\-]{2,}/g, '-');
@@ -1934,7 +1934,7 @@ function fmtCompsClassName (name) {
   return namearr.join('');
 };
 
-function renderExplainJSON (cname) {
+function renderExplainJSON(cname) {
   let className = fmtCompsClassName(cname);
   return `{
     "name" : "${cname}",
