@@ -1,5 +1,5 @@
 
-class page {
+class Page {
 
   constructor () {
   
@@ -32,4 +32,4 @@ class page {
 }
 
 //定义页面，请务必保持此代码，否则页面不会生效。
-definePage(page);
+definePage(Page);

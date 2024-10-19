@@ -1,6 +1,6 @@
 'use strict';
 
-class page {
+class Page {
 
   constructor () {
 
@@ -32,4 +32,4 @@ class page {
 
 }
 
-definePage(page);
+definePage(Page);
