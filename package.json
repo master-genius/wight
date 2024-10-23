@@ -14,7 +14,7 @@
   "dependencies": {
     "concise.css": "^4.1.2",
     "csso": "^5.0.5",
-    "gohttp": "^5.0.9",
+    "gohttp": "^5.1.0",
     "htmlparser2": "^9.1.0",
     "marked": "^11.2.0",
     "npargv": "^1.0.9",
