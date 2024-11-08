@@ -328,7 +328,7 @@ class initapp {
       c.setHeader('cache-control', `public, max-age=${this.maxAge}`)
       c.setHeader('content-encoding', 'gzip')
       c.setHeader('content-type', 'text/html; charset=utf-8')
-      c.res.body = appdata
+      c.send(appdata)
     })
 
     for (let a of this.appList) {
@@ -364,7 +364,7 @@ class initapp {
         if (c.service.icoCache[icokey]) {
           c.setHeader('cache-control', 'public, max-age=86400');
           c.setHeader('content-type', 'image/x-icon');
-          c.res.body = c.service.icoCache[icokey];
+          c.send(c.service.icoCache[icokey]);
           return ;
         }
 
@@ -375,10 +375,9 @@ class initapp {
 
         c.setHeader('content-type', 'image/x-icon');
 
-        c.res.body = data;
-
+        c.send(data);
       } catch (err) {
-        c.res.body = '';
+        c.send('');
       }
     });
 
@@ -391,7 +390,7 @@ class initapp {
         if (c.service.manifestCache[mkey]) {
           c.setHeader('cache-control', 'public, max-age=86400');
           c.setHeader('content-type', 'applocation/json;charset=utf-8');
-          c.res.body = c.service.manifestCache[mkey];
+          c.send(c.service.manifestCache[mkey]);
           return ;
         }
 
@@ -402,10 +401,10 @@ class initapp {
 
         c.setHeader('content-type', 'application/json;charset=utf-8');
 
-        c.res.body = data;
+        c.send(data);
 
       } catch (err) {
-        c.res.body = '';
+        c.send('');
       }
     });
 

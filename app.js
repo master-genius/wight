@@ -6,7 +6,7 @@ const titbit = require('titbit')
 const cluster = require('cluster')
 const fs = require('fs')
 const os = require('os')
-const {proxy, resource, parsebody, tofile} = require('titbit-toolkit')
+const {proxy, resource, tofile} = require('titbit-toolkit')
 const npargv = require('npargv')
 const loadddoc = require('./lib/loaddoc.js')
 
