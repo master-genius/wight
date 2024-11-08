@@ -23,7 +23,7 @@ let appState = {}
 sseNotice.connectCount = 0
 
 let presse = async (ctx, next) => {
-  ctx.box.connid = ctx.helper.uuid()
+  ctx.box.connid = ctx.ext.uuid()
 
   let name = ctx.param.name
   
@@ -369,7 +369,7 @@ class initapp {
         }
 
         let icofile = `${c.service.appPath}/${c.service.prefix}/${c.param.name}/favicon.ico`;
-        let data = await c.helper.readb(icofile);
+        let data = await c.ext.readb(icofile);
 
         c.service.icoCache[icokey] = data;
 
@@ -396,7 +396,7 @@ class initapp {
         }
 
         let mfile = `${c.service.appPath}/${c.service.prefix}/${c.param.name}/manifest.json`;
-        let data = await c.helper.readb(mfile);
+        let data = await c.ext.readb(mfile);
 
         c.service.manifestCache[mkey] = data;
 
@@ -412,11 +412,9 @@ class initapp {
     app.get('/:name/components/:comp/:src', async c => {
       let srcname = `${c.service.appPath}/${c.service.prefix}/${c.param.name}/`
           + `components/${c.param.comp}/static/${c.param.src}`;
-        
-      //console.log(srcname);
 
       try {
-        await c.helper.pipe(srcname, c.reply)
+        await c.ext.pipe(srcname, c.reply)
       } catch (err) {
         console.error(err)
         return c.status(404).send()
@@ -425,11 +423,8 @@ class initapp {
     })
 
     //sse route
-
     app.get('/:name/sse', async c => {}, {group: '__sse__'})
-
     app.use(presse).use(sseNotice.mid(), {group: '__sse__'})
-
   }
   
   init(app) {
