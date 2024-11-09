@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "node app --test",
-    "debug": "node app --test --debug",
-    "devzhiyuan": "node app --test zhiyuan"
+    "dev": "node app --test --debug",
+    "create": "node createproject.js",
+    "newcomp": "node newcomps.js",
+    "newpage": "node newpage.js"
   },
   "keywords": [],
   "author": "",
