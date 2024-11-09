@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 class Page {
 
@@ -32,4 +32,4 @@ class Page {
 
 }
 
-definePage(Page);
+definePage(Page)

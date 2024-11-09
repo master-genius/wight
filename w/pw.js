@@ -2090,10 +2090,7 @@ wapp.prototype.newComps = function (cname, cdir) {
     {encoding: 'utf8'});
 
   return true;
-
-};
-
-
+}
 
 //new project
 wapp.prototype.newProject = function (project_dir, project_template='newproject') {
@@ -2116,7 +2113,7 @@ wapp.prototype.newProject = function (project_dir, project_template='newproject'
 
   let new_project_dir = __dirname + '/' + project_template;
 
-  let cpfiles = ['app.js', 'app.css', 'config.json', 'favicon.ico', 'manifest.json'];
+  let cpfiles = ['app.js', 'app.css', 'config.json', 'manifest.json'];
 
   for (let i = 0; i < cpfiles.length; i++) {
     try {
@@ -2127,7 +2124,7 @@ wapp.prototype.newProject = function (project_dir, project_template='newproject'
   }
 
   let loopcp = [
-    'components', 'extends', 'static', 'pages',
+    'components', 'extends', 'static', 'pages', 'static/favicon.ico',
     'static/css', 'static/icon', 'static/images','static/components',
     'components/@css', 'pages/home', 'pages/user'
   ];
@@ -2157,7 +2154,7 @@ wapp.prototype.newProject = function (project_dir, project_template='newproject'
         console.error(err.message);
       }
     }
-  };
+  }
 
   for (let i=0; i < loopcp.length; i++) {
     try {
@@ -2170,7 +2167,7 @@ wapp.prototype.newProject = function (project_dir, project_template='newproject'
     copyFile(`${new_project_dir}/${loopcp[i]}`, `${project_dir}/${loopcp[i]}`);
   }
 
-};
+}
 
 module.exports = wapp;
 

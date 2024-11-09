@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cdpc": "^4.7.1",
     "concise.css": "^4.1.2",
     "csso": "^5.0.5",
     "gohttp": "^5.1.1",
