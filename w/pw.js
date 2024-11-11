@@ -2113,7 +2113,7 @@ wapp.prototype.newProject = function (project_dir, project_template='newproject'
 
   let new_project_dir = __dirname + '/' + project_template;
 
-  let cpfiles = ['app.js', 'app.css', 'config.json', 'manifest.json'];
+  let cpfiles = ['app.js', 'app.css', 'config.json', 'manifest.json', 'favicon.ico'];
 
   for (let i = 0; i < cpfiles.length; i++) {
     try {
@@ -2124,7 +2124,7 @@ wapp.prototype.newProject = function (project_dir, project_template='newproject'
   }
 
   let loopcp = [
-    'components', 'extends', 'static', 'pages', 'static/favicon.ico',
+    'components', 'extends', 'static', 'pages',
     'static/css', 'static/icon', 'static/images','static/components',
     'components/@css', 'pages/home', 'pages/user'
   ];
