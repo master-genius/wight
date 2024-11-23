@@ -659,7 +659,8 @@ const w = new function () {
       width = options.width;
     }
 
-    width && width > 0 && (dom.style.width = `${width}%`);
+    let unit = options.unit || '%';
+    width && width > 0 && (dom.style.width = `${width}${unit}`);
 
     if (!options.notClose) {
       let closedom = document.createElement('div');
@@ -671,7 +672,7 @@ const w = new function () {
       if (dom.style.transform) closedom.style.transform = dom.style.transform;
       if (dom.style.left) closedom.style.left = dom.style.left;
 
-      width && width > 0 && (closedom.style.width = `${width}%`);
+      width && width > 0 && (closedom.style.width = `${width}${unit}`);
 
       closedom.style.boxShadow = dom.style.boxShadow;
       closedom.style.bottom = `${100 - realTop - 0.09}%`;
@@ -684,7 +685,7 @@ const w = new function () {
       closedom.innerHTML = `<div style="text-align:right;padding:0.085%;">`
         +`<a data-onclick="w.cancelAlert" data-aid="${aid}" `
         +'style="color:#989595;font-size:111%;text-decoration:none;user-select:none;" click>'
-        +'&nbsp;X&nbsp;</a>'
+        +`${options.closeText || '&nbsp;X&nbsp;'}</a>`
         +'</div>';
 
       w[domname].appendChild(closedom);
@@ -3990,7 +3991,7 @@ class Component extends HTMLElement {
 
   cover(info, options=null) {
     if (!options || typeof options !== 'object') options = {};
-    options.notClose = true;
+    options.notClose === undefined && (options.notClose = true);
     options.withCover = true;
     return this.alert(info, options);
   }
