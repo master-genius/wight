@@ -53,7 +53,7 @@ class htmlstate {
     this.tagCloseStack = []
 
     this.singleTags = [
-      'br', 'hr', 'img', 'input', 'param', 'meta', 'link'
+      'br', 'hr', 'img', 'input', 'param', 'meta', 'link', '!doctype', '!DOCTYPE'
     ]
 
     this.lastErrorMsg = ''
