@@ -19,5 +19,8 @@ if (window.Element && typeof window.Element === 'function' && window.Element.pro
 if (window.DocumentFragment && typeof window.DocumentFragment === 'function' && window.DocumentFragment.prototype) {
   window.DocumentFragment.prototype.query = query;
   window.DocumentFragment.prototype.queryAll = queryAll;
+  //window.HTMLDocument.prototype.query = query;
+  //window.HTMLDocument.prototype.queryAll = queryAll;
+  document.__proto__.prototype.query = query;
+  document.__proto__.prototype.queryAll = queryAll;
 }
-
