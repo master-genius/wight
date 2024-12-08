@@ -24,6 +24,8 @@
 
   --w-prompt-glass-bg-color: rgba(42,43,45, 0.033);
 
+  --w-prompt-close-bg-color: rgba(38, 38, 38, 0.042);
+
   --w-cover-bg-color: rgba(22,23,25, 0.13);
 
   /* --w-notify-shadow:  */
@@ -204,7 +206,7 @@
 .w-prompt-close {
   z-index: 100;
   position: fixed;
-  background: rgba(38, 38, 38, 0.0298);
+  background: var(--w-prompt-close-bg-color, rgba(38, 38, 38, 0.059));
   width:99.999%;
   height:99.999%;
   top:0%;
