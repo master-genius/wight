@@ -1,6 +1,6 @@
 {
   "name": "wight",
-  "version": "1.0.0",
+  "version": "3.6.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,8 @@
     "dev": "node app --test --debug",
     "create": "node createproject.js",
     "newcomp": "node newcomps.js",
-    "newpage": "node newpage.js"
+    "newpage": "node newpage.js",
+    "build": "node build.js --compress"
   },
   "keywords": [],
   "author": "",
