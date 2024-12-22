@@ -2029,7 +2029,7 @@ class ${className} extends Component {
 
   }
 
-  //通道获取了数据时触发。
+  //通道获取了数据时触发，相当于外界进行输入。
   channelInput(ctx) {
   
   }
