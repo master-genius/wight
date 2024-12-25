@@ -2509,6 +2509,7 @@ w.runHooks = async function (ctx) {
       ch = w.hookFunc[h];
       if (!ch || !ch.func || typeof ch.func !== 'function')
         continue;
+
       if (ch.options.exclude && ch.options.exclude.indexOf(cname) >= 0) {
         continue;
       }
