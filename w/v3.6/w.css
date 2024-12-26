@@ -10,7 +10,7 @@
   --w-page-bg-color: #fcfcff;
 
   --w-slider-bg-color: #fcfcff;
-  --w-slider-close-bg-color: rgba(21,22,25,0.32);
+  --w-slider-close-bg-color: rgba(21,22,25,0.29);
   --w-common-shadow: 0px 0.1rem 1.2rem 0.1rem rgba(15, 15, 15, 0.1),inset 0px -0.1rem 0px 0px rgba(15,15,15,0.1);
 
   --w-notify-color: #f1f2f3;
@@ -76,7 +76,6 @@
 }
 
 .w-common-slide-public {
-  padding:0.6rem;
   z-index: 99;
   position:fixed;
   top:0;
