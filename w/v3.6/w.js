@@ -3900,8 +3900,8 @@ class Component extends HTMLElement {
     return nod;
   }
 
-  sendChannel(key, data, sp=null) {
-    return w.setShare(this.spaceKey(key, sp), data)
+  sendChannel(data, key=null, sp=null) {
+    return w.setShare(this.spaceKey(key || this.attrs.channel, sp), data)
   }
 
   getChannel(key, sp=null) {
