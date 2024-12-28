@@ -39,7 +39,7 @@ function simpleComporessHTML (html) {
 /**
  * 要根据pages记录的页面去指定的目录中加载页面，并生成一些初始化的代码。
  */
-let _page_dir = __dirname;
+let _pw_dir = __dirname;
 
 let wapp = function (options = {}) {
 
@@ -47,7 +47,7 @@ let wapp = function (options = {}) {
     return new wapp(options);
   }
 
-  this.mydir = _page_dir;
+  this.mydir = _pw_dir;
 
   this.codeTempPath = this.mydir + '/temp';
 
@@ -103,7 +103,9 @@ let wapp = function (options = {}) {
     iconPath: '/favicon.ico',
     asyncPage: false,
     metaDescription: '',
-    metaKeywords: ''
+    metaKeywords: '',
+    //使用模板的页面
+    templatePages: {}
   };
 
   this.builtinExtends = [
@@ -641,6 +643,12 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
           }
           break;
 
+        case 'templatePages':
+          if (cfg[k] && typeof cfg[k] === 'object') {
+            this.config.templatePages = cfg[k];
+          }
+          break;
+
         default:
           this.config[k] = cfg[k];
       }
@@ -840,6 +848,50 @@ wapp.prototype.fmtPageHTML = function (ht, pagename) {
   return ht;
 };
 
+//检测页面是否使用模板
+wapp.prototype.pageUseTemplate = function (name) {
+  if (this.config.templatePages) {
+    for (let k in this.config.templatePages) {
+      let tp = this.config.templatePages[k]
+      if (typeof tp === 'string') {
+        if (k === '!*') {
+          if (name === tp) return false;
+        }
+
+        if (tp === name || tp === '*') return k;
+      } else if (Array.isArray(tp)) {
+        if (k === '!*') {
+          if (tp.indexOf(name) >= 0) return false;
+        }
+        if (tp.indexOf(name) >= 0) return k;
+      }
+    }
+  }
+
+  return false;
+}
+
+wapp.prototype.getTemplateData = function (appdir, template_name) {
+  let tempfile = appdir + `/templatePages/${template_name}`
+
+  if (template_name.lastIndexOf('.html') < 0) {
+    tempfile = `${tempfile}.html`
+  }
+
+  try {
+    return fs.readFileSync(tempfile, {encoding: 'utf8'})
+  } catch (err) {
+    this.debug && console.error(err);
+    return false;
+  }
+}
+
+wapp.prototype.makePageTemplateData = function (pagedata, tempdata) {
+  if (!tempdata || typeof tempdata !== 'string') return pagedata;
+
+  return tempdata.replaceAll('__WIGHT_PAGE__', pagedata);
+}
+
 wapp.prototype.replaceCssUrl = function (codetext) {
 
   let replace_src = (url) => {
@@ -954,12 +1006,24 @@ wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = ''
 
 };
 
-wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename) {
+wapp.prototype.loadPage = async function (pagefile, htmlfile, cssfile, pagename, appdir='') {
+  let pdir = appdir || this.config.pagedir
+
   let htext = '';
 
   try {
     fs.accessSync(htmlfile);
     htext = fs.readFileSync(htmlfile, {encoding: 'utf8'});
+
+    //检测页面是否启用了模板
+    let template_name = this.pageUseTemplate(pagename)
+    if (template_name) {
+      let tempdata = this.getTemplateData(pdir, template_name)
+      if (tempdata) {
+        htext = this.makePageTemplateData(htext, tempdata)
+      }
+    }
+
     if (!htmlparser.parse(htext)) {
       throw new Error(htmlfile + '\n    ' + htmlparser.lastErrorMsg)
     }
@@ -1769,7 +1833,8 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
       `${pdir}/pages/${page}/${page}.js`,
       `${pdir}/pages/${page}/${page}.html`,
       `${pdir}/pages/${page}/${page}.css`,
-      page
+      page,
+      appdir
     );
   }
 
