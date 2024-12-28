@@ -183,3 +183,27 @@ view可以进行链式调用，并且可以传递第一个参数是字符串，�
 this.view('[data-tag=icons]', `<img src="/static/icon/a.png">`)
     .view('[data-group=grp]', 'OK')
 ```
+
+## 页面模板
+
+页面的模板需要自己在templatePages目录下创建html文件，其中的模板变量\_\_WIGHT_PAGE\_\_表示即将被替换的页面数据。
+
+具体的页面模板配置要在config.json中：
+
+```json
+{
+    "templatePages": {
+        "homebox": "home",
+        "!*": ["goods", "login"],
+        "pagebox": [
+            "user", "setting"
+        ],
+
+        "pagetemp": "*"
+    }
+}
+```
+
+以上配置表示对home页面启用模板homebox.html，对goods、login页面不使用模板，pagebox用于user、setting页面，pagetemp用于其他所有页面。
+
+匹配按照顺序进行，如果不匹配，才会进入到"*"表示的所有页面。

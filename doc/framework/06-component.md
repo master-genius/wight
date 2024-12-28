@@ -628,7 +628,7 @@ class XTimeTest extends Component {
 
 ### 通道函数
 
-- this.sendChannel(key, data, sp=null)
+- this.sendChannel(data, key=null, sp=null)
 
 发送数据到通道，key是channel属性的标识符，data为数据，sp为所在空间，默认为null表示组件自己的所在空间。
 
