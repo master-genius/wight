@@ -2239,12 +2239,16 @@ w._setData = function (pagename, pg, nds, data) {
           w.debug && console.error('数据类型不符合要求，无法渲染页面。');
           continue;
         } else if (vfunc) {
-          dtemp = vfunc({
+          let ret_temp_val = vfunc({
             data: data,
             target: nds[i],
             type: 'display',
             dataType
-          }) || (typeof data === 'object' ? JSON.stringify(data) : data);
+          });
+
+          dtemp = ret_temp_val === undefined
+                  ?  (typeof data === 'object' ? JSON.stringify(data) : data)
+                  : ret_temp_val;
         }
       } else if (typeof data === 'object') {
         dtemp = JSON.stringify(data);
