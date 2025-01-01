@@ -1,11 +1,11 @@
 .fullbox, [fullbox] {
   margin: 0 auto;
-  padding: 0 0;
+  padding: 0 0.005rem;
 }
 
-.pagebox, .container, [container],[pagebox] {
+.pagebox, .container, [pagebox], [container] {
   margin: 0 auto;
-  padding: 0 0.66rem;
+  padding: 0 1.1rem;
 }
 
 .row, [row] {
@@ -42,12 +42,17 @@
 }
 
 .c-0-5, [c-0-5] {
-  width: 4.1666%;
+  width: 4.16%;
   box-sizing: border-box;
 }
 
 .c-1, [c-1] {
   width: 8.333333%;
+  box-sizing: border-box;
+}
+
+.c-1-5, [c-1-5] {
+  width: 12.49999%;
   box-sizing: border-box;
 }
 
@@ -106,11 +111,6 @@
   box-sizing: border-box;
 }
 
-.c-1-5, [c-1-5] {
-  width: 12.49999%;
-  box-sizing: border-box;
-}
-
 .c-2-5, [c-2-5] {
   width: 20.83333%;
   box-sizing: border-box;
@@ -151,6 +151,11 @@
   box-sizing: border-box;
 }
 
+.c-10-5, [c-10-5] {
+  width: 87.49999%;
+  box-sizing: border-box;
+}
+
 @media only screen and (max-width: 759px) {
   .hide-for-small, [hide-for-small] {
     visibility: hidden;
@@ -165,6 +170,11 @@
   .show-middle-plus, [show-middle-plus] {
     visibility: hidden;
     display: none;
+  }
+
+  .sm-0-5, [sm-0-5] {
+    width: 4.16%;
+    box-sizing: border-box;
   }
 
   .sm-1, [sm-1] {
@@ -226,12 +236,7 @@
     width: 100%;
     box-sizing: border-box;
   }
-
-  .sm-0-5, [sm-0-5] {
-    width: 4.1666%;
-    box-sizing: border-box;
-  }
-
+  
   .sm-1-5, [sm-1-5] {
     width: 12.49999%;
     box-sizing: border-box;
@@ -282,9 +287,14 @@
     box-sizing: border-box;
   }
 
+  .sm-10-5, [sm-10-5] {
+    width: 87.49999%;
+    box-sizing: border-box;
+  }
+
 }
 
-@media only screen and (min-width:759px) and (max-width: 1280px) {
+@media only screen and (min-width:759px) and (max-width: 1200px) {
   .show-small-only, [show-small-only] {
     visibility: hidden;
     display: none;
@@ -361,7 +371,7 @@
   }
 
   .md-0-5, [md-0-5] {
-    width: 4.1666%;
+    width: 4.16%;
     box-sizing: border-box;
   }
 
@@ -369,7 +379,7 @@
     width: 12.49999%;
     box-sizing: border-box;
   }
-  
+
   .md-2-5, [md-2-5] {
     width: 20.83333%;
     box-sizing: border-box;
@@ -425,9 +435,14 @@
     box-sizing: border-box;
   }
 
+  .md-10-5, [md-10-5] {
+    width: 87.49999%;
+    box-sizing: border-box;
+  }
+
 }
 
-@media only screen and (min-width: 1280px) {
+@media only screen and (min-width: 1200px) {
   .show-small-only, [show-small-only] {
     visibility: hidden;
     display: none;
@@ -499,7 +514,7 @@
   }
 
   .lg-0-5, [lg-0-5] {
-    width: 4.1666%;
+    width: 4.16%;
     box-sizing: border-box;
   }
 
@@ -557,5 +572,9 @@
     width: 81.24999%;
     box-sizing: border-box;
   }
-  
+
+  .lg-10-5, [lg-10-5] {
+    width: 87.49999%;
+    box-sizing: border-box;
+  }
 }

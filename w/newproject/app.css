@@ -3,14 +3,16 @@
   src: url(/static/font/JetBrainsMono-Regular.ttf);
 }
 
-[container],[fullbox] {
-  max-width: 2560px;
+[container] {
+  max-width: 2048px;
 }
 
 :root {
-  font-size: 16px;
+  font-size: 15px;
   font-family: 'JetBrainsMono,Helvetica,Arial,sans-serif';
   --w-prompt-bg-color: #f7f9fc;
+  scrollbar-width: thin;
+  scrollbar-color: #c0c2c2 #efefef;
 }
 
 h1,h2,h3,h4,h5,h6,p,span,div {
@@ -29,16 +31,35 @@ button:active,input[type=submit]:active {
 
 button,[button] {
   background: #148de3;
-  border-radius: 0.08rem;
+  border-radius: 0.123rem;
 }
 
 textarea:focus {
   outline: none;
+  border:solid 1px #27a3fb;
+}
+
+input:not([type=submit]):not([type="range"]),select,textarea {
+  border:solid 1px #d1d2d3;
 }
 
 input:not([type=submit]):focus {
   outline: none;
-  border:solid 0.5px #27a3fb;
+  border:solid 1px #27a3fb;
+}
+
+a {
+  color: #252f3e;
+}
+
+input[type=submit] {
+  /* background: #a84e70; */
+  background:#248ad3;
+  border-radius: 0.123rem;
+}
+
+input[ok] {
+  background: #1ba3a3;
 }
 
 .short-input,[short-input] {
@@ -83,6 +104,11 @@ input:not([type=submit]):focus {
   color: #424345;
 }
 
+/* .btn-gray,[btn-gray] {
+  background: #d1d2d5;
+  color: #424345;
+}
+ */
 
 .btn-light-gray,[btn-light-gray] {
   background: #dfdfe1;
@@ -117,15 +143,6 @@ input:not([type=submit]):focus {
 .btn-ok,[btn-ok] {
   background: #3ca8bb;
   color: #424345;
-}
-
-input[type=submit] {
-  background:#248ad3;
-  border-radius: 0.08rem;
-}
-
-input[ok] {
-  background: #1ba3a3;
 }
 
 .testok {
@@ -193,15 +210,15 @@ input[ok] {
 }
 
 .middle,[middle] {
-  font-size: 92%;
+  font-size: 93.7%;
 }
 
 .small,[small] {
-  font-size: 85%;
+  font-size: 86.5%;
 }
 
 .small2,[small2] {
-  font-size: 80%;
+  font-size: 81%;
 }
 
 .tiny,[tiny] {
@@ -296,6 +313,37 @@ input[ok] {
   text-shadow: 2px 2px 2px #d7d8d9;
 }
 
+.linear-button, [linear-button] {
+  align-self: center;
+  padding:0.2rem 0.9rem;
+  border-radius:0.9rem;
+  background:linear-gradient(-36deg, #e6e7e9, #c2e1f5);
+  user-select: none;
+}
+
+.linear-button-big,[linear-button-big] {
+  padding:0.5rem 1.2rem;
+  border-radius:1.2rem;
+  background:linear-gradient(-36deg, #e6e7e9, #c2e1f5);
+  user-select: none;
+}
+
+.linear-gray, [linear-gray] {
+  background:linear-gradient(-36deg, #eff1f4, #d7dcdf);
+}
+
+.linear-orange, [linear-orange] {
+  background:linear-gradient(-36deg, #e6e7e9, #d87757);
+}
+
+.linear-blue, [linear-blue] {
+  background:linear-gradient(-36deg, #d5d2d2, #4cb5ea);
+}
+
+.linear-morning, [linear-morning] {
+  background:linear-gradient(-36deg, #eccdb5, #4cb5ea);
+}
+
 .card-space, [card-space] {
   margin: 0.38rem auto;
 }
@@ -369,11 +417,11 @@ table {
 }
 
 .ok,[ok] {
-  color: #1da678;
+  color: #219e99;
 }
 
 .success,[success],[done] {
-  color: #1a7965;
+  color: #1b7966;
 }
 
 .blue-dark, [blue-dark],[dark-blue] {
@@ -393,6 +441,7 @@ table {
 }
 
 .black-blue, [black-blue] {
+  /* color: #181d27; */
   color: #1e2431;
 }
 
@@ -477,10 +526,6 @@ a:active,.click:active,[click]:active {
   border-radius: 50%;
 }
 
-.overflow,[overflow] {
-  overflow: auto;
-}
-
 .overflow-hidden, [overflow-hidden] {
   overflow: hidden;
 }
@@ -491,6 +536,36 @@ a:active,.click:active,[click]:active {
 
 .overflow-hidden-y, [overflow-hidden-y] {
   overflow-y: hidden;
+}
+
+.left-menu,[left-menu] {
+  height:100vh;
+  overflow-y: auto;
+}
+
+.right-pagebox,[right-pagebox] {
+  height:95vh;
+  overflow-y: auto;
+}
+
+.radius, [radius] {
+  border-radius: 2.5px;
+}
+
+.top-menu, [top-menu] {
+  z-index: 10;
+  position: fixed;
+  top:0;
+  background: #f2f3f5;
+  height: 3rem;
+  line-height: 3rem;
+  /* border-bottom: solid 1px #d1d2d3; */
+  /* box-shadow: 0 1px 2px #d1d2d3; */
+}
+
+.top-menu-space, [top-menu-space] {
+  width: 100%;
+  height: 3rem;
 }
 
 .am-notice1,[am-notice1] {
@@ -773,4 +848,37 @@ a:active,.click:active,[click]:active {
   60% {transform: translateY(-330%);}
   80% {transform: translateY(-331%);}
   100% {transform: translateY(-333%);}
+}
+
+/*-------增加ol设置避免序号混乱-------*/
+
+ol {
+  counter-reset: item;
+}
+
+ol > li {
+  counter-increment: item;
+  display: block;
+}
+
+ol > li:before {
+  content: counter(item) ". ";
+}
+
+ol {
+  list-style: none;
+}
+
+ol ul {
+  list-style: circle;
+}
+
+ol ul li {
+  counter-increment: none;
+  display: list-item;
+  list-style: circle;
+}
+
+ol ul li:before {
+  content: none;
 }
