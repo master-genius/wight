@@ -132,7 +132,7 @@
   line-height: 150%;
   color: var(--w-notify-color, #f1f2f3);
   min-height: 9%;
-  max-height: 56.5%;
+  max-height: 56%;
   overflow-y: auto;
   overflow-x: hidden;
   word-break: break-all;
@@ -226,7 +226,7 @@
   z-index:103;
   bottom: 50%;
   min-height: 20%;
-  max-height: 86%;
+  max-height: 85%;
   transform: translate(-50%, 46.5%);
 }
 
@@ -234,7 +234,7 @@
   z-index: 103;
   top: 7%;
   min-height: 20%;
-  max-height: 86%;
+  max-height: 85%;
 }
 
 .w-prompt-block {
@@ -319,7 +319,7 @@
   line-height:2rem;
   color:var(--w-alert-color, #4a4a4a);
   min-height: 4rem;
-  max-height: 86.5%;
+  max-height: 85%;
   overflow-y: auto;
   background: var(--w-alert-bg-color, #f7f8fa);
   padding:0.5rem;
