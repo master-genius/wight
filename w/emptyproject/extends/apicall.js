@@ -134,9 +134,9 @@ exports.apicall = async function (api, options = {}, deep = 0) {
   let req_key = `${options.method} ${api}`
   let min_time = w.config.requestTimeSlice && !isNaN(w.config.requestTimeSlice)
                   ? w.config.requestTimeSlice
-                  : 50
+                  : 25
 
-  min_time < 1 && (min_time = 10);
+  min_time < 2 && (min_time = 10);
   min_time > 600_000 && (min_time = 600_000);
 
   let cur_time = Date.now()
@@ -227,8 +227,10 @@ exports.apicall = async function (api, options = {}, deep = 0) {
           })
           .then(d => {
             orgtext = d;
-
-            if (options.dataType === 'json') {
+            let contentType = ret.headers.get('content-type')
+            if (options.dataType === 'json'
+              || (contentType && contentType.indexOf('application/json') === 0) )
+            {
               try {
                 ret.data = JSON.parse(d);
               } catch (err) {
