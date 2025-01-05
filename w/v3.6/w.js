@@ -1471,7 +1471,8 @@ const w = new function () {
   
     pg.unprompt = function(isbottom=true) {w.unprompt(isbottom);}
     pg.unpromptMiddle = function(){w.unprompt(false);}
-  
+    pg.unpromptTop = pg.unpromptMiddle
+    
     pg.promptTop = function(info, options={}) {
       options.wh = 'top';
       this.prompt(info, options);
