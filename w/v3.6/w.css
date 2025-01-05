@@ -232,7 +232,7 @@
 
 .w-prompt-top {
   z-index: 103;
-  top: 7%;
+  top: 5%;
   min-height: 20%;
   max-height: 85%;
 }
@@ -313,7 +313,7 @@
   position:fixed;
   left:50%;
   transform: translateX(-50%);
-  top:10%;
+  top:9%;
   word-break: break-all;
   word-wrap: break-word;
   line-height:2rem;
