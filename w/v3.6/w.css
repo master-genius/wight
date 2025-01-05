@@ -136,7 +136,7 @@
   position:fixed;
   line-height: 150%;
   color: var(--w-notify-color, #f1f2f3);
-  min-height: 9%;
+  min-height: 2%;
   max-height: 56%;
   overflow-y: auto;
   overflow-x: hidden;
