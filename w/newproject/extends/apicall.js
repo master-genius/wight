@@ -100,24 +100,26 @@ exports.apicall = async function (api, options = {}, deep = 0) {
     options.headers = {};
   }
 
-  if (options.retry === undefined || typeof options.retry !== 'number' || options.retry < 3) {
-    options.retry = 0
+  if (!options.retry || typeof options.retry !== 'number' || options.retry < 3) {
+    options.retry = w.config.apiRetry || 0
   }
 
   if (options.retryDelay === undefined || typeof options.retryDelay !== 'number') {
-    options.retryDelay = 100
+    options.retryDelay = 1500
   }
 
-  if (api.indexOf('http') !== 0) {
-    api = `${w.host}${api}`;
+  let real_api = api
+
+  if (real_api.indexOf('http') !== 0) {
+    real_api = `${w.host}${api}`;
   }
 
   if (options.query) {
     let qstr = qs(options.query);
     if (api.indexOf('?') > 0) {
-      api += '&' + qstr;
+      real_api += '&' + qstr;
     } else {
-      api += '?' + qstr;
+      real_api += '?' + qstr;
     }
   }
 
@@ -208,7 +210,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
     cover_id = w.cover(cover_text)
   }
 
-  await fetch(api, options)
+  await fetch(real_api, options)
           .then(res => {
             ret.ok = res.ok;
             ret.status = res.status;
@@ -282,9 +284,9 @@ exports.apicall = async function (api, options = {}, deep = 0) {
       }
     }
 
-    if (deep > 0 && options.retry > 0
+    if (deep >= 0 && options.retry > 0
       && deep < options.retry
-      && [401, 403].indexOf(ret.status) < 0)
+      && [401, 403, 400, 429, 402, 405, 406, 413, 404].indexOf(ret.status) < 0)
     {
       if (options.retryDelay > 0) {
         await new Promise((rv, rj) => {
@@ -295,6 +297,10 @@ exports.apicall = async function (api, options = {}, deep = 0) {
           setTimeout(rv, min_time)
         })
       }
+
+      w.config.retryNotice
+        && typeof w.config.retryNotice === 'function'
+        && w.config.retryNotice(ret)
 
       return exports.apicall(api, options, deep + 1)
     }
