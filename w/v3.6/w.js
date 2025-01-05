@@ -874,10 +874,10 @@ const w = new function () {
     info = w.replaceSrc(info);
     
     if (ntype.indexOf('error') >= 0) {
-      info = `<span style="color:#f96567;font-size:95%;">${info}</span>`;
+      info = `<span style="color:var(--w-error-text-color,#dc3d37);font-size:95%;">${info}</span>`;
     }
 
-    let colorText = '#e5e5e9';
+    let colorText = 'var(--w-light-text-color, #e5e5e7)';
 
     if (ntype.indexOf('light') >= 0) {
       where_is += ' w-notify-light';
@@ -911,7 +911,7 @@ const w = new function () {
       ndom.style.display = 'flex';
       ndom.style.flexFlow = 'row wrap';
       ndom.innerHTML = `<div style="width:95%;">${info}</div>
-        <div data-onclick="w.cancelNotify" data-nid="${nid}" style="display: grid;place-items: center;color:#df4567;cursor:pointer;user-select:none;">X</div>`
+        <div data-onclick="w.cancelNotify" data-nid="${nid}" style="display: grid;place-items: center;color:var(--w-error-text-color,#dc3d37);cursor:pointer;user-select:none;">X</div>`
     } else {
       ndom.innerHTML = info;
     }

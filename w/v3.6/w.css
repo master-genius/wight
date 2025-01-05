@@ -28,6 +28,9 @@
 
   --w-cover-bg-color: rgba(22,23,25, 0.095);
 
+  --w-error-text-color: #ee3939;
+
+  --w-light-text-color: #e5e5e7;
   /* --w-notify-shadow:  */
 }
 
