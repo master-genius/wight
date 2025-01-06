@@ -14,7 +14,9 @@ function qs (args) {
 
 let _methods = [
   'GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'TRACE', 'PATCH'
-];
+]
+
+let errorCodes = [401, 403, 400, 429, 402, 405, 406, 413, 404, 500]
 
 let requestLock = {}
 if (!window.__request_lock_timer__) {
@@ -256,7 +258,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
             }
           })
 
-  if (!ret.ok && (!options.retry || deep >= options.retry) )
+  if (!ret.ok && (!options.retry || deep >= options.retry || errorCodes.indexOf(ret.status) >= 0))
   {
     if (w.config.requestError && typeof w.config.requestError === 'object') {
       let errorHandle;
@@ -286,7 +288,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
 
     if (deep >= 0 && options.retry > 0
       && deep < options.retry
-      && [401, 403, 400, 429, 402, 405, 406, 413, 404].indexOf(ret.status) < 0)
+      && errorCodes.indexOf(ret.status) < 0)
     {
       if (options.retryDelay > 0) {
         await new Promise((rv, rj) => {
