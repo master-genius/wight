@@ -2033,7 +2033,7 @@ function renderCompsClass(cname) {
 class ${className} extends Component {
 
   constructor() {
-    super(); //必须写在最开始。
+    super();
 
     //通过this.attrs访问所有属性。this.attributes是浏览器原始提供的属性对象。
     //this.attrs是为了方便而做的映射。
