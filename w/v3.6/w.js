@@ -3953,33 +3953,34 @@ class Component extends HTMLElement {
 
   //remove from page
   disconnectedCallback() {
-    if (this.onremove && typeof this.onremove === 'function') {
-      if (this.__channel_id__) {
-        w.removeShareNotice(this.__channel_id__)
-        this.__channel_id__ = null
-      }
-      this.onremove();
+    if (this.__channel_id__) {
+      w.removeShareNotice(this.__channel_id__)
+      this.__channel_id__ = null
+    }
+
+    if (this.onremove && typeof this.onremove === 'function') {  
+      this.onremove()
     }
   }
 
   //to new page
   adoptedCallback() {
     if (this.onadopted && typeof this.onadopted === 'function') {
-      this.onadopted();
+      this.onadopted()
     }
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (this.onattrchange && typeof this.onattrchange === 'function') {
-      this.onattrchange(name, oldValue, newValue);
+      this.onattrchange(name, oldValue, newValue)
     }
   }
 
   naviGlass(text, pr = 'left', up = false) {
-    w.navi(text, { context: this, position: pr, background: 'glass', up });
+    w.navi(text, { context: this, position: pr, background: 'glass', up })
   }
 
-  naviHide() { w.naviHide(); }
+  naviHide() { w.naviHide() }
 
   alert(info, options=null) {
     if (!options || typeof options !== 'object') options = {};
@@ -3993,7 +3994,7 @@ class Component extends HTMLElement {
     return w.alertDark(info, options);
   }
 
-  cancelAlert(aid='') {return w.cancelAlert(aid);}
+  cancelAlert(aid='') {return w.cancelAlert(aid)}
 
   cover(info, options=null) {
     if (!options || typeof options !== 'object') options = {};
