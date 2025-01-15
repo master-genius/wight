@@ -3233,6 +3233,18 @@ w.getShare = function (key) {
   return w.share[key];
 }
 
+w.makeSpace = function (key, sp=null) {
+  return `${sp ? (sp + '@') : ''}${key.indexOf('chan::') === 0 ? key : ('chan::' + key)}`
+}
+
+w.getChannel = function (key, sp=null) {
+  return w.getShare(w.makeSpace(key, sp))
+}
+
+w.setChannel = function (data, key, sp=null) {
+  w.setShare(w.makeSpace(key, sp), data)
+}
+
 w.loadScript = async function (src, cname = '') {
 
   if (!w._http_preg.test(src)) {
