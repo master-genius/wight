@@ -1881,7 +1881,9 @@ wapp.prototype.build = async function (appdir, appname = '') {
 
 wapp.prototype.newPage = function (name, pagedir) {
   
-  let html = `'use strict';\n\nclass Page {
+  let html = `'use strict';\n
+let htmltag = <-('htmltag')\nlet ejson = <-('ejson')\nlet djson = <-('djson')\n
+class Page {
 
   constructor() {
 
@@ -1988,7 +1990,7 @@ function fmtCompsClassName(name) {
 
   for (let i = 0; i < cname.length; i++) {
     if (i === 0) namearr.push(cname[i].toUpperCase());
-    else if (cname[i] === '-' && i < end && (/[a-z]/i).test(cname[i+1])) {
+    else if (cname[i] === '-' && i < end && (/[a-z0-9]/i).test(cname[i+1])) {
       namearr.push(cname[i+1].toUpperCase());
       i += 1;
     } else {
@@ -2030,6 +2032,7 @@ function renderCompsClass(cname) {
   let className = fmtCompsClassName(cname);
 
   return `'use strict';\n
+let htmltag = <-('htmltag')\nlet ejson = <-('ejson')\nlet djson = <-('djson')\n
 class ${className} extends Component {
 
   constructor() {
