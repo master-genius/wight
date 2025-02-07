@@ -1413,6 +1413,20 @@ wapp.prototype.loadCompsCss = async function (cdir, cssdir) {
   this.compsCssCode = JSON.stringify(csscodemap);
 };
 
+/**
+ * 格式化js代码，简单压缩``包含的字符串
+ * @param {string} text 
+ */
+wapp.prototype.fmtJSQuote = function (text) {
+  let end_preg = /(<\/[a-z0-9\-]+>)\n{0,}\s+/gi
+  let start_preg = /(<[^>]+>)\n{0,}\s+/ig
+  return text.replace(end_preg, (match, tag) => {
+    return tag
+  }).replace(start_preg, (match, tag) => {
+    return tag
+  })
+}
+
 /* wapp.prototype.loadOneComponent = async function (compdir, appdir) {
 
 }
@@ -1548,7 +1562,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
             if (data.error) {
               console.error(data.error);
             } else {
-              compress_jscode = data.code;
+              compress_jscode = this.fmtJSQuote(data.code);
             }
           }
           compress_jscode = `${compress_jscode} export default '${names[i]}';`;
@@ -1603,7 +1617,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
       if (data.error) {
         console.error(data.error);
       } else {
-        this.components = data.code;
+        this.components = this.fmtJSQuote(data.code);
       }
     }
 
@@ -1844,7 +1858,7 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
     if (data.code === undefined) {
       console.error(data.error);
     } else {
-      this.pagesCode = data.code;
+      this.pagesCode = this.fmtJSQuote(data.code);
     }
   }
 
