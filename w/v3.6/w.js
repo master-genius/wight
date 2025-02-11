@@ -620,7 +620,11 @@ const w = new function () {
     let dom = document.createElement('div');
     
     dom.className = 'w-global-alert-info';
-    if (options.transparent || options.glass) dom.className += ' w-global-alert-trans';
+    if (options.transparent || options.glass) {
+      dom.className += ' w-global-alert-trans';
+      dom.style.boxShadow = 'none';
+    }
+
     dom.style.zIndex = astack.curZIndex;
 
     let realTop = parseInt(10 + 0.07 * total);
