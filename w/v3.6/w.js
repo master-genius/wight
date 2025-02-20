@@ -986,47 +986,47 @@ const w = new function () {
 
   this.promptMiddle = function (info, options = {}) {
     options.wh = 'middle';
-    w.prompt(info, options);
+    return w.prompt(info, options);
   };
 
   this.promptMiddleGlass = function (info, options = {}) {
     options.wh = 'middle';
     options.glass = 'glass';
-    this.promptGlass(info, options);
+    return this.promptGlass(info, options);
   };
 
   this.promptGlass = function (info, options = {}) {
     options.glass = 'glass';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   this.promptDark = function (info, options = {}) {
     options.glass = 'dark';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   this.promptMiddleDark = function (info, options = {}) {
     options.wh = 'middle';
     options.glass = 'dark';
 
-    this.promptDark(info, options);
+    return this.promptDark(info, options);
   };
 
   this.promptTop = function (info, options = {}) {
     options.wh = 'top';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   this.promptTopGlass = function (info, options = {}) {
     options.wh = 'top';
     options.glass = 'glass';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   this.promptTopDark = function (info, options = {}) {
     options.wh = 'top';
     options.glass = 'dark';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   //wh = 'bottom', noclose = false, glass = false
@@ -1479,7 +1479,7 @@ const w = new function () {
     
     pg.promptTop = function(info, options={}) {
       options.wh = 'top';
-      this.prompt(info, options);
+      return this.prompt(info, options);
     }
   
     pg.promptMiddle = function(info, options={}) {
