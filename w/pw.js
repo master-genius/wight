@@ -1557,7 +1557,10 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           }
 
           let compress_jscode = comps_jscode;
-          if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)){
+          if (this.forceCompress
+              || this.config.debug === false
+              || (this.isbuild && this.config.buildCompress))
+          {
             data = await terser.minify(comps_jscode);
             if (data.error) {
               console.error(data.error);
@@ -1565,8 +1568,11 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
               compress_jscode = this.fmtJSQuote(data.code);
             }
           }
-          compress_jscode = `${compress_jscode} export default '${names[i]}';`;
-          fs.writeFileSync(mod_dir + '/' + names[i] + '.js', compress_jscode, {encoding: 'utf8'});
+
+          let final_compress_jscode = `${compress_jscode} export default '${names[i]}';`;
+          fs.writeFileSync(mod_dir + '/' + names[i] + '.js',
+                        final_compress_jscode,
+                        {encoding: 'utf8'});
         } else {
           this.components += comps_jscode;
         }
