@@ -1570,6 +1570,7 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
           }
 
           let final_compress_jscode = `${compress_jscode} export default '${names[i]}';`;
+
           fs.writeFileSync(mod_dir + '/' + names[i] + '.js',
                         final_compress_jscode,
                         {encoding: 'utf8'});
