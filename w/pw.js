@@ -1859,7 +1859,10 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   }
 
   //压缩页面
-  if (this.forceCompress || this.config.debug === false || (this.isbuild && this.config.buildCompress)) {
+  if (this.forceCompress
+      || this.config.debug === false
+      || (this.isbuild && this.config.buildCompress))
+  {
     let data = await terser.minify(this.pagesCode + '\n');
     if (data.code === undefined) {
       console.error(data.error);
@@ -1869,7 +1872,6 @@ wapp.prototype.makeApp = async function (appdir = '', isbuild = false) {
   }
 
   return this.compile();
-
 };
 
 /**
