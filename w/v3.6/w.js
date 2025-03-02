@@ -3179,6 +3179,7 @@ w.runShareNotice = function (type, obj, k, data = null) {
       }
 
       ret_tmp = a.callback({
+        id: a.id,
         type,
         obj,
         key: k,
