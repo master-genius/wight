@@ -3238,6 +3238,10 @@ w.getShare = function (key) {
   return w.share[key];
 }
 
+w.removeShare = function (key) {
+  delete w.share[key];
+}
+
 w.makeSpace = function (key, sp=null) {
   return `${sp ? (sp + '@') : ''}${key.indexOf('chan::') === 0 ? key : ('chan::' + key)}`
 }
