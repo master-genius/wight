@@ -2067,7 +2067,7 @@ class ${className} extends Component {
     //this.shadow可以访问shadow DOM，注意这是shadowRoot。
     //直接通过this访问组件节点自己。
     
-    //属性声明示例：用于声明支持的属性和类型限制，若不需要请去掉properties的定义。
+    //属性声明示例：用于声明支持的属性和类型限制。
     this.properties = {
       style: {
         //type默认就是字符串
