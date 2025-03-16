@@ -4052,6 +4052,7 @@ class Component extends HTMLElement {
 
   unprompt(isbottom=true) {w.unprompt(isbottom);}
   unpromptMiddle(){w.unprompt(false);}
+  unpromptTop(){w.unprompt(false);}
 
   promptTop(info, options={}) {
     options.wh = 'top';
