@@ -2899,6 +2899,8 @@ window._import = w.import = async function (path, reload=false) {
   }
 
   try {
+    //表示正导入
+    w.__mod__[path] = true;
     let mod;
     if (w._http_preg.test(path)) {
       mod = await import(path).then(mod => {
@@ -2919,6 +2921,7 @@ window._import = w.import = async function (path, reload=false) {
 
     return mod;
   } catch (err) {
+    delete w.__mod__[path];
     w.notifyError(`import module:<p>${err.message}</p>`, 5000);
   }
 };
