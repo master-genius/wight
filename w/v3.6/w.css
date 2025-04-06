@@ -22,9 +22,9 @@
   --w-prompt-color: #4a4a4a;
   --w-prompt-bg-color: #fafafd;
 
-  --w-prompt-glass-bg-color: rgba(42,43,45, 0.028);
+  --w-prompt-glass-bg-color: rgba(42,43,45, 0.03);
 
-  --w-prompt-close-bg-color: rgba(37, 38, 39, 0.035);
+  --w-prompt-close-bg-color: rgba(37, 38, 39, 0.039);
 
   --w-cover-bg-color: rgba(27,28,29, 0.036);
 
