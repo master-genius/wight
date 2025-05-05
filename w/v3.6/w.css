@@ -230,8 +230,8 @@
 .w-prompt-middle {
   z-index:103;
   bottom: 50%;
-  min-height: 20%;
-  max-height: 85%;
+  min-height: 10%;
+  max-height: 78%;
   transform: translate(-50%, 46.5%);
 }
 
@@ -239,7 +239,7 @@
   z-index: 103;
   top: 5%;
   min-height: 20%;
-  max-height: 85%;
+  max-height: 78%;
 }
 
 .w-prompt-block {
