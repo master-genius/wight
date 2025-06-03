@@ -689,7 +689,7 @@ const w = new function () {
       closedom.innerHTML = `<div style="text-align:right;padding:0.085%;">`
         +`<a data-onclick="w.cancelAlert" data-aid="${aid}" `
         +'style="color:#989595;font-size:111%;text-decoration:none;user-select:none;" click>'
-        +`${options.closeText || '&nbsp;X&nbsp;'}</a>`
+        +`${options.closeText || '&nbsp;🗙&nbsp;'}</a>`
         +'</div>';
 
       w[domname].appendChild(closedom);
@@ -1085,7 +1085,7 @@ const w = new function () {
         }
 
         if (options.showClose) {
-          w[closedom].innerHTML = typeof options.showClose === 'string' ? options.showClose : `<div style="color:#a1a2a3;font-size:150%;z-index:3;position:fixed;width:100%;left:0;text-align:center;bottom:${wh === 'bottom' ? 82 : 7}%;cursor:pointer;text-shadow:2px 2px 5px #c1c2c3;">🗙</div>`
+          w[closedom].innerHTML = typeof options.showClose === 'string' ? options.showClose : `<div style="color:#a7a8a9;font-size:185%;z-index:3;position:fixed;width:100%;left:0;text-align:center;bottom:${wh === 'bottom' ? 82 : 7}%;cursor:pointer;text-shadow:2px 2px 5px #c1c2c3;">🗙</div>`
         }
 
         w[domname].innerHTML = `<div style="overflow:auto;word-wrap:break-word;color:${pcolor}">${info}</div>`;
