@@ -1084,6 +1084,10 @@ const w = new function () {
           };
         }
 
+        if (options.showClose) {
+          w[closedom].innerHTML = typeof options.showClose === 'string' ? options.showClose : `<div style="color:#a1a2a3;font-size:150%;z-index:3;position:fixed;width:100%;left:0;text-align:center;bottom:${wh === 'bottom' ? 82 : 7}%;cursor:pointer;text-shadow:2px 2px 5px #c1c2c3;">🗙</div>`
+        }
+
         w[domname].innerHTML = `<div style="overflow:auto;word-wrap:break-word;color:${pcolor}">${info}</div>`;
       }
 
