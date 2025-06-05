@@ -1083,9 +1083,10 @@ const w = new function () {
             w.unprompt();
           };
         }
+        let show_close = options.showClose || (options.showClose === undefined);
 
-        if (options.showClose) {
-          w[closedom].innerHTML = typeof options.showClose === 'string' ? options.showClose : `<div style="color:#a7a8a9;font-size:185%;z-index:3;position:fixed;width:100%;left:0;text-align:center;bottom:${wh === 'bottom' ? 82 : 7}%;cursor:pointer;text-shadow:2px 2px 5px #c1c2c3;">🗙</div>`
+        if (show_close) {
+          w[closedom].innerHTML = typeof show_close === 'string' ? show_close : `<div style="color:#a7a8a9;font-size:185%;z-index:3;position:fixed;width:100%;left:0;text-align:center;bottom:${wh === 'bottom' ? 82 : 7}%;cursor:pointer;text-shadow:2px 2px 5px #c1c2c3;">🗙</div>`
         }
 
         w[domname].innerHTML = `<div style="overflow:auto;word-wrap:break-word;color:${pcolor}">${info}</div>`;
