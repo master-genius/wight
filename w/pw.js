@@ -599,7 +599,7 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
 
         case 'showTabs':
           this.showTabs = cfg.showTabs;
-          this.tabsClassName = this.fmtTabsName(this.showTabs);
+          this.tabsClassName = this.tabsClassMap[this.fmtTabsName(this.showTabs)] || 'w-hide-for-large';
           break;
         
         case 'host':
