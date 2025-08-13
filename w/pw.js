@@ -61,9 +61,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '3.6';
+  this.defaultVersion = '3.7';
 
-  this.version = '3.6';
+  this.version = '3.7';
 
   this.usedVersion = this.version;
 
@@ -105,8 +105,41 @@ let wapp = function (options = {}) {
     metaDescription: '',
     metaKeywords: '',
     //使用模板的页面
-    templatePages: {}
+    templatePages: {},
+    // 'sm', 'md', 'lg', ['sm', 'md', 'lg']
+    showTabs: ['md', 'sm']
   };
+
+  this.tabsClassMap = {
+    'sm': 'w-show-small-only',
+    'md': 'w-hide-for-small w-hide-for-large',
+    'lg': 'w-show-large-only',
+    'md,sm': 'w-hide-for-large',
+    'lg,sm': 'w-hide-for-middle',
+    'lg,md': 'w-hide-for-small',
+    'lg,md,sm': '',
+    'all': '',
+  }
+
+  this.tabsClassName = this.tabsClassMap[this.config.showTabs.join(',')]
+
+  this.fmtTabsName = (name) => {
+    if (typeof name === 'string') {
+      if (name.indexOf(',') >= 0) {
+        return name.split(',').filter(p => p.length > 0)
+                    .sort((a, b) => {
+                      return a > b ? 1 : -1
+                    })
+                    .join(',') || 'md,sm'
+      }
+    } else if (Array.isArray(name)) {
+      return name.sort((a, b) => {
+        return a > b ? 1 : -1
+      }).join(',')
+    }
+
+    return 'md,sm'
+  }
 
   this.builtinExtends = [
     'htmltag', 'apicall', 'ejson', 'djson', 'confirm',
@@ -341,6 +374,7 @@ let wapp = function (options = {}) {
     window.alertDark = w.alertDark.bind(w);
     window.coverDark = w.coverDark.bind(w);
     window.cancelAlert = w.cancelAlert.bind(w);
+    w.__tabs_class_name__ = '${this.tabsClassName}';
   </script>
   <script>'use strict';${this.extends}</script>
   <script>'use strict';${this.components}</script>
@@ -373,6 +407,10 @@ let wapp = function (options = {}) {
 
     if (w.tabs.list.length > 0) {
       w.tabsmenudom.className = 'w-tabbar-row-x';
+      ${
+        this.tabsClassName
+        ? `w.tabsmenudom.className += ' ${this.tabsClassName}';`
+        : ''}
       w.tabsmenudom.background = '${this.config.tabsBackground}';
       w.tabsmenudom.innerHTML = \`${this.tabsHTML}\`;
     }
@@ -557,6 +595,11 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
           if (cfg.tabs.selectedBackground) {
             this.config.tabsSelectedBackground = cfg.tabs.selectedBackground;
           }
+          break;
+
+        case 'showTabs':
+          this.showTabs = cfg.showTabs;
+          this.tabsClassName = this.fmtTabsName(this.showTabs);
           break;
         
         case 'host':

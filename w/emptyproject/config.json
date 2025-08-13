@@ -16,7 +16,7 @@
 
     "tabs": {
         "background": "#fafaff",
-        "selectedBackground": "#fdad45",
+        "selectedBackground": "#f1f2f3",
         "list": [
             {
                 "page": "home",
@@ -75,7 +75,7 @@
 
     "templatePages": {},
 
-    "version": "3.6",
+    "version": "3.7",
 
     "manifest": false,
 
