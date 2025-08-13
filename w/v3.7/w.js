@@ -1083,7 +1083,7 @@ const w = new function () {
             w.unprompt();
           };
         }
-        let show_close = options.showClose || (options.showClose === undefined);
+        let show_close = !!options.showClose;
 
         if (show_close) {
           w[closedom].innerHTML = typeof show_close === 'string' ? show_close : `<div style="color:#a7a8a9;font-size:175%;z-index:9;position:fixed;width:100%;left:0;text-align:center;bottom:${wh === 'bottom' ? 82 : 8}%;cursor:pointer;text-shadow:2px 2px 5px #c1c2c3;">X</div>`
