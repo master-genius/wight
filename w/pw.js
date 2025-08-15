@@ -539,7 +539,7 @@ wapp.prototype.loadConfig = function (cfgfile, isbuild = false) {
     }
 
     if (m.name && typeof m.name === 'string') {
-      mtext += `<div name="${m.page}" style="box-sizing:border-box;font-size:81%;line-height:102%;padding-bottom:3.2px;padding-top:2px;">${m.name}</div>`;
+      mtext += `<div name="${m.page}" style="box-sizing:border-box;font-size:78%;line-height:103%;padding-bottom:3.2px;padding-top:2px;">${m.name}</div>`;
     }
     
     mtext += `</div>`;
