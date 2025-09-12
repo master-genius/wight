@@ -2550,7 +2550,7 @@ w.runHooks = async function (ctx) {
 };
 
 w.events = {
-  scroll : function () {
+  scroll : function (evt) {
     if (w.curpage) {
       w.curpage.__scroll__ = w.curpage.__dom__.scrollTop;
       let h = w.curpage.__dom__.clientHeight + w.curpage.__scroll__;
@@ -2560,17 +2560,19 @@ w.events = {
           w.curpage.onscroll(w.curpage.__dom__.scrollTop,
             w.curpage.__dom__.clientHeight,
             w.curpage.__dom__.scrollHeight);
-        } catch (err){}
+        } catch (err){
+          w.debug && console.error(err)
+        }
       }
 
-      var isBottom = false;
+      let isBottom = false;
       if (w.isFirefox) {
         isBottom = (Math.abs(h - w.curpage.__dom__.scrollHeight) <= 1.21);
       } else {
         isBottom = (Math.abs(h - w.curpage.__dom__.scrollHeight) < 1.56);
       }
 
-      if (w.curpage.__scroll__ <= 0.0000001) {
+      if (w.curpage.__scroll__ <= 0.0001) {
         if (typeof w.curpage.ontop === 'function') {
           if (!w.curpage.onTopLock) {
             w.curpage.onTopLock = true;
@@ -2591,7 +2593,7 @@ w.events = {
                 if (w.curpage.__dom__.scrollHeight - t < 1.56) {
                   w.curpage.onbottom(w.curpage.__dom__.scrollHeight);
                 }
-              }, 350);
+              }, 200);
             }
           } catch (err) {console.log(err);}
         } else {}
