@@ -3260,7 +3260,7 @@ w.getChannel = function (key, sp=null) {
   return w.getShare(w.makeSpace(key, sp))
 }
 
-w.setChannel = function (data, key, sp=null) {
+w.setChannel = function (key, data, sp=null) {
   w.setShare(w.makeSpace(key, sp), data)
 }
 
