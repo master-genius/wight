@@ -5,14 +5,14 @@ const fs = require('fs')
 const zlib = require('zlib')
 const wpg = require('./w/pw.js')
 const wkthread = require('worker_threads')
-const {resource, sse} = require('titbit-toolkit')
+const {resource, SSE} = require('titbit-toolkit')
 const path = require('path')
 
 if (wkthread.isMainThread) {
   process.chdir(__dirname)
 }
 
-let sseNotice = new sse({
+let sseNotice = new SSE({
   timeout: 0,
   retry: 500,
   timeSlice: 1000,
