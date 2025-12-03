@@ -25,7 +25,7 @@
     "qrcode": "^1.5.4",
     "terser": "^5.44.1",
     "titbit": "^25.2.0",
-    "titbit-loader": "^22.6.9",
+    "titbit-loader": "^22.6.10",
     "titbit-token": "^2.2.0",
     "titbit-toolkit": "^4.1.2",
     "zipdata": "^1.0.2"
