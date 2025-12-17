@@ -113,7 +113,7 @@ module.exports = class PointerHandle {
     if (e.pointerId !== this.activePointerId) return;
 
     const data = this._calculateDirection(e[this.xKey], e[this.yKey]);
-    const fullData = { ...data, ...this._getPointerDetails(e) };
+    const fullData = { ...data, ...this._getPointerDetails(e)};
 
     if (typeof this.options.onEnd === 'function') {
       this.options.onEnd(fullData, e);
@@ -190,6 +190,7 @@ module.exports = class PointerHandle {
    */
   _getPointerDetails(e) {
     return {
+      target: e.target,
       pointerType: e.pointerType, // 'mouse', 'touch', 'pen'
       pressure: e.pressure,       // 0 - 1 (笔和3D Touch支持)
       tiltX: e.tiltX,             // 笔的倾斜 X
@@ -203,6 +204,7 @@ module.exports = class PointerHandle {
 
   _packEventData(e, type) {
     return {
+      target: e,
       type,
       x: e[this.xKey],
       y: e[this.yKey],
