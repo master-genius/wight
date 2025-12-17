@@ -4,8 +4,10 @@ function qs (args) {
   }
   
   let qsarr = [];
+  let akeys = Object.keys(args);
+  if (akeys.length <= 0) return '';
 
-  for (let k in args) {
+  for (let k of akeys) {
     qsarr.push(`${k}=${encodeURIComponent(args[k])}`);
   }
 
@@ -76,10 +78,7 @@ function makeResponse(err = null) {
   return res;
 }
 
-const token = await require('token');
-
 exports.apicall = async function (api, options = {}, deep = 0) {
-
   if (typeof api === 'object' && api !== null) {
     options = api;
     api = options.url;
@@ -112,7 +111,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
 
   let real_api = api
 
-  if (real_api.indexOf('http') !== 0) {
+  if (real_api.indexOf('http:') !== 0 && real_api.indexOf('https:') !== 0) {
     real_api = `${w.host}${api}`;
   }
 
@@ -199,9 +198,27 @@ exports.apicall = async function (api, options = {}, deep = 0) {
 
   }
 
-  let tk = token.get();
+  let token
+  //没有指定本次不需要验证
+  if (!options.notAuth) {
+    //基于配置驱动或直接传递
+    if (w.config.getToken && typeof w.config.getToken === 'function') {
+      token = w.config.getToken();
+    }
 
-  if (tk && !options.headers.authorization) options.headers.authorization = tk.token;
+    if (token) {
+      let tokenHeader = 'authorization';
+      if (w.config.tokenHeader && typeof w.config.tokenHeader === 'string') {
+        tokenHeader = w.config.tokenHeader;
+      }
+      if (!options.headers[tokenHeader]) options.headers[tokenHeader] = token;
+    }
+  }
+
+  //若存在则进行预处理，开发者自行定义
+  if (w.config.beforeRequest && typeof w.config.beforeRequest === 'function') {
+    w.config.beforeRequest(real_api, options);
+  }
 
   let ret = makeResponse();
 

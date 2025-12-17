@@ -61,9 +61,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '3.7';
+  this.defaultVersion = '4.0';
 
-  this.version = '3.7';
+  this.version = '4.0';
 
   this.usedVersion = this.version;
 
@@ -960,6 +960,78 @@ wapp.prototype.replaceCssUrl = function (codetext) {
 };
 
 wapp.prototype.replaceSrc = function (codetext, is_comps = false, comp_name = '', is_jscode=false) {
+  if (is_jscode) return codetext;
+
+  let replace_src = (url, plist, offset, text) => {
+    if ((/^http[s]?:\/\//).test(url)) {
+      return url;
+    }
+
+    let turl = url.trim();
+    if (turl.indexOf('${') === 0) {
+      return url;
+    }
+
+    //不做替换处理。
+    if (turl[0] === '!') {
+      return turl.substring(1).trim();
+    }
+
+    // 修复无引号时可能吸入末尾的 '/' 问题 (例如 <img src=abc/>)
+    // 如果 URL 以 / 结尾，且不是根路径 /，通常是解析错误吸入了闭合标签
+    if (turl.length > 1 && turl.endsWith('/')) {
+       turl = turl.substring(0, turl.length - 1);
+    }
+
+    if (is_comps) {
+      turl = turl.replace('./static', '/static/components/' + comp_name);
+    }
+
+    if (this.isbuild) {
+      if (this.buildPrePath && turl.indexOf(this.buildPrePath) === 0) return turl;
+
+      return `${this.buildPrePath}/${turl}`.replace(/\/{2,}/ig, '/');
+    }
+
+    if (turl.indexOf(this.pageUrlPath) === 0) return turl;
+
+    return `${this.pageUrlPath}/${turl}`.replace(/\/{2,}/ig, '/');
+
+  };
+
+  // 2. 更精确的正则
+  // Group 1: 标签头 (img, script...)
+  // Group 2: src 前的属性
+  // Group 3: 双引号包裹的值 "val"
+  // Group 4: 单引号包裹的值 'val'
+  // Group 5: 无引号的值 val (排除 > 和 空格)
+  // Group 6: src 后的属性
+  const regex = /<(audio|embed|iframe|img|input|source|track|video|script)([^>]*) src\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))([^>]*)>/gi;
+
+  let match_replace = (match, tag, before, valDouble, valSingle, valNoQuote, after) => {
+    // 这里的逻辑是：谁有值就用谁
+    let rawUrl = '';
+    if (valDouble !== undefined) rawUrl = valDouble;
+    else if (valSingle !== undefined) rawUrl = valSingle;
+    else if (valNoQuote !== undefined) rawUrl = valNoQuote;
+    
+    // 转换路径
+    const newUrl = replace_src(rawUrl);
+    // 无论原来有没有引号，替换后统一强制加双引号，这是最安全的做法
+    // 这样如果 newUrl 里有空格也不会导致 HTML 结构错误
+    return `<${tag}${before||''} src="${newUrl}"${after||''}>`;
+  };
+
+  codetext = codetext.replace(regex, match_replace);
+
+  if (this.componentReplaceRegex) {
+    codetext = codetext.replace(this.componentReplaceRegex, match_replace);
+  }
+
+  return codetext;
+}
+
+wapp.prototype.replaceSrcOld = function (codetext, is_comps = false, comp_name = '', is_jscode=false) {
 
   if (is_jscode) return codetext;
 
@@ -1523,7 +1595,8 @@ wapp.prototype.loadComps = async function (cdir, appdir) {
       }
 
       if (this.config.componentReplaceSrc.length > 0) {
-        this.componentReplaceRegex = new RegExp(`<(${this.config.componentReplaceSrc.join('|')})[^>]* src\\s*=\\s*"[^"]+"[^>]*>`, 'ig');
+        this.componentReplaceRegex = new RegExp(`<(${this.config.componentReplaceSrc.join('|')})([^>]*) src\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))([^>]*)>`, 'ig');
+        //this.componentReplaceRegex = new RegExp(`<(${this.config.componentReplaceSrc.join('|')})[^>]* src\\s*=\\s*"[^"]+"[^>]*>`, 'ig');
       }
     } else {
       this.config.componentReplaceSrc = [];
