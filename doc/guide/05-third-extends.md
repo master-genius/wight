@@ -1,6 +1,37 @@
 <!--name:内置扩展和第三方扩展-->
 # 内置扩展和第三方扩展
 
+## 内置扩展
+
+
+- PointerHandle
+
+- clipboard
+
+- scrollEvent
+
+- htmltag
+
+- apicall
+
+- ejson
+
+- djson
+
+- confirm
+
+- pushStart
+
+- querybind
+
+- renders
+
+- storageEvent
+
+内置扩展不可删除，是内置模块。
+
+---
+
 框架层面在创建项目的时候，会默认提供一些扩展，这些扩展为开发工作提供了巨大的方便：
 
 | 扩展文件 | 说明 | 详细 |
@@ -18,6 +49,9 @@
 | timestr.js | 格式化时间字符串 | 格式：2023-10-23_23-15-06 |
 | querybind.js | 添加query和queryAll方法用于CSS选择器查询。 | 查询方式和querySelector一致，只是提供第二个参数可以传递回调函数，并针对每个查询到的节点执行回调函数。 |
 | renders.js | 给数组原型添加的方法，数组类型可以直接调用，接受参数为回调函数，目的是方便为每个元素构建html并整合。 |  |
+| PointerHandle | 支持鼠标、触摸轨迹，实现触摸屏的处理，方便进行方向判断，距离、速度判断等 |  |
+| clipboard | 便捷的剪贴板操作 |  |
+| scrollEvent | 让DOM节点元素具备onScrollTop和onScrollBottom方法 | | |
 
 这些扩展其实就是按照扩展的规则编写的，但是从一开始就内置到项目上，开发者根据需求选择是否启用。
 

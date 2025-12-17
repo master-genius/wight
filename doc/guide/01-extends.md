@@ -7,6 +7,7 @@
 
 
 使用require而不是直接使用w.ext的好处一方面是可以降低代码耦合性，另一方面就是require在扩展找不到的时候会进行等待，直到找到或超时报错。
+另一个好处是：可以自动查找内置扩展。
 
 
 require其实是一个async function声明的函数，所以返回值是promise，但是你可以直接使用require，框架层面会自动替换成await require。
@@ -21,3 +22,8 @@ require其实是一个async function声明的函数，所以返回值是promise�
 
 > 实际上，它使用了类似于睡眠排序的逻辑。
 
+## 明确导入内置扩展
+
+```javascript
+const apicall = <-('w:apicall')
+```

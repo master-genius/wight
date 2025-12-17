@@ -60,9 +60,15 @@ exports.editorReload = function() {
 
 ### 内置扩展
 
-内置扩展是必须存在的，它们为组件的正常运行提供支持，很多组件都依赖于某些扩展，所以内置扩展有一部分是自动加载的，不必出现在config.json配置文件中。
+内置扩展是必须存在的，它们为组件的正常运行提供支持，很多组件都依赖于某些扩展。
 
 这些扩展有：
+
+- PointerHandle
+
+- clipboard
+
+- scrollEvent
 
 - htmltag
 
