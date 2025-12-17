@@ -3,7 +3,9 @@
 
     "pages" : [
         "home",
-        "user"
+        "user",
+        "test",
+        "list"
     ],
 
     "buildInApp": false,
