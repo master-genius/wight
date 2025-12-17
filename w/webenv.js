@@ -1183,7 +1183,7 @@ class HtmlSyntaxState {
     this.tagCloseStack = []
 
     this.singleTags = [
-      'br', 'hr', 'img', 'input', 'param', 'meta', 'link'
+      'br', 'hr', 'img', 'input', 'param', 'meta', 'link', '!doctype', '!DOCTYPE'
     ]
 
     this.lastErrorMsg = ''
@@ -1771,7 +1771,11 @@ const w = new function () {
     let dom = document.createElement('div');
     
     dom.className = 'w-global-alert-info';
-    if (options.transparent) dom.className += ' w-global-alert-trans';
+    if (options.transparent || options.glass) {
+      dom.className += ' w-global-alert-trans';
+      dom.style.boxShadow = 'none';
+    }
+
     dom.style.zIndex = astack.curZIndex;
 
     let realTop = parseInt(10 + 0.07 * total);
@@ -1810,7 +1814,8 @@ const w = new function () {
       width = options.width;
     }
 
-    width && width > 0 && (dom.style.width = `${width}%`);
+    let unit = options.unit || '%';
+    width && width > 0 && (dom.style.width = `${width}${unit}`);
 
     if (!options.notClose) {
       let closedom = document.createElement('div');
@@ -1822,7 +1827,7 @@ const w = new function () {
       if (dom.style.transform) closedom.style.transform = dom.style.transform;
       if (dom.style.left) closedom.style.left = dom.style.left;
 
-      width && width > 0 && (closedom.style.width = `${width}%`);
+      width && width > 0 && (closedom.style.width = `${width}${unit}`);
 
       closedom.style.boxShadow = dom.style.boxShadow;
       closedom.style.bottom = `${100 - realTop - 0.09}%`;
@@ -1835,7 +1840,7 @@ const w = new function () {
       closedom.innerHTML = `<div style="text-align:right;padding:0.085%;">`
         +`<a data-onclick="w.cancelAlert" data-aid="${aid}" `
         +'style="color:#989595;font-size:111%;text-decoration:none;user-select:none;" click>'
-        +'&nbsp;X&nbsp;</a>'
+        +`${options.closeText || '&nbsp;🗙&nbsp;'}</a>`
         +'</div>';
 
       w[domname].appendChild(closedom);
@@ -2024,10 +2029,10 @@ const w = new function () {
     info = w.replaceSrc(info);
     
     if (ntype.indexOf('error') >= 0) {
-      info = `<span style="color:#f96567;font-size:95%;">${info}</span>`;
+      info = `<span style="color:var(--w-error-text-color,#dc3d37);font-size:95%;">${info}</span>`;
     }
 
-    let colorText = '#e5e5e9';
+    let colorText = 'var(--w-light-text-color, #e5e5e7)';
 
     if (ntype.indexOf('light') >= 0) {
       where_is += ' w-notify-light';
@@ -2061,7 +2066,7 @@ const w = new function () {
       ndom.style.display = 'flex';
       ndom.style.flexFlow = 'row wrap';
       ndom.innerHTML = `<div style="width:95%;">${info}</div>
-        <div data-onclick="w.cancelNotify" data-nid="${nid}" style="display: grid;place-items: center;color:#df4567;cursor:pointer;user-select:none;">X</div>`
+        <div data-onclick="w.cancelNotify" data-nid="${nid}" style="display: grid;place-items: center;color:var(--w-close-text-color,#dc3d37);cursor:pointer;user-select:none;">X</div>`
     } else {
       ndom.innerHTML = info;
     }
@@ -2132,47 +2137,47 @@ const w = new function () {
 
   this.promptMiddle = function (info, options = {}) {
     options.wh = 'middle';
-    w.prompt(info, options);
+    return w.prompt(info, options);
   };
 
   this.promptMiddleGlass = function (info, options = {}) {
     options.wh = 'middle';
     options.glass = 'glass';
-    this.promptGlass(info, options);
+    return this.promptGlass(info, options);
   };
 
   this.promptGlass = function (info, options = {}) {
     options.glass = 'glass';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   this.promptDark = function (info, options = {}) {
     options.glass = 'dark';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   this.promptMiddleDark = function (info, options = {}) {
     options.wh = 'middle';
     options.glass = 'dark';
 
-    this.promptDark(info, options);
+    return this.promptDark(info, options);
   };
 
   this.promptTop = function (info, options = {}) {
     options.wh = 'top';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   this.promptTopGlass = function (info, options = {}) {
     options.wh = 'top';
     options.glass = 'glass';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   this.promptTopDark = function (info, options = {}) {
     options.wh = 'top';
     options.glass = 'dark';
-    this.prompt(info, options);
+    return this.prompt(info, options);
   };
 
   //wh = 'bottom', noclose = false, glass = false
@@ -2228,6 +2233,11 @@ const w = new function () {
           w[closedom].onclick = evt => {
             w.unprompt();
           };
+        }
+        let show_close = !!options.showClose;
+
+        if (show_close) {
+          w[closedom].innerHTML = typeof show_close === 'string' ? show_close : `<div style="color:#a7a8a9;font-size:175%;z-index:9;position:fixed;width:100%;left:0;text-align:center;bottom:${wh === 'bottom' ? 82 : 8}%;cursor:pointer;text-shadow:2px 2px 5px #c1c2c3;">X</div>`
         }
 
         w[domname].innerHTML = `<div style="overflow:auto;word-wrap:break-word;color:${pcolor}">${info}</div>`;
@@ -2514,8 +2524,9 @@ const w = new function () {
 
     if (pg.__state__) return false;
 
-    pg.__dom__ = this.pgcdom.insertBefore(document.createElement('div'),
-                                          this.pgcdom.firstChild);
+    pg.__dom__ = this.pgcdom.appendChild(document.createElement('div'));
+    pg.__dom__.dataset.container = '__wight_page__';
+    //pg.__dom__ = this.pgcdom.insertBefore(document.createElement('div'), this.pgcdom.firstChild);
     pg.__init_count__ = 0;
     pg.__loaded__ = false;
     pg.__scroll__ = 0;
@@ -2534,7 +2545,7 @@ const w = new function () {
     pg.__tabs_place__ = '';
 
     if (w.tabs.list.length > 0) {
-        pg.__tabs_place__ = '<div style="height:4.2rem;">&nbsp;</div>';
+        pg.__tabs_place__ = `<div style="height:4.2rem;"${w.__tabs_class_name__ ? (' class="' + w.__tabs_class_name__ + '"') : ''}>&nbsp;</div>`;
 
         if (w.tabs.pages.indexOf(name) >= 0) {
           pg.__dom__.style.cssText = 'z-index:1;';
@@ -2620,10 +2631,11 @@ const w = new function () {
   
     pg.unprompt = function(isbottom=true) {w.unprompt(isbottom);}
     pg.unpromptMiddle = function(){w.unprompt(false);}
-  
+    pg.unpromptTop = pg.unpromptMiddle
+    
     pg.promptTop = function(info, options={}) {
       options.wh = 'top';
-      this.prompt(info, options);
+      return this.prompt(info, options);
     }
   
     pg.promptMiddle = function(info, options={}) {
@@ -3258,7 +3270,6 @@ w._resetData = function (pagename, pg, nds) {
   }
 };
 
-//w.replaceRegex = /\{\:[A-Za-z0-9\-\_]{1,100}\:\}/;
 /**
  *
  * @param {string} codetext 
@@ -3269,72 +3280,57 @@ w._resetData = function (pagename, pg, nds) {
 w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
   if (!codetext || typeof codetext !== 'string') return codetext;
 
-  let replace_src = (url, plist, offset, text) => {
-    if ((/^http[s]?:\/\//).test(url)) {
-      return url;
-    }
-
+  // 1. 核心路径转换逻辑 (抽取出来供共用)
+  const replace_src = (url) => {
+    if (!url) return '';
     let turl = url.trim();
 
-    //只会对 /static开头的数据做替换处理
+    // 忽略 http/https
+    if ((/^http[s]?:\/\//i).test(turl)) return turl;
+
+    // 忽略已处理路径
     if ((w.prepath !== '/static' && turl.indexOf(w.prepath) === 0) 
-      || w.prepath === '/static' && turl.indexOf('/static/static') === 0)
-    {
+      || (w.prepath === '/static' && turl.indexOf('/static/static') === 0)) {
         return turl;
     }
-    
-    if (w.prepath && turl.indexOf('/static') === 0) {
-      return `${w.prepath}/${turl}`.replace(/\/{2,}/ig, '/');
+
+    // 组件路径处理
+    if (is_comps && turl.indexOf('./static') === 0) {
+      turl = turl.replace('./static', '/static/components/' + comp_name);
     }
 
+    // 全局前缀处理
+    if (w.prepath && turl.indexOf('/static') === 0) {
+      return `${w.prepath}/${turl}`.replace(/\/{2,}/g, '/');
+    }
     return turl;
   };
 
-  let match_replace = m => {
-    let arr = m.split(' src=');
+  // 2. 更精确的正则
+  // Group 1: 标签头 (img, script...)
+  // Group 2: src 前的属性
+  // Group 3: 双引号包裹的值 "val"
+  // Group 4: 单引号包裹的值 'val'
+  // Group 5: 无引号的值 val (排除 > 和 空格)
+  // Group 6: src 后的属性
+  const regex = /<(audio|embed|iframe|img|input|source|track|video|script)([^>]*) src\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))([^>]*)>/gi;
+
+  let match_replace = (match, tag, before, valDouble, valSingle, valNoQuote, after) => {
+    // 这里的逻辑是：谁有值就用谁
+    let rawUrl = '';
+    if (valDouble !== undefined) rawUrl = valDouble;
+    else if (valSingle !== undefined) rawUrl = valSingle;
+    else if (valNoQuote !== undefined) rawUrl = valNoQuote;
     
-    let q = arr[1][0];
-    let startind = 1;
-    let endind = arr[1].indexOf(q, 1);
-
-    if (q !== '"' && q !== "'") {
-      q = '';
-      startind = 0;
-      endind = arr[1].indexOf(' ', 1);
-      if (endind < 0) endind = arr[1].length - 1;
-    }
-
-    let orgsrc = arr[1].substring(startind, endind);
-    //针对组件
-    if (is_comps) {
-      orgsrc = orgsrc.replace('./static', '/static/components/' + comp_name);
-    }
-
-    let final_src = `${arr[0]} src=${q}${replace_src(orgsrc)}${arr[1].substring(endind)}`;
-    return final_src;
+    // 转换路径
+    const newUrl = replace_src(rawUrl);
+    // 无论原来有没有引号，替换后统一强制加双引号，这是最安全的做法
+    // 这样如果 newUrl 里有空格也不会导致 HTML 结构错误
+    return `<${tag}${before||''} src="${newUrl}"${after||''}>`;
   };
 
-  let fix_src_space = (m) => {
-    return m.replace(/ src\s+=\s+/g, ' src=');
-  }
-
-  codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src\s+=\s+"[^"]+"[^>]*>/ig, 
-    fix_src_space);
-
-  codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src\s+=\s+'[^']+'[^>]*>/ig, 
-    fix_src_space);
-
-  //audio embed iframe img input source track video
-  codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src="[^"]+"[^>]*>/ig, 
-    match_replace);
-
-  codetext = codetext.replace(
-    /<(audio|embed|iframe|img|input|source|track|video|script)[^>]* src='[^']+'[^>]*>/ig, 
-    match_replace);
-
+  // 4. 保留自定义正则 (完全保留原功能)
+  // 这里的内部替换也使用了同样的逻辑，确保一致性
   if (w.__replace_src_regex__ && (w.__replace_src_regex__ instanceof RegExp)) {
     codetext = codetext.replace(w.__replace_src_regex__, match_replace);
   }
@@ -3388,12 +3384,16 @@ w._setData = function (pagename, pg, nds, data) {
           w.debug && console.error('数据类型不符合要求，无法渲染页面。');
           continue;
         } else if (vfunc) {
-          dtemp = vfunc({
+          let ret_temp_val = vfunc({
             data: data,
             target: nds[i],
             type: 'display',
             dataType
-          }) || (typeof data === 'object' ? JSON.stringify(data) : data);
+          });
+
+          dtemp = ret_temp_val === undefined
+                  ?  (typeof data === 'object' ? JSON.stringify(data) : data)
+                  : ret_temp_val;
         }
       } else if (typeof data === 'object') {
         dtemp = JSON.stringify(data);
@@ -3658,6 +3658,7 @@ w.runHooks = async function (ctx) {
       ch = w.hookFunc[h];
       if (!ch || !ch.func || typeof ch.func !== 'function')
         continue;
+
       if (ch.options.exclude && ch.options.exclude.indexOf(cname) >= 0) {
         continue;
       }
@@ -3684,7 +3685,7 @@ w.runHooks = async function (ctx) {
 };
 
 w.events = {
-  scroll : function () {
+  scroll : function (evt) {
     if (w.curpage) {
       w.curpage.__scroll__ = w.curpage.__dom__.scrollTop;
       let h = w.curpage.__dom__.clientHeight + w.curpage.__scroll__;
@@ -3694,17 +3695,19 @@ w.events = {
           w.curpage.onscroll(w.curpage.__dom__.scrollTop,
             w.curpage.__dom__.clientHeight,
             w.curpage.__dom__.scrollHeight);
-        } catch (err){}
+        } catch (err){
+          w.debug && console.error(err)
+        }
       }
 
-      var isBottom = false;
+      let isBottom = false;
       if (w.isFirefox) {
         isBottom = (Math.abs(h - w.curpage.__dom__.scrollHeight) <= 1.21);
       } else {
         isBottom = (Math.abs(h - w.curpage.__dom__.scrollHeight) < 1.56);
       }
 
-      if (w.curpage.__scroll__ <= 0.0000001) {
+      if (w.curpage.__scroll__ <= 0.0001) {
         if (typeof w.curpage.ontop === 'function') {
           if (!w.curpage.onTopLock) {
             w.curpage.onTopLock = true;
@@ -3725,7 +3728,7 @@ w.events = {
                 if (w.curpage.__dom__.scrollHeight - t < 1.56) {
                   w.curpage.onbottom(w.curpage.__dom__.scrollHeight);
                 }
-              }, 350);
+              }, 200);
             }
           } catch (err) {console.log(err);}
         } else {}
@@ -3836,101 +3839,112 @@ w.naviHide = function () {
   w.navibtndom.className = '';
 };
 
-Object.defineProperty(w, '_devents', {
-  enumerable: false,
-  writable: false,
-  configurable: false,
-  value: [
-    "animationcancel", "animationend", "animationiteration", "animationstart", "auxclick",
-    "beforematch", "blur", "canplay", "change", "click", "close", "compositionend",
-    "compositionstart", "compositionupdate", "contextmenu", "copy", "cut", "dblclick",
-    "drag", "dragend", "dragenter", "dragleave", "dragover", "dragstart", "drop",
-    "ended", "error", "focus", "focusin", "focusout", "fullscreenchange",
-    "fullscreenerror", "input", "invalid", "keydown", "keyup", "load", "mousedown",
-    "mouseenter", "mouseleave", "mousemove", "mouseout", "mouseover", "mouseup",
-    "paste", "play", "playing", "pointercancel", "pointerdown", "pointerenter",
-    "pointerleave", "pointermove", "pointerout", "pointerover", "pointerup", "reset",
-    "resize", "scroll", "scrollend", "securitypolicyviolation", "seeked", "seeking",
-    "select", "submit", "touchcancel", "touchend", "touchmove", "touchstart",
-    "transitioncancel", "transitionend", "transitionrun", "transitionstart", "wheel"
-  ]
-});
 
-w.initDomEvent = function (pg, dom, evtname, bindSelf=true) {
-  if (!dom || !dom.querySelectorAll) return false;
-  
-  let nds = dom.querySelectorAll('form');
+w.initDomEvent = function (pg, dom, bindSelf=true) {
+  if (!dom) return;
 
-  for (let d of nds) {
-    if (!d.onsubmit) {
-      d.onsubmit = () => {
-        return false;
-      };
-    }
-  }
+  const processElement = (el) => {
+    // 性能优化：如果没有 dataset，直接跳过 (TextNode 等没有 dataset)
+    if (!el.dataset) return;
 
-  nds = dom.querySelectorAll(`[data-on${evtname}]`);
+    // 获取 dataset 的所有 key
+    // HTML: <div data-onclick="fn" data-on-mouse-over="fn">
+    // Dataset Keys: "onclick", "onMouseOver"
+    const keys = Object.keys(el.dataset);
+    
+    // 如果没有 data- 属性，跳过
+    if (keys.length === 0) return;
 
-  let bind_event = (d) => {
-    let evtlist = d.dataset[`on${evtname}`].trim().split(' ').filter(x => x.length > 0);
-    if (!d.__events_map__) {
-      Object.defineProperty(d, '__events_map__', {
-        enumerable: false,
-        writable: true,
-        configurable: true,
-        value: {}
+    // 防止重复绑定的标记对象
+    if (!el.__events_map__) {
+      // 定义不可枚举属性，避免污染业务逻辑遍历
+      Object.defineProperty(el, '__events_map__', {
+        value: {},
+        enumerable: false, 
+        writable: true
       });
     }
 
-    let ek = '';
-    evtlist.forEach(ehandle => {
-      let ind = ehandle.indexOf(':');
-      let options = false;
-      if (ind > 0) {
-        let real_ehandle = ehandle.substring(0, ind);
-        let optstr = ehandle.substring(ind+1);
-        ehandle = real_ehandle;
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+      
+      // 核心判断：key 是否以 "on" 开头，且长度 > 2 (排除仅叫 "on" 的属性)
+      // 注意：dataset 的 key 是驼峰命名。
+      // data-onclick -> onclick
+      // data-oninput -> oninput
+      // data-animation-end -> animationEnd
+      if (key.startsWith('on') && key.length > 2) {
+        
+        // 还原事件名：将 dataset 的驼峰或全小写转为标准事件名
+        // 大部分 DOM 事件名都是全小写的 (click, input)，但 dataset 会自动转驼峰
+        // 简单粗暴转为小写即可：animationEnd -> animationend, onClick -> onclick
+        const evtName = key.substring(2).toLowerCase(); 
+        
+        const handleStr = el.dataset[key];
+        const uniqueKey = `${evtName}:${handleStr}`;
 
-        if (optstr.length > 0) {
-          options = {};
-          for (let i = 0; i < optstr.length; i++) {
-            switch (optstr[i]) {
-              case 'c':
-                options.capture = true;
-                break;
-              case 'o':
-                options.once = true;
-                break;
-              case 'p':
-                options.passive = true;
-                break;
-              case 's':
-                options.signal = true;
-                break;
-            }
+        // 检查是否已绑定
+        if (el.__events_map__[uniqueKey]) continue;
+
+        // --- 解析修饰符逻辑 (保持你原有的逻辑不变) ---
+        let finalHandleStr = handleStr;
+        let options = false;
+        
+        // 检查是否包含参数 :cops
+        const colonIdx = handleStr.indexOf(':');
+        if (colonIdx > 0) {
+          finalHandleStr = handleStr.substring(0, colonIdx);
+          const optStr = handleStr.substring(colonIdx + 1);
+          if (optStr) {
+            options = {};
+            // 使用 includes 稍微比 switch/loop 快一点且代码更短
+            if (optStr.includes('c')) options.capture = true;
+            if (optStr.includes('o')) options.once = true;
+            if (optStr.includes('p')) options.passive = true;
+            if (optStr.includes('s')) options.signal = true;
           }
         }
+        // -------------------
+
+        // 执行绑定
+        el.addEventListener(evtName, w.genEventProxy(pg, finalHandleStr), options);
+        
+        // 标记已绑定
+        el.__events_map__[uniqueKey] = true;
       }
-      ek = evtname + ':' + ehandle;
-      if (d.__events_map__[ek]) return;
-      d.__events_map__[ek] = ek;
-      d.addEventListener(evtname, w.genEventProxy(pg, ehandle), options);
-    });
+    }
   };
+  
+  // 处理自身 确保是 Element 节点
+  if (bindSelf && dom.nodeType === 1) {
+    processElement(dom);
+  }
 
-  bindSelf && dom.dataset && dom.dataset[`on${evtname}`] && bind_event(dom);
+  // 处理所有子孙节点
+  // querySelectorAll('*') 在此处完全够用且兼容性更好
+  const children = dom.querySelectorAll('*');
+  
+  // 使用基础 for 循环遍历，在量大时比 forEach 性能好
+  for (let i = 0; i < children.length; i++) {
+    processElement(children[i]);
+  }
 
-  if (bindSelf === 'self') return;
-
-  for (let d of nds) {
-    bind_event(d);
+  // 4. 保留原有的 Form 特殊处理逻辑
+  if (dom.tagName === 'FORM') {
+    if (!dom.onsubmit) dom.onsubmit = () => false;
+  }
+  // 注意：上面的 querySelectorAll('*') 已经包含了所有子 form，
+  // 这里只需要过滤出来处理 submit 即可，不需要再次 querySelectorAll
+  // 如果为了代码清晰，可以用 matches
+  for (let i = 0; i < children.length; i++) {
+    if (children[i].tagName === 'FORM' && !children[i].onsubmit) {
+      children[i].onsubmit = () => false;
+    }
   }
 };
 
 w.initPageDomEvents = function (pg, dom, bindSelf=true) {
-  for (let e of w._devents) {
-    w.initDomEvent(pg, dom, e, bindSelf);
-  }
+  return w.initDomEvent(pg, dom, bindSelf);
 };
 
 w.eventProxy = function (evt, pg, funcname) {
@@ -4038,6 +4052,8 @@ window._import = w.import = async function (path, reload=false) {
   }
 
   try {
+    //表示正导入
+    w.__mod__[path] = true;
     let mod;
     if (w._http_preg.test(path)) {
       mod = await import(path).then(mod => {
@@ -4058,6 +4074,7 @@ window._import = w.import = async function (path, reload=false) {
 
     return mod;
   } catch (err) {
+    delete w.__mod__[path];
     w.notifyError(`import module:<p>${err.message}</p>`, 5000);
   }
 };
@@ -4264,7 +4281,7 @@ w.removeShareNotice = function (id) {
   }
 
   return opts;
-};
+}
 
 w.runShareNotice = function (type, obj, k, data = null) {
   let kmlist = [];
@@ -4318,6 +4335,7 @@ w.runShareNotice = function (type, obj, k, data = null) {
       }
 
       ret_tmp = a.callback({
+        id: a.id,
         type,
         obj,
         key: k,
@@ -4362,6 +4380,35 @@ Object.defineProperty(w, 'share', {
     }
   })
 });
+
+w.setShare = function (key, data) {
+  if (!key) {
+    this.debug && console.error(`共享数据的 key 必须是字符串。`);
+    return false;
+  }
+
+  w.share[key] = data;
+}
+
+w.getShare = function (key) {
+  return w.share[key];
+}
+
+w.removeShare = function (key) {
+  delete w.share[key];
+}
+
+w.makeSpace = function (key, sp=null) {
+  return `${sp ? (sp + '@') : ''}${key.indexOf('chan::') === 0 ? key : ('chan::' + key)}`
+}
+
+w.getChannel = function (key, sp=null) {
+  return w.getShare(w.makeSpace(key, sp))
+}
+
+w.setChannel = function (key, data, sp=null) {
+  w.setShare(w.makeSpace(key, sp), data)
+}
 
 w.loadScript = async function (src, cname = '') {
 
@@ -4527,6 +4574,19 @@ class Component extends HTMLElement {
       enumerable: false
     });
 
+    Object.defineProperty(this, '__space__', {
+      value: '',
+      configurable: false,
+      writable: true,
+      enumerable: false
+    });
+
+    Object.defineProperty(this, 'space', {
+      get: () => {
+        return this.__space__;
+      }
+    });
+
     this.allAttrs = () => {return this.__attrs__;};
 
     this.attrs = new Proxy(this.__attrs__, {
@@ -4619,6 +4679,8 @@ class Component extends HTMLElement {
         w.debug && w.notifyTopError(err.message);
       }
     }
+    
+    this.findSpace();
 
     if (this.render && typeof this.render === 'function') {
       let d = this.render() || '';
@@ -4771,6 +4833,31 @@ class Component extends HTMLElement {
     let outerText = st.outername.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     w.notifyError(`${this.tagName} [${outerText}]存在循环引用${st.ref ? ' &lt;--&gt; ' : ''}${st.ref || ''}`, 20000);
     return '';
+  }
+
+  //找到自己的父级空间
+  findSpace() {
+    if (this.dataset && this.dataset.space) {
+      this.__space__ = this.dataset.space
+      return this.__space__
+    }
+
+    let pn = this.parentNode;
+    let n;
+    while (pn) {
+      n = (pn instanceof ShadowRoot) ? pn.host : pn;
+
+      if (!n || !n.dataset || n.dataset.container === '__wight_page__') break;
+
+      if (n.dataset.space) {
+        this.__space__ = n.dataset.space
+        return this.__space__
+      }
+
+      pn = n.parentNode;
+    }
+
+    return ''
   }
   
   //不会重复初始化基础结构。
@@ -4995,59 +5082,82 @@ class Component extends HTMLElement {
     return nod;
   }
 
+  sendChannel(data, key=null, sp=null) {
+    return w.setShare(this.spaceKey(key || this.attrs.channel, sp), data)
+  }
+
+  getChannel(key, sp=null) {
+    return w.getShare(this.spaceKey(key, sp), data)
+  }
+
+  spaceKey(key, sp=null) {
+    if (sp !== null && typeof sp === 'string') return `${sp ? sp + '@' : ''}${key}`
+
+    return `${this.__space__ ? this.__space__ + '@' : ''}${key}`
+  }
+
   connectedCallback() {
-    if (this.onload && typeof this.onload === 'function') {
-      //注册通道函数
+    //注册通道函数
+    queueMicrotask(() => {
       if (this.attrs.channel) {
-        this.__channel_id__ = w.registerShareNotice({
-          mode: 'always',
-          type: ['set', 'get'],
-          only: !!this.attrs.channelOnly,
-          callback: ctx => {
-            if (ctx.type === 'set') {
-              this.channelInput
-                && (typeof this.channelInput === 'function')
-                && this.channelInput(ctx);
-            } else {
-              if (this.channelOutput && (typeof this.channelOutput === 'function'))
-                return this.channelOutput(ctx);
+        if (this.attrs.channel.indexOf('chan::') === 0) {
+          this.__channel_id__ = w.registerShareNotice({
+            key: this.spaceKey(this.attrs.channel),
+            mode: 'always',
+            type: ['set', 'get'],
+            only: !!this.attrs['channel-only'],
+            action: !!this.attrs['channel-action'],
+            callback: ctx => {
+              if (ctx.type === 'set') {
+                this.channelInput
+                  && (typeof this.channelInput === 'function')
+                  && this.channelInput(ctx);
+              } else {
+                this.channelOutput
+                  && (typeof this.channelOutput === 'function')
+                  && this.channelOutput(ctx);
+              }
             }
-          }
-        })
+          })
+        } else {
+          console.error(this.tagName.toLocaleLowerCase(),'=> channel 属性必须以 chan:: 开头');
+        }
       }
-      this.onload();
-    }
+
+      this.onload && (typeof this.onload === 'function') && this.onload();
+    })
   }
 
   //remove from page
   disconnectedCallback() {
-    if (this.onremove && typeof this.onremove === 'function') {
-      if (this.__channel_id__) {
-        w.removeShareNotice(this.__channel_id__)
-        this.__channel_id__ = null
-      }
-      this.onremove();
+    if (this.__channel_id__) {
+      w.removeShareNotice(this.__channel_id__)
+      this.__channel_id__ = null
+    }
+
+    if (this.onremove && typeof this.onremove === 'function') {  
+      this.onremove()
     }
   }
 
   //to new page
   adoptedCallback() {
     if (this.onadopted && typeof this.onadopted === 'function') {
-      this.onadopted();
+      this.onadopted()
     }
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (this.onattrchange && typeof this.onattrchange === 'function') {
-      this.onattrchange(name, oldValue, newValue);
+      this.onattrchange(name, oldValue, newValue)
     }
   }
 
-  naviGlass (text, pr = 'left', up = false) {
-    w.navi(text, { context: this, position: pr, background: 'glass', up });
+  naviGlass(text, pr = 'left', up = false) {
+    w.navi(text, { context: this, position: pr, background: 'glass', up })
   }
 
-  naviHide() { w.naviHide(); }
+  naviHide() { w.naviHide() }
 
   alert(info, options=null) {
     if (!options || typeof options !== 'object') options = {};
@@ -5061,11 +5171,11 @@ class Component extends HTMLElement {
     return w.alertDark(info, options);
   }
 
-  cancelAlert(aid='') {return w.cancelAlert(aid);}
+  cancelAlert(aid='') {return w.cancelAlert(aid)}
 
   cover(info, options=null) {
     if (!options || typeof options !== 'object') options = {};
-    options.notClose = true;
+    options.notClose === undefined && (options.notClose = true);
     options.withCover = true;
     return this.alert(info, options);
   }
@@ -5098,6 +5208,7 @@ class Component extends HTMLElement {
 
   unprompt(isbottom=true) {w.unprompt(isbottom);}
   unpromptMiddle(){w.unprompt(false);}
+  unpromptTop(){w.unprompt(false);}
 
   promptTop(info, options={}) {
     options.wh = 'top';

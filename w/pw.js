@@ -40,6 +40,7 @@ function simpleComporessHTML (html) {
  * 要根据pages记录的页面去指定的目录中加载页面，并生成一些初始化的代码。
  */
 let _pw_dir = __dirname;
+let buildin_extends_path = __dirname + '/builtinExtends';
 
 let wapp = function (options = {}) {
 
@@ -142,9 +143,9 @@ let wapp = function (options = {}) {
   }
 
   this.builtinExtends = [
-    'htmltag', 'apicall', 'ejson', 'djson', 'confirm',
-    'pushStart', 'querybind', 'renders', 'storageEvent'
-  ]
+    'ejson', 'djson', 'renders', 'pushStart', 'querybind', 'scrollEvent', 
+    'htmltag', 'pushStart', 'PointerHandle', 'storageEvent', 'confirm', 'apicall'
+  ];
 
   this.jch = {
     css : '',
@@ -1271,15 +1272,33 @@ wapp.prototype.loadExt = async function (cdir) {
       this.config.extends = real_extends
     }
 
-    let need_push = [];
-    this.builtinExtends.forEach(x => {
-      if (this.config.extends.indexOf(x) < 0) {
-        need_push.push(x);
-      }
-    });
+    //加载内建扩展，并兼容旧版本
+    if (this.version < '4.0') {
+      let need_push = [];
+      this.builtinExtends.forEach(x => {
+        if (this.config.extends.indexOf(x) < 0) {
+          need_push.push(x);
+        }
+      });
 
-    if (need_push.length > 0) {
-      this.config.extends = this.config.extends.concat(need_push);
+      if (need_push.length > 0) {
+        this.config.extends = this.config.extends.concat(need_push);
+      }
+    } else {
+      for (let ename of this.builtinExtends) {
+        try {
+          orgdata = fs.readFileSync(`${buildin_extends_path}/${ename}.js`, 'utf8') + '\n';
+          
+          orgdata = this.replaceRequire(orgdata);
+
+          await this.checkCode(`${buildin_extends_path}/${ename}.js`, orgdata);
+
+          this.extends += `;(async function(exports, module){${orgdata}})(w.builtin, w.__module__('${ename.replaceAll('\'', '').replaceAll('"','')}', 'builtin'));`;
+        } catch (err) {
+          console.error(err.message);
+          this.errorCount += 1;
+        }
+      }
     }
     
     let names = this.config.extends;
