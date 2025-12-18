@@ -1649,11 +1649,19 @@ const w = new function () {
     writable: false
   });
 
-  Object.defineProperty(this, 'config', {
-    value: {},
-    writable: false,
-    enumerable: true,
-    configurable: false
+  Object.defineProperties(this, {
+    config: {
+      value: {},
+      writable: false,
+      enumerable: true,
+      configurable: false
+    },
+    builtin: {
+      value: Object.create(null),
+      writable: false,
+      enumerable: false,
+      configurable: false
+    }
   });
 
   this.config.notFound = '';
@@ -4117,18 +4125,28 @@ Object.defineProperty(w, '__require_loop__', {
 });
 
 window.require = async function (name) {
+  let extobj = w.__ext__;
+  let is_builtin = false;
+  if (name.startsWith('w:')) {
+    name = name.substring(2);
+    extobj = w.builtin;
+    is_builtin = true;
+  }
+
+  if (!name) {
+    console.error('没有指定扩展名字！！');
+    return null;
+  }
+
   try {
-    if (w.__ext__[name]) return w.__ext__[name];
+    if (extobj[name]) return extobj[name];
 
     let nleng = name.length;
     if (name[nleng - 1] === '/') {
       let mobj = {};
-      await new Promise((rv) => {
-        setTimeout(() => { rv(); }, 10);
-      });
-      for (let k in w.__ext__) {
+      for (let k in extobj) {
         if (k.indexOf(name) === 0) {
-          mobj[k.substring(nleng)] = w.__ext__[k];
+          mobj[k.substring(nleng)] = extobj[k];
         }
       }
 
@@ -4142,7 +4160,10 @@ window.require = async function (name) {
         setTimeout(() => { rv(); }, 5);
       });
 
-      if (w.__ext__[name]) return w.__ext__[name];
+      if (extobj[name]) return extobj[name];
+      if (i < 2 && !is_builtin && w.builtin[name]) {
+        return w.builtin[name];
+      }
     }
 
     throw new Error(`${name}: 没有此扩展。`);
@@ -4470,12 +4491,12 @@ Object.defineProperty(w, '__module__', {
   enumerable: false,
   configurable: false,
   writable: false,
-  value: (name) => {
+  value: (name, target='ext') => {
     let oo = {}
     Object.defineProperty(oo, 'exports', {
       set: (val) => {
         //if (w.__ext__[name]) delete w.__ext__[name];
-        w.ext[name] = val;
+        w[target][name] = val;
       },
       get: () => {
         return name;

@@ -741,24 +741,53 @@ wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
 
   let initRequireEnv = () => {
     return `let require = async function (name) {
-      try {
-        if (w.__ext__[name]) return w.__ext__[name];
-        
-        let loop = w.__require_loop__;
-    
-        for (let i = 0; i < loop; i++) {
-          await new Promise((rv) => {
-            setTimeout(() => { rv(); }, 2);
-          });
-    
-          if (w.__ext__[name]) return w.__ext__[name];
+  let extobj = w.__ext__;
+  let is_builtin = false;
+  if (name.startsWith('w:')) {
+    name = name.substring(2);
+    extobj = w.builtin;
+    is_builtin = true;
+  }
+
+  if (!name) {
+    console.error('没有指定扩展名字！！');
+    return null;
+  }
+
+  try {
+    if (extobj[name]) return extobj[name];
+
+    let nleng = name.length;
+    if (name[nleng - 1] === '/') {
+      let mobj = {};
+      for (let k in extobj) {
+        if (k.indexOf(name) === 0) {
+          mobj[k.substring(nleng)] = extobj[k];
         }
-    
-        return function () {};
-      } catch (err) {
-        console.error(err.message);
       }
-    };`;
+
+      return mobj;
+    }
+    
+    let loop = w.__require_loop__;
+
+    for (let i = 0; i < loop; i++) {
+      await new Promise((rv) => {
+        setTimeout(() => { rv(); }, 5);
+      });
+
+      if (extobj[name]) return extobj[name];
+      if (i < 2 && !is_builtin && w.builtin[name]) {
+        return w.builtin[name];
+      }
+    }
+
+    throw new Error(\`${name}: 没有此扩展。\`);
+  } catch (err) {
+    console.error(err.message);
+    console.error('请检查扩展是否启用或是否存在循环引用。');
+  }
+}`;
   }
 
   let globalBind = () => {
