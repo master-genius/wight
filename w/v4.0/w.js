@@ -3010,10 +3010,9 @@ window.require = async function (name) {
       });
 
       if (extobj[name]) return extobj[name];
-    }
-
-    if (!is_builtin && w.builtin[name]) {
-      return w.builtin[name];
+      if (i < 2 && !is_builtin && w.builtin[name]) {
+        return w.builtin[name];
+      }
     }
 
     throw new Error(`${name}: 没有此扩展。`);
