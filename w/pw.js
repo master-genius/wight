@@ -782,7 +782,7 @@ wapp.prototype.requireCheckCode = function (filename, ctext, options = {}) {
       }
     }
 
-    throw new Error(\`${name}: 没有此扩展。\`);
+    throw new Error(`+'`${name}: 没有此扩展。`'+`);
   } catch (err) {
     console.error(err.message);
     console.error('请检查扩展是否启用或是否存在循环引用。');
