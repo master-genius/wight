@@ -217,7 +217,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
 
   //若存在则进行预处理，开发者自行定义
   if (w.config.beforeRequest && typeof w.config.beforeRequest === 'function') {
-    w.config.beforeRequest(real_api, options);
+    await w.config.beforeRequest(real_api, options);
   }
 
   let ret = makeResponse();
