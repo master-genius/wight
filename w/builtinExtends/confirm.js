@@ -79,7 +79,7 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
       <div style="padding:0.2rem 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
       <button class="small"
         style="font-weight:bold;background:#2376b3;${okStyle}" 
-        data-onclick="w.ext.confirmExec" 
+        data-onclick="w.builtin.confirmExec" 
         data-id="${id}">
           确定</button>
       </div>
@@ -87,7 +87,7 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
       <div style="padding:0.2rem 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
         <button class="small inverse" 
           style="background:#777879;${cancelStyle}" 
-          data-onclick="w.ext.confirmCancel" 
+          data-onclick="w.builtin.confirmCancel" 
           data-id="${id}">
             取消</button>
       </div>
