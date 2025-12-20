@@ -1621,6 +1621,7 @@ const w = new function () {
 
 };
 
+const wight = w;
 //因为JS的主线程以事件循环的方式运转，目前的浏览器模式不必考虑多线程竞争问题。
 w._htmlparse = new HtmlSyntaxState();
 w._htmlcheck = function (data) {
@@ -2177,7 +2178,6 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
     else if (valSingle !== undefined) rawUrl = valSingle;
     else if (valNoQuote !== undefined) rawUrl = valNoQuote;
     
-    // 转换路径
     const newUrl = replace_src(rawUrl);
     // 无论原来有没有引号，替换后统一强制加双引号，这是最安全的做法
     // 这样如果 newUrl 里有空格也不会导致 HTML 结构错误
@@ -2186,8 +2186,7 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
 
   codetext = codetext.replace(regex, match_replace);
 
-  // 4. 保留自定义正则 (完全保留原功能)
-  // 这里的内部替换也使用了同样的逻辑，确保一致性
+  // 自定义正则 
   if (w.__replace_src_regex__ && (w.__replace_src_regex__ instanceof RegExp)) {
     codetext = codetext.replace(w.__replace_src_regex__, match_replace);
   }
@@ -2433,9 +2432,6 @@ Object.defineProperties(w, {
     configurable: false,
   }
 });
-
-//w.hooks = [];
-//w.hookFunc = {};
 
 /**
  * 
