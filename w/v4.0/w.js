@@ -2141,7 +2141,6 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
   const replace_src = (url) => {
     if (!url) return '';
     let turl = url.trim();
-
     // 忽略 http/https
     if ((/^http[s]?:\/\//i).test(turl)) return turl;
 
@@ -2171,7 +2170,6 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
   // Group 5: 无引号的值 val (排除 > 和 空格)
   // Group 6: src 后的属性
   const regex = /<(audio|embed|iframe|img|input|source|track|video|script)([^>]*) src\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))([^>]*)>/gi;
-
   let match_replace = (match, tag, before, valDouble, valSingle, valNoQuote, after) => {
     // 这里的逻辑是：谁有值就用谁
     let rawUrl = '';
@@ -2185,6 +2183,8 @@ w.replaceSrc = function (codetext, is_comps = false, comp_name = '') {
     // 这样如果 newUrl 里有空格也不会导致 HTML 结构错误
     return `<${tag}${before||''} src="${newUrl}"${after||''}>`;
   };
+
+  codetext = codetext.replace(regex, match_replace);
 
   // 4. 保留自定义正则 (完全保留原功能)
   // 这里的内部替换也使用了同样的逻辑，确保一致性
