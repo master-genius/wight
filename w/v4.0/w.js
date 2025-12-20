@@ -2696,12 +2696,11 @@ w.naviHide = function () {
   w.navibtndom.className = '';
 };
 
-
 w.initDomEvent = function (pg, dom, bindSelf=true) {
   if (!dom) return;
 
   const processElement = (el) => {
-    // 性能优化：如果没有 dataset，直接跳过 (TextNode 等没有 dataset)
+    // 如果没有 dataset，直接跳过 (TextNode 等没有 dataset)
     if (!el.dataset) return;
 
     // 获取 dataset 的所有 key
@@ -2714,7 +2713,6 @@ w.initDomEvent = function (pg, dom, bindSelf=true) {
 
     // 防止重复绑定的标记对象
     if (!el.__events_map__) {
-      // 定义不可枚举属性，避免污染业务逻辑遍历
       Object.defineProperty(el, '__events_map__', {
         value: {},
         enumerable: false, 
@@ -2792,7 +2790,6 @@ w.initDomEvent = function (pg, dom, bindSelf=true) {
   }
   // 注意：上面的 querySelectorAll('*') 已经包含了所有子 form，
   // 这里只需要过滤出来处理 submit 即可，不需要再次 querySelectorAll
-  // 如果为了代码清晰，可以用 matches
   for (let i = 0; i < children.length; i++) {
     if (children[i].tagName === 'FORM' && !children[i].onsubmit) {
       children[i].onsubmit = () => false;
@@ -3268,16 +3265,16 @@ w.removeShare = function (key) {
   delete w.share[key];
 }
 
-w.makeSpace = function (key, sp=null) {
-  return `${sp ? (sp + '@') : ''}${key.indexOf('chan::') === 0 ? key : ('chan::' + key)}`
+w.makeChanKey = function (key) {
+  return `${key.indexOf('chan::') === 0 ? key : ('chan::' + key)}`
 }
 
-w.getChannel = function (key, sp=null) {
-  return w.getShare(w.makeSpace(key, sp))
+w.getChannel = function (key) {
+  return w.getShare(w.makeChanKey(key))
 }
 
-w.setChannel = function (key, data, sp=null) {
-  w.setShare(w.makeSpace(key, sp), data)
+w.setChannel = function (key, data) {
+  w.setShare(w.makeChanKey(key), data)
 }
 
 w.loadScript = async function (src, cname = '') {
@@ -3444,19 +3441,6 @@ class Component extends HTMLElement {
       enumerable: false
     });
 
-    Object.defineProperty(this, '__space__', {
-      value: '',
-      configurable: false,
-      writable: true,
-      enumerable: false
-    });
-
-    Object.defineProperty(this, 'space', {
-      get: () => {
-        return this.__space__;
-      }
-    });
-
     this.allAttrs = () => {return this.__attrs__;};
 
     this.attrs = new Proxy(this.__attrs__, {
@@ -3549,8 +3533,6 @@ class Component extends HTMLElement {
         w.debug && w.notifyTopError(err.message);
       }
     }
-    
-    this.findSpace();
 
     if (this.render && typeof this.render === 'function') {
       let d = this.render() || '';
@@ -3704,31 +3686,6 @@ class Component extends HTMLElement {
     w.notifyError(`${this.tagName} [${outerText}]存在循环引用${st.ref ? ' &lt;--&gt; ' : ''}${st.ref || ''}`, 20000);
     return '';
   }
-
-  //找到自己的父级空间
-  findSpace() {
-    if (this.dataset && this.dataset.space) {
-      this.__space__ = this.dataset.space
-      return this.__space__
-    }
-
-    let pn = this.parentNode;
-    let n;
-    while (pn) {
-      n = (pn instanceof ShadowRoot) ? pn.host : pn;
-
-      if (!n || !n.dataset || n.dataset.container === '__wight_page__') break;
-
-      if (n.dataset.space) {
-        this.__space__ = n.dataset.space
-        return this.__space__
-      }
-
-      pn = n.parentNode;
-    }
-
-    return ''
-  }
   
   //不会重复初始化基础结构。
   initPlateTemplate(id=null, d=null) {
@@ -3854,7 +3811,6 @@ class Component extends HTMLElement {
 
     let qcss = '';
     let nds;
-    
     for (let k in data) {
       qcss = this._fmtquery(k);
       nds = this.shadow.querySelectorAll(qcss);
@@ -3952,46 +3908,36 @@ class Component extends HTMLElement {
     return nod;
   }
 
-  sendChannel(data, key=null, sp=null) {
-    return w.setShare(this.spaceKey(key || this.attrs.channel, sp), data)
+  sendChannel(data, key=null) {
+    return w.setShare(w.makeChanKey(key || this.attrs.channel), data);
   }
 
-  getChannel(key, sp=null) {
-    return w.getShare(this.spaceKey(key, sp), data)
-  }
-
-  spaceKey(key, sp=null) {
-    if (sp !== null && typeof sp === 'string') return `${sp ? sp + '@' : ''}${key}`
-
-    return `${this.__space__ ? this.__space__ + '@' : ''}${key}`
+  getChannel(key=null) {
+    return w.getShare(w.makeChanKey(key||this.attrs.channel));
   }
 
   connectedCallback() {
     //注册通道函数
     queueMicrotask(() => {
       if (this.attrs.channel) {
-        if (this.attrs.channel.indexOf('chan::') === 0) {
-          this.__channel_id__ = w.registerShareNotice({
-            key: this.spaceKey(this.attrs.channel),
-            mode: 'always',
-            type: ['set', 'get'],
-            only: !!this.attrs['channel-only'],
-            action: !!this.attrs['channel-action'],
-            callback: ctx => {
-              if (ctx.type === 'set') {
-                this.channelInput
-                  && (typeof this.channelInput === 'function')
-                  && this.channelInput(ctx);
-              } else {
-                this.channelOutput
-                  && (typeof this.channelOutput === 'function')
-                  && this.channelOutput(ctx);
-              }
+        this.__channel_id__ = w.registerShareNotice({
+          key: w.makeChanKey(this.attrs.channel),
+          mode: 'always',
+          type: ['set', 'get'],
+          only: !!this.attrs['channel-only'],
+          action: !!this.attrs['channel-action'],
+          callback: ctx => {
+            if (ctx.type === 'set') {
+              this.channelInput
+                && (typeof this.channelInput === 'function')
+                && this.channelInput(ctx);
+            } else {
+              this.channelOutput
+                && (typeof this.channelOutput === 'function')
+                && this.channelOutput(ctx);
             }
-          })
-        } else {
-          console.error(this.tagName.toLocaleLowerCase(),'=> channel 属性必须以 chan:: 开头');
-        }
+          }
+        })
       }
 
       this.onload && (typeof this.onload === 'function') && this.onload();
