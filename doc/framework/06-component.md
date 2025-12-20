@@ -592,46 +592,12 @@ class XTimeTest extends Component {
 }
 ```
 
-### channel的所在空间
-
-一个组件经常需要复用到多个地方，如果为了避免channel的冲突，就要改channel属性的名字，这种方式是在所难免的。但是为了更方便开发，框架层面提供了space的功能：
-
-- 通过data-space属性来限制channel的所在空间。
-
-- 利用data-space的目的在于使用data-*自定义属性是web规范，保证最大的兼容性和维护性。
-
-- 不仅自定义组件可用，标准的标签也可以使用。
-
-组件初始化会自动找到父级的所在空间，直到页面顶层或遇到data-space属性。
-
-```javascript
-
-<div data-space="space1">
-  <x-time-test></x-time-test>
-</div>
-
-<div data-space="space2">
-  <x-time-test></x-time-test>
-  <x-time-test data-space="space3"></x-time-test>
-</div>
-
-```
-
-以上3个组件：
-
-- 第1个组件的channel为 'space1@chan::x-time-test'
-
-- 第2个组件的channel为 'space2@chan::x-time-test'
-
-- 第3个组件的channel为 'space3@chan::x-time-test'
-
-
 ### 通道函数
 
-- this.sendChannel(data, key=null, sp=null)
+- this.sendChannel(data, key=null)
 
-发送数据到通道，key是channel属性的标识符，data为数据，sp为所在空间，默认为null表示组件自己的所在空间。
+发送数据到通道，key是channel属性的标识符，data为数据，key默认为null表示组件自己的channel。
 
-- this.getChannel(key, sp=null)
+- this.getChannel(key)
 
-获取通道数据，key是channel属性的标识符，sp为所在空间，默认为null表示组件自己的所在空间。
+获取通道数据，key是channel属性的标识符，默认为null表示组件自己的channel。
