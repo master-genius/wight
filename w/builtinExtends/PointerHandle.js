@@ -40,6 +40,13 @@ module.exports = class PointerHandle {
     return this;
   }
 
+  capture() {
+    this.element.addEventListener('pointerdown', e => {
+      e.target.setPointerCapture(e.pointerId);
+    });
+    return this;
+  }
+
   /**
    * 开启监听
    */
