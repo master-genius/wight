@@ -159,7 +159,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
     rl.logTime += 5
   }
 
-  requestLock.set(req_kek, {
+  requestLock.set(req_key, {
     time: cur_time,
     minTime: min_time,
     logTime: cur_time
