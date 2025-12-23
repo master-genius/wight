@@ -20,16 +20,15 @@ let _methods = [
 
 let errorCodes = [401, 403, 400, 429, 402, 405, 406, 413, 404, 500]
 
-let requestLock = {}
+let requestLock = new Map()
+
 if (!window.__request_lock_timer__) {
   window.__request_lock_timer__ = setInterval(() => {
-    for (let k in requestLock) {
-      let r = requestLock[k]
-
-      let tm = Date.now()
+    let tm = Date.now()
+    for (let [k,r] of requestLock) {
       if (tm - r.time > r.minTime) {
         if ((tm - r.logTime) >= (r.minTime * 50)) {
-          delete requestLock[k]
+          requestLock.delete(k)
         }
       }
     }
@@ -134,7 +133,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
     }
   }
 
-  let req_key = `${options.method} ${api}`
+  let req_key = `${options.method} ${real_api}`
   let min_time = w.config.requestTimeSlice && !isNaN(w.config.requestTimeSlice)
                   ? w.config.requestTimeSlice
                   : 25
@@ -144,8 +143,9 @@ exports.apicall = async function (api, options = {}, deep = 0) {
 
   let cur_time = Date.now()
 
-  if (requestLock[req_key]) {
-    let rtime = requestLock[req_key].time
+  if (requestLock.has(req_key)) {
+    let rl = requestLock.get(req_key)
+    let rtime = rl.time
 
     if (cur_time - rtime < min_time) {
       let err_res = makeResponse(new Error(`请求太频繁`))
@@ -154,16 +154,16 @@ exports.apicall = async function (api, options = {}, deep = 0) {
       return err_res
     }
 
-    requestLock[req_key].time = cur_time
+    rl.time = cur_time
     //100个周期之后会删除缓存，此处用于缓解高频请求的频繁删除引发的抖动
-    requestLock[req_key].logTime += 5
+    rl.logTime += 5
   }
 
-  requestLock[req_key] = {
+  requestLock.set(req_kek, {
     time: cur_time,
     minTime: min_time,
     logTime: cur_time
-  }
+  })
 
   if (options.method && options.body) {
     let bodyType = typeof options.body;
@@ -294,8 +294,8 @@ exports.apicall = async function (api, options = {}, deep = 0) {
   }
 
   if (!ret.ok) {
-    if (ret.status == 401) {
-      if (await token.refresh(true)) {
+    if (ret.status == 401 && w.config.refreshToken && typeof w.config.refreshToken === 'function') {
+      if (await w.config.refreshToken()) {
         if (options.headers && options.headers.authorization)
           delete options.headers.authorization
 
