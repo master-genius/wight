@@ -1,17 +1,9 @@
 module.exports = function (data) {
   if (typeof data === 'string') {
-    let d = null
-    
     try {
-      d = decodeURIComponent(data)
+      return JSON.parse(decodeURIComponent(data))
     } catch (err) {
-      d = data
-    }
-
-    try {
-      JSON.parse(d)
-    } catch (err) {
-      return data
+      w.dev && console.error(err)
     }
   }
 
