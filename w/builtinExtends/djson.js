@@ -3,7 +3,7 @@ module.exports = function (data) {
     try {
       return JSON.parse(decodeURIComponent(data))
     } catch (err) {
-      w.dev && console.error(err)
+
     }
   }
 
