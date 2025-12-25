@@ -2069,7 +2069,7 @@ wapp.prototype.build = async function (appdir, appname = '') {
 wapp.prototype.newPage = function (name, pagedir) {
   
   let html = `'use strict';\n
-let htmltag = <-('htmltag')\nlet ejson = <-('ejson')\nlet djson = <-('djson')\n
+let htmltag = <-('w:htmltag')\nlet ejson = <-('w:ejson')\nlet djson = <-('w:djson')\n
 class Page {
 
   constructor() {
@@ -2219,7 +2219,7 @@ function renderCompsClass(cname) {
   let className = fmtCompsClassName(cname);
 
   return `'use strict';\n
-let htmltag = <-('htmltag')\nlet ejson = <-('ejson')\nlet djson = <-('djson')\n
+let htmltag = <-('w:htmltag')\nlet ejson = <-('w:ejson')\nlet djson = <-('w:djson')\n
 class ${className} extends Component {
 
   constructor() {
