@@ -136,7 +136,7 @@ exports.apicall = async function (api, options = {}, deep = 0) {
   let req_key = `${options.method} ${real_api}`
   let min_time = w.config.requestTimeSlice && !isNaN(w.config.requestTimeSlice)
                   ? w.config.requestTimeSlice
-                  : 25
+                  : 10
 
   min_time < 2 && (min_time = 10);
   min_time > 600_000 && (min_time = 600_000);
