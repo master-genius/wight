@@ -864,7 +864,7 @@ const w = new function () {
     if (typeof options === 'number') options = {timeout: options};
 
     let tmout = (options.timeout && !isNaN(options.timeout) && options.timeout > 0)
-                ? options.timeout : 3500;
+                ? options.timeout : 3600;
 
     let check_stat = true;
     w.checkhtml && (check_stat = w._htmlcheck(info));
