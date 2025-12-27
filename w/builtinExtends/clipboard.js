@@ -27,10 +27,10 @@ module.exports = new function clipboard() {
       try {
         // 注意：这必须在点击等用户交互事件中直接调用，不能延迟太久
         await navigator.clipboard.writeText(text);
-        return; // 成功
+        return true;
       } catch (err) {
         console.warn('Clipboard write failed (API):', err);
-        // 如果 API 失败，尝试降级处理
+        return false;
       }
     }
 
