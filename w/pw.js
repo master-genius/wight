@@ -144,7 +144,8 @@ let wapp = function (options = {}) {
 
   this.builtinExtends = [
     'ejson', 'djson', 'renders', 'pushStart', 'querybind', 'scrollEvent', 
-    'htmltag', 'pushStart', 'PointerHandle', 'storageEvent', 'confirm', 'apicall'
+    'htmltag', 'PointerHandle', 'storageEvent', 'confirm', 'apicall',
+    'clipboard'
   ];
 
   this.jch = {

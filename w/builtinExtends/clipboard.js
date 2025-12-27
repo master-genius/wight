@@ -1,5 +1,5 @@
 module.exports = new function clipboard() {
-  
+
   // 读取剪贴板
   this.get = async function () {
     // 1. 尝试直接使用新版 API
