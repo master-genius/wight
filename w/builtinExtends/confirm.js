@@ -71,6 +71,8 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
   if (opts.buttonStyle && Array.isArray(opts.buttonStyle) && opts.buttonStyle.length > 0) {
     okStyle = opts.buttonStyle[0];
     cancelStyle = opts.buttonStyle[1] || '';
+  } else if (opts.smallButton) {
+    okStyle = cancelStyle = 'line-height:2rem;padding:0 0.65rem;'
   }
 
   let atext = `<div style="text-align:center;font-size:95%;color:${color};">
@@ -78,7 +80,7 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
     <div style="box-sizing: border-box;display: flex;flex-flow: row wrap;margin-top:1.5rem;">
       <div style="padding:0.2rem 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
       <button class="small"
-        style="font-weight:bold;background:#2376b3;${okStyle}" 
+        style="font-weight:bold;background:#2376c9;${okStyle}" 
         data-onclick="w.builtin.confirmExec" 
         data-id="${id}">
           确定</button>
