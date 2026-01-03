@@ -80,7 +80,7 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
     <div style="box-sizing: border-box;display: flex;flex-flow: row wrap;margin-top:1.5rem;">
       <div style="padding:0.2rem 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
       <button class="small"
-        style="font-weight:bold;background:#2376c9;${okStyle}" 
+        style="font-weight:bold;background:var(--w-button-bg, #1680e1);color: #ffffff;${okStyle}" 
         data-onclick="w.builtin.confirmExec" 
         data-id="${id}">
           确定</button>
@@ -88,7 +88,7 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
 
       <div style="padding:0.2rem 0.5rem;flex: 1;box-sizing: border-box;text-align:center">
         <button class="small inverse" 
-          style="background:#777879;${cancelStyle}" 
+          style="background:var(--w-button-bg-cancel, #777879);color:#fcfdfe;${cancelStyle}" 
           data-onclick="w.builtin.confirmCancel" 
           data-id="${id}">
             取消</button>
