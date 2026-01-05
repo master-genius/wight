@@ -1402,7 +1402,7 @@ const w = new function () {
     pg.__tabs_place__ = '';
 
     if (w.tabs.list.length > 0) {
-        pg.__tabs_place__ = `<div style="height:4.2rem;"${w.__tabs_class_name__ ? (' class="' + w.__tabs_class_name__ + '"') : ''}>&nbsp;</div>`;
+        pg.__tabs_place__ = `<div style="height:4.2rem;user-select:none;"${w.__tabs_class_name__ ? (' class="' + w.__tabs_class_name__ + '"') : ''}></div>`;
 
         if (w.tabs.pages.indexOf(name) >= 0) {
           pg.__dom__.style.cssText = 'z-index:1;';
