@@ -618,7 +618,8 @@ const w = new function () {
       }
     }
 
-    if (options.context && options.context.tagName) {
+    let is_component = options.context && options.context.tagName && (options.context instanceof Component);
+    if (is_component) {
       info = w.replaceSrc(info, true, options.context.tagName.toLowerCase());
     } else {
       info = w.replaceSrc(info);
