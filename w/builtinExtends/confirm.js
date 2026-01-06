@@ -53,7 +53,7 @@ exports.confirm = function (opts = {callback : null, args : null, text : ''}) {
   let id = `call_${Date.now()}${parseInt(Math.random() * 10000)+1}`;
 
   cexp[id] = {
-    callback : opts.callback,
+    callback : opts.ok || opts.callback,
     args : opts.args || null
   };
 
