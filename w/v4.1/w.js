@@ -2114,20 +2114,18 @@ w.view = function (pagename, data) {
     nds = pgdom.querySelectorAll(qcss);
     this._coreView(pagename, pg, data, k, nds);
 
-    for (let k in w.alertStack.pagemap) {
-      if (w.alertStack.pagemap[k] === pg) {
-        this._coreView(pagename, pg, data, k, w.alertStack.dmap[k].querySelectorAll(qcss));
+    for (let id in w.alertStack.pagemap) {
+      if (w.alertStack.pagemap[id] === pg) {
+        this._coreView(pagename, pg, data, k, w.alertStack.dmap[id].querySelectorAll(qcss));
       }
     }
 
-    for (let k in this.promptTargetMap) {
-      if (this.promptTargetMap[k] === pg) {
-        this._coreView(pagename, pg, data, k, w[k].querySelectorAll(qcss));
+    for (let id in this.promptTargetMap) {
+      if (this.promptTargetMap[id] === pg) {
+        this._coreView(pagename, pg, data, k, w[id].querySelectorAll(qcss));
       }
     }
   }
-
-  return this;
 };
 
 w.resetView = function(pagename, qss) {
@@ -3869,15 +3867,15 @@ class Component extends HTMLElement {
       nds = this.shadow.querySelectorAll(qcss);
       this._coreView(data, k, nds);
 
-      for (let k in w.alertStack.compmap) {
-        if (w.alertStack.compmap[k] === this) {
-          this._coreView(data, k, w.alertStack.dmap[k].querySelectorAll(qcss));
+      for (let id in w.alertStack.compmap) {
+        if (w.alertStack.compmap[id] === this) {
+          this._coreView(data, k, w.alertStack.dmap[id].querySelectorAll(qcss));
         }
       }
 
-      for (let k in w.promptTargetMap) {
-        if (w.promptTargetMap[k] === this) {
-          this._coreView(data, k, w[k].querySelectorAll(qcss));
+      for (let id in w.promptTargetMap) {
+        if (w.promptTargetMap[id] === this) {
+          this._coreView(data, k, w[id].querySelectorAll(qcss));
         }
       }
     }
