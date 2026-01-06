@@ -62,9 +62,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '4.0';
+  this.defaultVersion = '4.1';
 
-  this.version = '4.0';
+  this.version = '4.1';
 
   this.usedVersion = this.version;
 
