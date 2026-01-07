@@ -62,9 +62,9 @@ let wapp = function (options = {}) {
 
   this.pageUrlPath = '/';
 
-  this.defaultVersion = '4.1';
+  this.defaultVersion = '4.2';
 
-  this.version = '4.1';
+  this.version = '4.2';
 
   this.usedVersion = this.version;
 
@@ -390,6 +390,7 @@ let wapp = function (options = {}) {
     let dms = [
       'coverdom','notifydom','alertdom', 'slidedom', 'alertcoverdom', 'notifytopdom',
       'tabsdom','tabsmenudom', 'historydom','slidexdom', 'navibtndom', 'promptdom', 'promptclosedom', 'promptmiddledom', 'promptmiddleclosedom',
+      'comp_promptdom', 'comp_promptclosedom', 'comp_promptmiddledom', 'comp_promptmiddleclosedom',
     ];
 
     for (let i=0; i<dms.length; i++) {
