@@ -3698,7 +3698,7 @@ class Component extends HTMLElement {
 
   checkLoopRef(d) {
     let lname = `<${this.tagName.toLowerCase()}`;
-    
+
     let tagname = lname + '>';
 
     let istart = this.outerHTML.indexOf(lname);
