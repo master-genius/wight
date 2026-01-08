@@ -1463,12 +1463,43 @@ const w = new function () {
     pg.destroy = function () {w.destroyPage(w.pages[name]);};
     pg.query = function(qstr,callback=null) {
       let nod = w.pages[name].__dom__.querySelector(qstr);
-      if (!nod) return null;
+      if (!nod) {
+        for (let id in w.alertStack.pagemap) {
+          if (w.alertStack.pagemap[id] === pg) {
+            nod = w.alertStack.dmap[id].querySelector(qstr);
+            if (nod) break;
+          }
+        }
+
+        if (!nod) {
+          for (let id in w.promptTargetMap) {
+            if (w.promptTargetMap[id] === pg) {
+              nod = w[id].querySelector(qstr);
+              if (nod) break;
+            }
+          }
+        }
+
+        if (!nod) return null;
+      }
       if (callback && typeof callback === 'function') callback(nod);
       return nod;
     };
     pg.queryAll = function(qstr, callback=null) {
       let nds = w.pages[name].__dom__.querySelectorAll(qstr);
+      let alert_nds = [], prompt_nds = [];
+      for (let id in w.alertStack.pagemap) {
+        if (w.alertStack.pagemap[id] === pg) {
+          alert_nds = [...alert_nds, ...w.alertStack.dmap[id].querySelectorAll(qstr)];
+        }
+      }
+
+      for (let id in w.promptTargetMap) {
+        if (w.promptTargetMap[id] === pg) {
+          prompt_nds = [...prompt_nds, ...w[id].querySelectorAll(qstr)];
+        }
+      }
+      nds = [...nds, ...alert_nds, ...prompt_nds];
       if (callback && typeof callback === 'function') nds.forEach(callback);
       return nds;
     };
@@ -3956,13 +3987,46 @@ class Component extends HTMLElement {
 
   queryAll(qss, callback=null) {
     let nds = this.shadow.querySelectorAll(qss);
+    let alert_nds = [],prompt_nds = []
+    for (let id in w.alertStack.compmap) {
+      if (w.alertStack.compmap[id] === this) {
+        alert_nds = [...alert_nds, ...w.alertStack.dmap[id].querySelectorAll(qss)];
+      }
+    }
+
+    for (let id in w.promptTargetMap) {
+      if (w.promptTargetMap[id] === this) {
+        prompt_nds = [...prompt_nds, ...w[id].querySelectorAll(qss)];
+      }
+    }
+
+    nds = [...nds, ...alert_nds, ...prompt_nds];
     if (callback && typeof callback === 'function') nds.forEach(callback);
     return nds;
   }
 
   query(qss,callback=null) {
     let nod = this.shadow.querySelector(qss);
-    if (!nod) return null;
+    if (!nod) {
+      for (let id in w.alertStack.compmap) {
+        if (w.alertStack.compmap[id] === this) {
+          nod = w.alertStack.dmap[id].querySelector(qss);
+          if (nod) break;
+        }
+      }
+
+      if (!nod) {
+        for (let id in w.promptTargetMap) {
+          if (w.promptTargetMap[id] === this) {
+            nod = w[id].querySelector(qss);
+            if (nod) break;
+          }
+        }
+      }
+
+      if (!nod) return null;
+    }
+
     if (callback && typeof callback === 'function') callback(nod);
     return nod;
   }
