@@ -3697,8 +3697,8 @@ class Component extends HTMLElement {
   }
 
   checkLoopRef(d) {
-    let lname = `<${this.tagName.toLowerCase()}`;
-
+    let localname = this.tagName.toLowerCase();
+    let lname = `<${localname}`;
     let tagname = lname + '>';
 
     let istart = this.outerHTML.indexOf(lname);
@@ -3719,11 +3719,11 @@ class Component extends HTMLElement {
     }
 
     let p = this.parentNode;
-
-    let localname = lname.substring(1);
     if (!w.__comps_loop__[localname])
       w.__comps_loop__[localname] = [];
     
+    let comp_list = w.__comps_loop__[localname];
+    comp_list[comp_list.length - 1] !== '' && comp_list.push('');
     while (p) {
       if (p.toString() !== '[object ShadowRoot]') {
         return st;
@@ -3738,6 +3738,7 @@ class Component extends HTMLElement {
 
     let loopcheck = (arr, name) => {
       for (let a of arr) {
+        if (!a) continue;
         if (a === name) ref_count++;
         if (ref_count > 2) return false;
 
@@ -4069,6 +4070,9 @@ class Component extends HTMLElement {
 
   //remove from page
   disconnectedCallback() {
+    let pops = w.__comps_loop__[this.tagName.toLowerCase()];
+    if (pops) while(pops.pop()){};
+    
     if (this.__channel_id__) {
       w.removeShareNotice(this.__channel_id__)
       this.__channel_id__ = null
