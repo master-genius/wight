@@ -3095,11 +3095,11 @@ window.require = async function (name) {
 };
 
 Object.defineProperties(w, {
-  'shareData': {
+  shareData: {
     writable: false,
     value: {}
   },
-  'shareNoticeList': {
+  noticeList: {
     writable: false,
     value: {
       length: 0,
@@ -3113,14 +3113,14 @@ Object.defineProperties(w, {
  * mode默认为一直执行，或者是选择once表示执行一次则删除。
  * @param {object} options callback, type, mode
  */
-w.registerShareNotice = function (options) {
+w.shareNotice = function (options) {
   if (!options || typeof options !== 'object') {
     w.notifyError('options不是object类型。');
     return false;
   }
 
-  if (w.shareNoticeList.length >= 10101) {
-    w.notifyError('注册通知函数已达上限，不能超过10101个。');
+  if (w.noticeList.length >= 10101) {
+    w.notifyError('注册通知函数已达上限，总数不能超过10101个。');
     return false;
   }
 
@@ -3145,7 +3145,7 @@ w.registerShareNotice = function (options) {
 
   options.id = w.randid(`${options.key}::`);
 
-  if (!w.shareNoticeList.funcmap[ options.key ]) {
+  if (!w.noticeList.funcmap[ options.key ]) {
       let okey = options.key;
       let key_match = (k) => {
         return okey === '*' ? true : (k === okey);
@@ -3166,19 +3166,19 @@ w.registerShareNotice = function (options) {
         };
       }
 
-      w.shareNoticeList.funcmap[ options.key ] = {
+      w.noticeList.funcmap[ options.key ] = {
         type: ktype,
         match: key_match,
         list: [options]
       };
   } else {
     if (options.only && !options.reuse) return false;
-    let kn = w.shareNoticeList.funcmap[options.key];
+    let kn = w.noticeList.funcmap[options.key];
     //原始的模式也是only reuse
     if (options.only && options.reuse && kn.list[0] && kn.list[0].only && kn.list[0].reuse) {
       options.id = kn.list[0].id;
       kn.list = [ options ];
-      w.shareNoticeList.idmap[options.id] = options;
+      w.noticeList.idmap[options.id] = options;
       return options.id;
     }
 
@@ -3193,30 +3193,30 @@ w.registerShareNotice = function (options) {
     kn.list.push(options);
   }
 
-  w.shareNoticeList.length += 1;
-  w.shareNoticeList.idmap[options.id] = options;
+  w.noticeList.length += 1;
+  w.noticeList.idmap[options.id] = options;
   return options.id;
 };
 
-w.removeShareNotice = function (id) {
+w.removeNotice = function (id) {
   if (!id) return false;
-  if (!w.shareNoticeList.idmap[id]) return false;
+  if (!w.noticeList.idmap[id]) return false;
 
-  let opts = w.shareNoticeList.idmap[id];
+  let opts = w.noticeList.idmap[id];
   
-  if (!w.shareNoticeList.funcmap[opts.key]) {
-    delete w.shareNoticeList.idmap[id];
+  if (!w.noticeList.funcmap[opts.key]) {
+    delete w.noticeList.idmap[id];
     return opts;
   }
 
-  let kmap = w.shareNoticeList.funcmap[opts.key].list;
+  let kmap = w.noticeList.funcmap[opts.key].list;
   let ind = 0;
 
   for (let a of kmap) {
     if (a.id === id) {
       kmap.splice(ind, 1);
-      w.shareNoticeList.length -= 1;
-      if (kmap.length === 0) delete w.shareNoticeList.funcmap[opts.key];
+      w.noticeList.length -= 1;
+      if (kmap.length === 0) delete w.noticeList.funcmap[opts.key];
       return a;
     }
     ind += 1;
@@ -3225,22 +3225,22 @@ w.removeShareNotice = function (id) {
   return opts;
 }
 
-w.runShareNotice = function (type, obj, k, data = null) {
+w.runNotice = function (type, obj, k, data = null) {
   let kmlist = [];
   let gkmlist = null;
-  if (w.shareNoticeList.funcmap['*']) {
-    gkmlist = w.shareNoticeList.funcmap['*'].list;
+  if (w.noticeList.funcmap['*']) {
+    gkmlist = w.noticeList.funcmap['*'].list;
   }
 
-  if (k !== '*' && w.shareNoticeList.funcmap[k]) {
-    kmlist = kmlist.concat(w.shareNoticeList.funcmap[k].list);
+  if (k !== '*' && w.noticeList.funcmap[k]) {
+    kmlist = kmlist.concat(w.noticeList.funcmap[k].list);
   }
 
   let rtmp;
-  for (let sk in w.shareNoticeList.funcmap) {
+  for (let sk in w.noticeList.funcmap) {
     if (sk === '*' || sk === k) continue;
 
-    rtmp = w.shareNoticeList.funcmap[sk];
+    rtmp = w.noticeList.funcmap[sk];
     if (rtmp.type !== 's' && rtmp.match(k)) kmlist = kmlist.concat(rtmp.list);
   }
 
@@ -3291,7 +3291,7 @@ w.runShareNotice = function (type, obj, k, data = null) {
 
   if (delids.length > 0) {
     for (let id of delids) {
-      w.removeShareNotice(id);
+      w.removeNotice(id);
     }
   }
 
@@ -3305,17 +3305,17 @@ Object.defineProperty(w, 'share', {
   value: new Proxy(w.shareData, {
     set: (obj, k, data) => {
       obj[k] = data;
-      w.runShareNotice('set', obj, k, data);
+      w.runNotice('set', obj, k, data);
       return true;
     },
   
     get: (obj, k) => {
-      return w.runShareNotice('get', obj, k) || obj[k] || null;
+      return w.runNotice('get', obj, k) || obj[k] || null;
     },
   
     deleteProperty: (obj, k) => {
       if (obj[k] !== undefined) {
-        w.runShareNotice('delete', obj, k);
+        w.runNotice('delete', obj, k);
         delete obj[k];
       }
       return true;
@@ -4044,7 +4044,7 @@ class Component extends HTMLElement {
     //注册通道函数
     queueMicrotask(() => {
       if (this.attrs.channel) {
-        this.__channel_id__ = w.registerShareNotice({
+        this.__channel_id__ = w.shareNotice({
           key: w.makeChanKey(this.attrs.channel),
           mode: 'always',
           type: ['set', 'get'],
@@ -4074,7 +4074,7 @@ class Component extends HTMLElement {
     if (pops) while(pops.pop()){};
     
     if (this.__channel_id__) {
-      w.removeShareNotice(this.__channel_id__)
+      w.removeNotice(this.__channel_id__)
       this.__channel_id__ = null
     }
 
