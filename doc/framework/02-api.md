@@ -123,16 +123,16 @@ w.removeHook('login-check')
 
 w.share是一个Proxy实例，因此，基于此机制，实现了数据状态变化的通知函数：
 
-- w.registerShareNotice(object) {String}id
+- w.shareNotice(object) {String}id
 
-- w.removeShareNotice(id)
+- w.removeNotice(id)
 
 
 示例：
 
 ```javascript
 //返回值为唯一标识id
-let id = w.registerShareNotice({
+let id = w.shareNotice({
     //mode支持always或once
     mode: 'always',
     //要监听的key，如果w.share.datalist变化则会执行回调函数
@@ -146,7 +146,7 @@ let id = w.registerShareNotice({
 })
 
 setTimeout(() => {
-    w.removeShareNotice(id)
+    w.removeNotice(id)
 }, 5000)
 
 ```
@@ -159,7 +159,7 @@ key支持前缀模式和正则表达式，这带来了极大的灵活性。前�
 
 ```javascript
 //返回值为唯一标识id
-let id = w.registerShareNotice({
+let id = w.shareNotice({
     //mode支持always或once
     mode: 'always',
     //要监听的key，data开头的key都会执行。
